@@ -1,0 +1,149 @@
+{
+  "name": "wcag-enhancer",
+  "displayName": "AccessiMind",
+  "description": "AI-powered WCAG accessibility enhancement tool with wizard configuration and persistent settings",
+  "version": "1.0.0",
+  "publisher": "wcag-enhancer",
+  "engines": {
+    "vscode": "^1.101.0"
+  },
+  "categories": [
+    "Other",
+    "Linters",
+    "Formatters"
+  ],
+  "keywords": [
+    "accessibility",
+    "wcag",
+    "aria",
+    "a11y",
+    "enhancement",
+    "ai"
+  ],
+  "activationEvents": [
+    "onCommand:wcag-enhancer.openPanel",
+    "onCommand:wcag-enhancer.runWizard",
+    "onCommand:wcag-enhancer.improveFile",
+    "onCommand:wcag-enhancer.improveSelection"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "wcag-enhancer.openPanel",
+        "title": "Open AccessiMind",
+        "category": "AccessiMind"
+      },
+      {
+        "command": "wcag-enhancer.runWizard",
+        "title": "Run Setup Wizard",
+        "category": "AccessiMind"
+      },
+      {
+        "command": "wcag-enhancer.improveFile",
+        "title": "Improve Current File",
+        "category": "AccessiMind"
+      },
+      {
+        "command": "wcag-enhancer.improveSelection",
+        "title": "Improve Selection",
+        "category": "AccessiMind"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "wcag-enhancer.openPanel",
+          "when": "true"
+        },
+        {
+          "command": "wcag-enhancer.runWizard",
+          "when": "true"
+        },
+        {
+          "command": "wcag-enhancer.improveFile",
+          "when": "editorTextFocus"
+        },
+        {
+          "command": "wcag-enhancer.improveSelection",
+          "when": "editorHasSelection"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "wcag-enhancer.improveSelection",
+          "when": "editorHasSelection",
+          "group": "wcag-enhancer"
+        },
+        {
+          "command": "wcag-enhancer.improveFile",
+          "when": "editorTextFocus",
+          "group": "wcag-enhancer"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "AccessiMind",
+      "properties": {
+        "wcagEnhancer.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "API key for AI enhancement service",
+          "scope": "application"
+        },
+        "wcagEnhancer.language": {
+          "type": "string",
+          "default": "en",
+          "enum": [
+            "en",
+            "tr"
+          ],
+          "description": "Default language for enhancement suggestions"
+        },
+        "wcagEnhancer.accessibilityLevel": {
+          "type": "string",
+          "default": "AA",
+          "enum": [
+            "A",
+            "AA",
+            "AAA"
+          ],
+          "description": "WCAG compliance level"
+        },
+        "wcagEnhancer.enhancementMode": {
+          "type": "string",
+          "default": "standard",
+          "enum": [
+            "standard",
+            "aggressive",
+            "conservative"
+          ],
+          "description": "Enhancement mode"
+        },
+        "wcagEnhancer.autoSave": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically save improvements"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "package": "vsce package",
+    "publish": "vsce publish"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.101.0",
+    "@vscode/vsce": "^3.6.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wcag-enhancer/vscode-extension.git"
+  },
+  "license": "MIT",
+  "author": "",
+  "bugs": {
+    "url": "https://github.com/wcag-enhancer/vscode-extension/issues"
+  },
+  "homepage": "https://github.com/wcag-enhancer/vscode-extension#readme"
+}
