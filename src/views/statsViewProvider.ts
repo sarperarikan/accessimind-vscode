@@ -346,18 +346,94 @@ export class StatsViewProvider implements vscode.WebviewViewProvider {
 	}
 
 	private getFilteredStats(period: string, language?: string): any {
-		// Bu metod gerçek istatistikleri filtrelemek için kullanılacak
-		// Şimdilik boş bir obje döndürüyoruz
-		return {
-			totalImprovements: 0,
-			totalLinesImproved: 0,
-			totalTokensUsed: 0,
-			totalProcessingTime: 0,
-			dailyStats: {},
-			languageStats: {},
-			wcagCriteriaStats: {},
-			errors: { total: 0, byType: {}, recent: [] }
+		if (!this._statisticsManager) {
+			return {
+				totalImprovements: 0,
+				totalLinesImproved: 0,
+				totalTokensUsed: 0,
+				totalProcessingTime: 0,
+				dailyStats: {},
+				languageStats: {},
+				wcagCriteriaStats: {},
+				errors: { total: 0, byType: {}, recent: [] }
+			};
+		}
+
+		const stats: any = this._statisticsManager.getDetailedStatistics();
+		let filteredImprovements = stats.recentImprovements || [];
+
+		// Döneme göre filtrele
+		const now = new Date();
+		let startDate: Date | null = null;
+		switch (period) {
+			case "today":
+				startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+				break;
+			case "week":
+				const day = now.getDay();
+				startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - day);
+				break;
+			case "month":
+				startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+				break;
+			case "year":
+				startDate = new Date(now.getFullYear(), 0, 1);
+				break;
+			default:
+				startDate = null;
+		}
+		if (startDate) {
+			const startTimestamp = startDate.getTime();
+			filteredImprovements = filteredImprovements.filter((rec: any) => rec.timestamp >= startTimestamp);
+		}
+
+		// Dile göre filtrele
+		if (language && language !== "all") {
+			filteredImprovements = filteredImprovements.filter((rec: any) => rec.language === language);
+		}
+
+		// Toplamlar ve detaylar
+		const result = {
+			totalImprovements: filteredImprovements.length,
+			totalLinesImproved: filteredImprovements.reduce((sum: number, rec: any) => sum + (rec.linesImproved || 0), 0),
+			totalTokensUsed: filteredImprovements.reduce((sum: number, rec: any) => sum + (rec.tokensUsed || 0), 0),
+			totalProcessingTime: filteredImprovements.reduce((sum: number, rec: any) => sum + (rec.processingTime || 0), 0),
+			dailyStats: {} as any,
+			languageStats: {} as any,
+			wcagCriteriaStats: {} as any,
+			errors: stats.errors || { total: 0, byType: {}, recent: [] }
 		};
+
+		// Günlük istatistikler
+		filteredImprovements.forEach((rec: any) => {
+			const date = new Date(rec.timestamp).toISOString().split("T")[0];
+			if (!result.dailyStats[date]) {
+				result.dailyStats[date] = { improvements: 0, linesImproved: 0, processingTime: 0 };
+			}
+			result.dailyStats[date].improvements += 1;
+			result.dailyStats[date].linesImproved += rec.linesImproved || 0;
+			result.dailyStats[date].processingTime += rec.processingTime || 0;
+		});
+
+		// Dil istatistikleri
+		filteredImprovements.forEach((rec: any) => {
+			if (!result.languageStats[rec.language]) {
+				result.languageStats[rec.language] = { count: 0, linesImproved: 0, avgProcessingTime: 0 };
+			}
+			const lang = result.languageStats[rec.language];
+			lang.count += 1;
+			lang.linesImproved += rec.linesImproved || 0;
+			lang.avgProcessingTime = lang.count > 0 ? Math.round((lang.avgProcessingTime * (lang.count - 1) + (rec.processingTime || 0)) / lang.count) : 0;
+		});
+
+		// WCAG kriteri istatistikleri
+		filteredImprovements.forEach((rec: any) => {
+			(rec.wcagCriteria || []).forEach((crit: string) => {
+				result.wcagCriteriaStats[crit] = (result.wcagCriteriaStats[crit] || 0) + 1;
+			});
+		});
+
+		return result;
 	}
 
 	private convertToCSV(stats: any): string {
@@ -479,12 +555,22 @@ ${prediction.reasoning.join('\n')}`;
 			--border-color: var(--vscode-panel-border);
 			--card-bg: var(--vscode-input-background);
 			--hover-bg: var(--vscode-list-hoverBackground);
+			--zebra-bg: #f5f7fa;
+			--focus-outline: 2px solid #005a9e;
 		}
 
 		* {
 			margin: 0;
 			padding: 0;
 			box-sizing: border-box;
+		}
+		.modern-table tbody tr:nth-child(even) {
+			background: var(--zebra-bg);
+		}
+		.modern-table tbody tr:focus-visible, .stat-card:focus-visible, .btn:focus-visible {
+			outline: var(--focus-outline);
+			outline-offset: 2px;
+			z-index: 2;
 		}
 
 		body {
@@ -933,24 +1019,27 @@ ${prediction.reasoning.join('\n')}`;
 		</div>
 
 		<div id="statsContent" style="display: none;">
-			<!-- Genel İstatistikler -->
-			<div class="stats-grid">
-				<div class="stat-card success">
-					<span class="stat-number" id="totalImprovements">0</span>
-					<div class="stat-label">${isEnglish ? "Total Improvements" : "Toplam İyileştirme"}</div>
-				</div>
-				<div class="stat-card info">
-					<span class="stat-number" id="totalLines">0</span>
-					<div class="stat-label">${isEnglish ? "Lines Improved" : "İyileştirilen Satır"}</div>
-				</div>
-				<div class="stat-card warning">
-					<span class="stat-number" id="successRate">100%</span>
-					<div class="stat-label">${isEnglish ? "Success Rate" : "Başarı Oranı"}</div>
-				</div>
-				<div class="stat-card">
-					<span class="stat-number" id="avgTime">0ms</span>
-					<div class="stat-label">${isEnglish ? "Avg. Processing Time" : "Ort. İşleme Süresi"}</div>
-				</div>
+			<!-- Genel İstatistikler Tablosu -->
+			<div class="section" role="region" aria-labelledby="generalStatsTableCaption" style="overflow-x:auto;">
+				<table class="modern-table" style="width:100%; border-collapse:collapse;" aria-describedby="generalStatsTableCaption">
+					<caption id="generalStatsTableCaption" class="screen-reader-only">${isEnglish ? "General Statistics Table" : "Genel İstatistikler Tablosu"}</caption>
+					<thead>
+						<tr>
+							<th scope="col" aria-sort="none">${isEnglish ? "Total Improvements" : "Toplam İyileştirme"}</th>
+							<th scope="col" aria-sort="none">${isEnglish ? "Lines Improved" : "İyileştirilen Satır"}</th>
+							<th scope="col" aria-sort="none">${isEnglish ? "Success Rate" : "Başarı Oranı"}</th>
+							<th scope="col" aria-sort="none">${isEnglish ? "Avg. Processing Time" : "Ort. İşleme Süresi"}</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td id="totalImprovements" style="text-align:center;font-weight:bold;color:var(--success-color);">0</td>
+							<td id="totalLines" style="text-align:center;font-weight:bold;color:var(--info-color);">0</td>
+							<td id="successRate" style="text-align:center;font-weight:bold;color:var(--warning-color);">100%</td>
+							<td id="avgTime" style="text-align:center;font-weight:bold;">0ms</td>
+						</tr>
+					</tbody>
+				</table>
 			</div>
 
 			<!-- Günlük/Aylık Özet -->
@@ -988,16 +1077,21 @@ ${prediction.reasoning.join('\n')}`;
 				</div>
 			</div>
 
-			<!-- En Çok Kullanılan Dil -->
-			<div class="section">
-				<div class="section-header">
-					💻 ${isEnglish ? "Language Statistics" : "Dil İstatistikleri"}
-				</div>
-				<div class="section-content">
-					<div id="languageStats">
+			<!-- En Çok Kullanılan Dil Tablosu -->
+			<div class="section" role="region" aria-labelledby="languageStatsTableCaption" style="overflow-x:auto;">
+				<table class="modern-table" style="width:100%; border-collapse:collapse;" aria-describedby="languageStatsTableCaption">
+					<caption id="languageStatsTableCaption" class="screen-reader-only">${isEnglish ? "Language Statistics Table" : "Dil İstatistikleri Tablosu"}</caption>
+					<thead>
+						<tr>
+							<th scope="col" aria-sort="none">${isEnglish ? "Language" : "Dil"}</th>
+							<th scope="col" aria-sort="none">${isEnglish ? "Improvements" : "İyileştirme"}</th>
+							<th scope="col" aria-sort="none">${isEnglish ? "Lines" : "Satır"}</th>
+						</tr>
+					</thead>
+					<tbody id="languageStatsTableBody">
 						<!-- Dinamik olarak doldurulacak -->
-					</div>
-				</div>
+					</tbody>
+				</table>
 			</div>
 
 			<!-- WCAG Kriterleri -->
@@ -1186,26 +1280,37 @@ ${prediction.reasoning.join('\n')}`;
 		}
 
 		function updateLanguageStats(languageStats) {
-			const container = document.getElementById('languageStats');
-			container.innerHTML = '';
+			const tbody = document.getElementById('languageStatsTableBody');
+			tbody.innerHTML = '';
 			
 			const languages = Object.entries(languageStats)
 				.sort(([,a], [,b]) => b.improvements - a.improvements)
 				.slice(0, 5); // En çok kullanılan 5 dil
 			
 			if (languages.length === 0) {
-				container.innerHTML = '<p style="text-align: center; color: var(--vscode-descriptionForeground);">' + (isEnglish ? 'No language data yet' : 'Henüz dil verisi yok') + '</p>';
+				const row = document.createElement('tr');
+				const cell = document.createElement('td');
+				cell.colSpan = 3;
+				cell.style.textAlign = 'center';
+				cell.style.color = 'var(--vscode-descriptionForeground)';
+				cell.textContent = isEnglish ? 'No language data yet' : 'Henüz dil verisi yok';
+				row.appendChild(cell);
+				tbody.appendChild(row);
 				return;
 			}
 			
 			languages.forEach(([lang, stats]) => {
-				const item = document.createElement('div');
-				item.className = 'language-item';
-				item.innerHTML = \`
-					<div class="language-name">\${getLanguageDisplayName(lang)}</div>
-					<div class="language-stats">\${stats.improvements} ${isEnglish ? 'improvements' : 'iyileştirme'}, \${stats.linesImproved} ${isEnglish ? 'lines' : 'satır'}</div>
-				\`;
-				container.appendChild(item);
+				const row = document.createElement('tr');
+				const langCell = document.createElement('td');
+				const impCell = document.createElement('td');
+				const linesCell = document.createElement('td');
+				langCell.textContent = getLanguageDisplayName(lang);
+				impCell.textContent = stats.improvements;
+				linesCell.textContent = stats.linesImproved;
+				row.appendChild(langCell);
+				row.appendChild(impCell);
+				row.appendChild(linesCell);
+				tbody.appendChild(row);
 			});
 		}
 
@@ -1417,7 +1522,9 @@ ${prediction.reasoning.join('\n')}`;
 		}
 
 		function exportStats() {
-			vscode.postMessage({ type: 'exportStats' });
+			const format = document.getElementById('exportFormat') ? document.getElementById('exportFormat').value : 'json';
+			const period = document.getElementById('periodFilter') ? document.getElementById('periodFilter').value : 'all';
+			vscode.postMessage({ type: 'exportStats', format, period });
 		}
 
 		function resetStats() {
