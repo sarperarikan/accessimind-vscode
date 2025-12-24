@@ -1,0 +1,8 @@
+ INFO  Publishing 'sarperarikan.accessimind v1.1.0'...                                                                  
+ INFO  Extension URL (might take a few minutes): https://marketplace.visualstudio.com/items?itemName=sarperarikan.accessimind                                                                                                                   
+ INFO  Hub URL: https://marketplace.visualstudio.com/manage/publishers/sarperarikan/extensions/accessimind/hub          
+ DONE  Published sarperarikan.accessimind v1.1.0.                                                                       
+ INFO  The latest version of @vscode/vsce is 3.7.1 and you have 2.32.0.                                                 
+Update it now: npm install -g @vscode/vsce                                                                              
+                                                                                                                        
+C:\Users\sarpe\workspace\accessi-mind>                                                                                  

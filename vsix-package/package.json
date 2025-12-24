@@ -1,0 +1,281 @@
+{
+  "name": "accessimind",
+  "displayName": "AccessiMind - AI-Powered WCAG Enhancer",
+  "description": "Advanced WCAG 2.2 accessibility improvements with VS Code Copilot & Gemini AI integration",
+  "version": "0.4.0",
+  "publisher": "ai-accessibility-publisher",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/ai-accessibility-enhancer.git"
+  },
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package",
+    "install-extension": "code --install-extension accessimind-0.4.0.vsix"
+  },
+  "devDependencies": {
+    "@types/node": "16.x",
+    "@types/vscode": "^1.74.0",
+    "typescript": "^4.9.4",
+    "vsce": "^2.15.0"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.17.1",
+    "axios": "^1.6.0"
+  },
+  "categories": [
+    "Other",
+    "Linters",
+    "Formatters",
+    "Machine Learning",
+    "Testing"
+  ],
+  "keywords": [
+    "wcag",
+    "accessibility",
+    "aria",
+    "gemini",
+    "copilot",
+    "ai",
+    "assistant",
+    "a11y",
+    "inclusive-design",
+    "code-improvement"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "accessimind.analyzeCode",
+        "title": "Analyze Current Code",
+        "category": "AccessiMind",
+        "icon": "$(search)"
+      },
+      {
+        "command": "accessimind.improveCode",
+        "title": "Improve Current Code",
+        "category": "AccessiMind",
+        "icon": "$(wand)"
+      },
+      {
+        "command": "accessimind.showWizard",
+        "title": "Show AccessiMind Wizard",
+        "category": "AccessiMind",
+        "icon": "$(gear)"
+      },
+      {
+        "command": "accessimind.autoDetectWCAG",
+        "title": "Auto-Detect Issues",
+        "category": "AccessiMind",
+        "icon": "$(eye)"
+      },
+      {
+        "command": "accessimind.setDetailLevel",
+        "title": "Configure Detail Level",
+        "category": "AccessiMind",
+        "icon": "$(settings-gear)"
+      },
+      {
+        "command": "accessimind.endToEndImprove",
+        "title": "Complete Code Enhancement",
+        "category": "AccessiMind",
+        "icon": "$(rocket)"
+      },
+      {
+        "command": "accessimind.improveCurrentFile",
+        "title": "Current File Improve",
+        "category": "AccessiMind",
+        "icon": "$(file-code)"
+      },
+      {
+        "command": "accessimind.improveSelectedCode",
+        "title": "Current Selected Code Improve",
+        "category": "AccessiMind",
+        "icon": "$(selection)"
+      },
+      {
+        "command": "accessimind.createJiraTask",
+        "title": "Create Jira Task from Current File",
+        "category": "AccessiMind",
+        "icon": "$(issues)"
+      },
+      {
+        "command": "accessimind.createJiraTaskFromSelection",
+        "title": "Create Jira Task from Current Selected Code",
+        "category": "AccessiMind",
+        "icon": "$(bug)"
+      },
+      {
+        "command": "accessimind.showStatistics",
+        "title": "Show Statistics",
+        "category": "AccessiMind",
+        "icon": "$(graph)"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "submenu": "accessimind.submenu",
+          "when": "editorTextFocus && (resourceExtname == .html || resourceExtname == .htm || resourceExtname == .css || resourceExtname == .js || resourceExtname == .ts || resourceExtname == .jsx || resourceExtname == .tsx || resourceExtname == .vue || resourceExtname == .svelte)",
+          "group": "accessibility"
+        }
+      ],
+      "accessimind.submenu": [
+        {
+          "command": "accessimind.analyzeCode",
+          "group": "1_analysis"
+        },
+        {
+          "command": "accessimind.improveCode",
+          "group": "1_analysis"
+        },
+        {
+          "command": "accessimind.improveCurrentFile",
+          "group": "1_analysis"
+        },
+        {
+          "command": "accessimind.improveSelectedCode",
+          "group": "1_analysis"
+        },
+        {
+          "command": "accessimind.autoDetectWCAG",
+          "group": "2_detection"
+        },
+        {
+          "command": "accessimind.endToEndImprove",
+          "group": "3_actions"
+        },
+        {
+          "command": "accessimind.createJiraTask",
+          "group": "4_jira"
+        },
+        {
+          "command": "accessimind.createJiraTaskFromSelection",
+          "group": "4_jira"
+        }
+      ]
+    },
+    "submenus": [
+      {
+        "id": "accessimind.submenu",
+        "label": "♿ AccessiMind"
+      }
+    ],
+    "configuration": {
+      "title": "AccessiMind",
+      "properties": {
+        "accessimind.detailLevel": {
+          "type": "string",
+          "enum": ["basic", "detailed", "comprehensive"],
+          "default": "detailed",
+          "description": "Detail level for WCAG analysis and suggestions",
+          "enumDescriptions": [
+            "Basic - Essential accessibility issues only",
+            "Detailed - Comprehensive analysis with explanations",
+            "Comprehensive - In-depth analysis with code examples"
+          ]
+        },
+        "accessimind.autoDetect": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically detect WCAG issues when opening supported files"
+        },
+        "accessimind.wcagLevel": {
+          "type": "string",
+          "enum": ["A", "AA", "AAA"],
+          "default": "AA",
+          "description": "WCAG compliance level to target"
+        },
+        "accessimind.enableCopilotIntegration": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable VS Code Copilot integration for enhanced suggestions"
+        },
+        "accessimind.jiraUrl": {
+          "type": "string",
+          "default": "",
+          "description": "Jira instance URL for creating tasks"
+        },
+        "accessimind.jiraProject": {
+          "type": "string",
+          "default": "",
+          "description": "Default Jira project key for creating tasks"
+        }
+      }
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "accessimind",
+          "title": "♿ AccessiMind",
+          "icon": "resources/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "accessimind": [
+        {
+          "id": "accessimind.tabbedMainView",
+          "name": "Accessibility Dashboard",
+          "when": "true"
+        },
+        {
+          "id": "accessimind.statsView",
+          "name": "Statistics",
+          "when": "false"
+        },
+        {
+          "id": "accessimind.dynamicPanelView",
+          "name": "Quick Actions",
+          "when": "false"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "accessimind.analyzeCode",
+        "key": "ctrl+shift+a",
+        "mac": "cmd+shift+a",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "accessimind.improveCode",
+        "key": "ctrl+shift+i",
+        "mac": "cmd+shift+i",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "accessimind.autoDetectWCAG",
+        "key": "ctrl+shift+d",
+        "mac": "cmd+shift+d",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "accessimind.improveCurrentFile",
+        "key": "ctrl+shift+f",
+        "mac": "cmd+shift+f",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "accessimind.improveSelectedCode",
+        "key": "ctrl+shift+s",
+        "mac": "cmd+shift+s",
+        "when": "editorHasSelection"
+      },
+      {
+        "command": "accessimind.showStatistics",
+        "key": "ctrl+shift+t",
+        "mac": "cmd+shift+t"
+      }
+    ]
+  }
+}

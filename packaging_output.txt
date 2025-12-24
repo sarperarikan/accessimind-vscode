@@ -1,0 +1,10 @@
+﻿Executing prepublish script 'npm run vscode:prepublish'...
+
+> accessimind@1.0.0 vscode:prepublish
+> npm run compile
+
+
+> accessimind@1.0.0 compile
+> tsc -p ./
+
+src/utils/aiProvider.ts(373,2): error TS1128: Declaration or statement expected.

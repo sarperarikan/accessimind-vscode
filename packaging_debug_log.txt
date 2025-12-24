@@ -1,0 +1,35 @@
+﻿Executing prepublish script 'npm run vscode:prepublish'...
+
+> accessimind@1.0.0 vscode:prepublish
+> npm run compile
+
+
+> accessimind@1.0.0 compile
+> tsc -p ./
+
+ INFO  Files included in the VSIX:
+accessimind-1.0.0.vsix
+Ôö£ÔöÇ [Content_Types].xml 
+Ôö£ÔöÇ extension.vsixmanifest 
+ÔööÔöÇ extension/
+   Ôö£ÔöÇ CHANGELOG.md [9.14 KB]
+   Ôö£ÔöÇ LICENSE.txt 
+   Ôö£ÔöÇ PROJECT_DOCUMENTATION.md [12.58 KB]
+   Ôö£ÔöÇ README.md [9.29 KB]
+   Ôö£ÔöÇ accessi-mind-128.jpg [3.34 KB]
+   Ôö£ÔöÇ accessi-mind.jpg [72.11 KB]
+   Ôö£ÔöÇ accessimind.json [1.62 KB]
+   Ôö£ÔöÇ package.json [20.31 KB]
+   Ôö£ÔöÇ packaging_debug_log.txt [0.17 KB]
+   Ôö£ÔöÇ packaging_output.txt [0.25 KB]
+   Ôö£ÔöÇ test-accessimind-json.md [6.52 KB]
+   Ôö£ÔöÇ test-settings-persistence.md [5.14 KB]
+   Ôö£ÔöÇ dist/ (2 files) [898.29 KB]
+   Ôö£ÔöÇ media/ (13 files) [217.11 KB]
+   Ôö£ÔöÇ out/ (72 files) [1.12 MB]
+   Ôö£ÔöÇ resources/ (1 file) [0.99 KB]
+   ÔööÔöÇ vsix-package/ (42 files) [539.91 KB]
+
+=> Run vsce ls --tree to see all included files.
+
+ DONE  Packaged: C:\Users\sarpe\workspace\accessi-mind\accessimind-1.0.0.vsix (144 files, 726.69 KB)

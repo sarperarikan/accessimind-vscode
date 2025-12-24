@@ -1,0 +1,647 @@
+{
+  "name": "accessimind",
+  "displayName": "AccessiMind - AI WCAG Accessibility",
+  "description": "AI-powered WCAG 2.2 accessibility analyzer with Gemini & Copilot integration. Real-time code improvement, Jira export, and comprehensive statistics.",
+  "version": "1.1.0",
+  "publisher": "sarperarikan",
+  "icon": "accessi-mind.jpg",
+  "galleryBanner": {
+    "color": "#1e1e1e",
+    "theme": "dark"
+  },
+  "badges": [
+    {
+      "url": "https://img.shields.io/badge/WCAG-2.2-green",
+      "href": "https://www.w3.org/WAI/WCAG22/quickref/",
+      "description": "WCAG 2.2 Compliant"
+    },
+    {
+      "url": "https://img.shields.io/badge/AI-Gemini%20%26%20Copilot-blue",
+      "href": "https://github.com/sarperarikan/accessi-mind",
+      "description": "AI Powered"
+    }
+  ],
+  "homepage": "https://github.com/sarperarikan/accessi-mind",
+  "bugs": {
+    "url": "https://github.com/sarperarikan/accessi-mind/issues"
+  },
+  "preview": false,
+  "pricing": "Free",
+  "sponsor": {
+    "url": "https://github.com/sponsors/sarperarikan"
+  },
+  "type": "commonjs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sarperarikan/accessi-mind.git"
+  },
+  "author": {
+    "name": "Sarper Arıkan",
+    "email": "sarperarikan@gmail.com"
+  },
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.93.0"
+  },
+  "categories": [
+    "Linters",
+    "Other",
+    "Machine Learning",
+    "Testing"
+  ],
+  "keywords": [
+    "wcag",
+    "accessibility",
+    "a11y",
+    "aria",
+    "gemini",
+    "copilot",
+    "ai",
+    "wcag 2.2",
+    "screen reader",
+    "jira",
+    "code analysis",
+    "web accessibility"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "wcagEnhancer.analyzeOpenCode",
+        "title": "♿ AccessiMind: Analyze Open File",
+        "icon": "$(search)"
+      },
+      {
+        "command": "wcagEnhancer.analyzeSelectedCode",
+        "title": "♿ AccessiMind: Analyze Selection",
+        "icon": "$(selection)"
+      },
+      {
+        "command": "wcagEnhancer.setApiKey",
+        "title": "♿ AccessiMind: Set Gemini API Key",
+        "icon": "$(key)"
+      },
+      {
+        "command": "wcagEnhancer.testAIConnection",
+        "title": "♿ AccessiMind: Test AI Connection",
+        "icon": "$(plug)"
+      },
+      {
+        "command": "wcagEnhancer.showWelcome",
+        "title": "♿ AccessiMind: Welcome Guide",
+        "icon": "$(home)"
+      },
+      {
+        "command": "wcagEnhancer.showDetailedStatistics",
+        "title": "♿ AccessiMind: Statistics",
+        "icon": "$(graph)"
+      },
+      {
+        "command": "wcagEnhancer.openSettings",
+        "title": "♿ AccessiMind: Settings",
+        "icon": "$(gear)"
+      },
+      {
+        "command": "wcagEnhancer.openHelp",
+        "title": "♿ AccessiMind: Help & Documentation",
+        "icon": "$(book)"
+      },
+      {
+        "command": "wcagEnhancer.exportStatistics",
+        "title": "♿ AccessiMind: Export Statistics",
+        "icon": "$(export)"
+      },
+      {
+        "command": "wcagEnhancer.resetStatistics",
+        "title": "♿ AccessiMind: Reset Statistics",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "wcagEnhancer.createJiraTask",
+        "title": "♿ AccessiMind: Create Jira Task",
+        "icon": "$(issues)"
+      },
+      {
+        "command": "wcagEnhancer.showStatusBarMenu",
+        "title": "♿ AccessiMind: Quick Menu",
+        "icon": "$(menu)"
+      },
+      {
+        "command": "wcagEnhancer.resetDailyStatistics",
+        "title": "♿ AccessiMind: Reset Daily Stats"
+      },
+      {
+        "command": "wcagEnhancer.resetMonthlyStatistics",
+        "title": "♿ AccessiMind: Reset Monthly Stats"
+      },
+      {
+        "command": "wcagEnhancer.resetYearlyStatistics",
+        "title": "♿ AccessiMind: Reset Yearly Stats"
+      },
+      {
+        "command": "wcagEnhancer.showModernStatsPanel",
+        "title": "♿ AccessiMind: Modern Statistics Panel",
+        "icon": "$(dashboard)"
+      },
+      {
+        "command": "wcagEnhancer.showPeriodStatistics",
+        "title": "♿ AccessiMind: Period Statistics"
+      },
+      {
+        "command": "wcagEnhancer.exportPeriodStatistics",
+        "title": "♿ AccessiMind: Export Period Statistics"
+      },
+      {
+        "command": "wcagEnhancer.restoreSettings",
+        "title": "♿ AccessiMind: Restore Settings"
+      },
+      {
+        "command": "wcagEnhancer.exportSettings",
+        "title": "♿ AccessiMind: Export Settings"
+      },
+      {
+        "command": "wcagEnhancer.importSettings",
+        "title": "♿ AccessiMind: Import Settings"
+      },
+      {
+        "command": "wcagEnhancer.clearPersistedSettings",
+        "title": "♿ AccessiMind: Clear Persistent Settings"
+      },
+      {
+        "command": "wcagEnhancer.showSettingsStatus",
+        "title": "♿ AccessiMind: Settings Status"
+      },
+      {
+        "command": "wcagEnhancer.applyJsonSettings",
+        "title": "♿ AccessiMind: Apply JSON Settings"
+      },
+      {
+        "command": "wcagEnhancer.syncToJson",
+        "title": "♿ AccessiMind: Sync to JSON"
+      },
+      {
+        "command": "wcagEnhancer.showJsonPath",
+        "title": "♿ AccessiMind: Show JSON Path"
+      },
+      {
+        "command": "wcagEnhancer.showJsonStatus",
+        "title": "♿ AccessiMind: JSON Status"
+      },
+      {
+        "command": "wcagEnhancer.resetJsonFile",
+        "title": "♿ AccessiMind: Reset JSON File"
+      },
+      {
+        "command": "wcagEnhancer.validateJsonHealth",
+        "title": "♿ AccessiMind: Validate JSON"
+      },
+      {
+        "command": "wcagEnhancer.repairJsonFile",
+        "title": "♿ AccessiMind: Repair JSON"
+      },
+      {
+        "command": "wcagEnhancer.openChat",
+        "title": "♿ AccessiMind: Chat",
+        "icon": "$(comment-discussion)"
+      },
+      {
+        "command": "wcagEnhancer.inlineChat",
+        "title": "♿ AccessiMind: Inline Chat",
+        "icon": "$(edit)"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "wcagEnhancer",
+          "title": "♿ AccessiMind",
+          "icon": "resources/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "wcagEnhancer": [
+        {
+          "type": "webview",
+          "id": "wcagEnhancer.tabbedMainView",
+          "name": "AccessiMind",
+          "icon": "resources/icon.svg",
+          "when": "true"
+        },
+        {
+          "id": "wcagEnhancer.settingsView",
+          "name": "Settings",
+          "icon": "resources/icon.svg",
+          "when": "true"
+        },
+        {
+          "type": "webview",
+          "id": "wcagEnhancer.statsView",
+          "name": "Statistics",
+          "icon": "resources/icon.svg",
+          "when": "false"
+        },
+        {
+          "type": "webview",
+          "id": "wcagEnhancer.modernStatsView",
+          "name": "Modern Statistics",
+          "icon": "resources/icon.svg",
+          "when": "false"
+        },
+        {
+          "type": "webview",
+          "id": "wcagEnhancer.chatView",
+          "name": "AccessiMind Chat",
+          "icon": "resources/icon.svg",
+          "when": "true"
+        }
+      ]
+    },
+    "menus": {
+      "editor/context": [
+        {
+          "submenu": "wcagEnhancer.submenu",
+          "group": "1_modification@1"
+        }
+      ],
+      "wcagEnhancer.submenu": [
+        {
+          "command": "wcagEnhancer.analyzeOpenCode",
+          "group": "1_analyze"
+        },
+        {
+          "command": "wcagEnhancer.analyzeSelectedCode",
+          "when": "editorHasSelection",
+          "group": "1_analyze"
+        }
+      ]
+    },
+    "submenus": [
+      {
+        "id": "wcagEnhancer.submenu",
+        "label": "♿ AccessiMind"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "wcagEnhancer.analyzeOpenCode",
+        "key": "ctrl+alt+w",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "wcagEnhancer.analyzeSelectedCode",
+        "key": "ctrl+alt+shift+w",
+        "when": "editorHasSelection"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "AccessiMind",
+      "description": "All settings are managed through the extension UI. Please use the Settings panel in the AccessiMind sidebar.",
+      "properties": {
+        "wcagEnhancer.ai": {
+          "type": "object",
+          "title": "AI Configuration",
+          "description": "All AI provider and model settings - Use the Settings panel to configure",
+          "properties": {
+            "provider": {
+              "type": "string",
+              "enum": [
+                "gemini",
+                "vscode-copilot"
+              ],
+              "default": "gemini",
+              "description": "AI provider for WCAG improvements - Configure via Settings panel",
+              "enumDescriptions": [
+                "Google Gemini API (requires API key)",
+                "VS Code Copilot (uses GitHub Copilot subscription)"
+              ]
+            },
+            "apiKey": {
+              "type": "string",
+              "default": "",
+              "description": "Your Gemini API key (only needed for Gemini provider) - Configure via Settings panel",
+              "scope": "application"
+            },
+            "testConnection": {
+              "type": "boolean",
+              "default": true,
+              "description": "Test AI connection when settings are changed - Configure via Settings panel"
+            },
+            "autoTestOnChange": {
+              "type": "boolean",
+              "default": true,
+              "description": "Automatically test connection when API key or provider changes - Configure via Settings panel"
+            }
+          }
+        },
+        "wcagEnhancer.aiModels": {
+          "type": "object",
+          "title": "AI Model Configuration",
+          "description": "AI model selection and preferences - Use the Settings panel to configure",
+          "properties": {
+            "selectedModel": {
+              "type": "string",
+              "default": "gemini-2.5-flash",
+              "description": "Currently selected AI model - Configure via Settings panel",
+              "enum": [
+                "gemini-2.5-flash",
+                "gemini-2.5-pro",
+                "gpt-4o",
+                "gpt-4o-mini",
+                "gpt-4",
+                "gpt-3.5-turbo",
+                "claude-3.5-sonnet",
+                "claude-3-opus",
+                "claude-3-sonnet",
+                "claude-3-haiku"
+              ],
+              "enumDescriptions": [
+                "Gemini 2.5 Flash - Fastest response time",
+                "Gemini 2.5 Pro - Highest quality",
+                "GPT-4o - Latest OpenAI model",
+                "GPT-4o Mini - Fast and efficient",
+                "GPT-4 - High quality responses",
+                "GPT-3.5 Turbo - Fast and reliable",
+                "Claude 3.5 Sonnet - Advanced reasoning",
+                "Claude 3 Opus - Most capable",
+                "Claude 3 Sonnet - Balanced performance",
+                "Claude 3 Haiku - Fast and efficient"
+              ]
+            },
+            "enableGeminiModels": {
+              "type": "boolean",
+              "default": true,
+              "description": "Enable Gemini models for selection - Configure via Settings panel"
+            },
+            "enableCopilotModels": {
+              "type": "boolean",
+              "default": true,
+              "description": "Enable GitHub Copilot models for selection - Configure via Settings panel"
+            },
+            "autoSelectBestModel": {
+              "type": "boolean",
+              "default": false,
+              "description": "Automatically select the best available model based on provider - Configure via Settings panel"
+            },
+            "preferFastModels": {
+              "type": "boolean",
+              "default": true,
+              "description": "Prefer faster models over higher quality ones - Configure via Settings panel"
+            },
+            "modelPreferences": {
+              "type": "object",
+              "description": "Model preferences for different use cases - Configure via Settings panel",
+              "properties": {
+                "forQuickImprovements": {
+                  "type": "string",
+                  "default": "gemini-2.5-flash",
+                  "description": "Model for quick WCAG improvements",
+                  "enum": [
+                    "gemini-2.5-flash",
+                    "gpt-4o-mini",
+                    "claude-3-haiku",
+                    "gpt-3.5-turbo"
+                  ]
+                },
+                "forComplexAnalysis": {
+                  "type": "string",
+                  "default": "gemini-2.5-pro",
+                  "description": "Model for complex WCAG analysis",
+                  "enum": [
+                    "gemini-2.5-pro",
+                    "gpt-4o",
+                    "claude-3.5-sonnet",
+                    "claude-3-opus"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "wcagEnhancer.language": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "en",
+            "tr"
+          ],
+          "default": "en",
+          "description": "Language for AI responses and interface - Configure via Settings panel",
+          "enumDescriptions": [
+            "Auto-detect from VS Code",
+            "English",
+            "Turkish"
+          ]
+        },
+        "wcagEnhancer.wcagLevel": {
+          "type": "string",
+          "enum": [
+            "A",
+            "AA",
+            "AAA"
+          ],
+          "default": "AA",
+          "description": "Target WCAG compliance level - Configure via Settings panel",
+          "enumDescriptions": [
+            "Level A - Basic accessibility",
+            "Level AA - Standard accessibility (Recommended)",
+            "Level AAA - Enhanced accessibility"
+          ]
+        },
+        "wcagEnhancer.autoApply": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically apply improvements to code without confirmation - Configure via Settings panel"
+        },
+        "wcagEnhancer.includeComments": {
+          "type": "boolean",
+          "default": true,
+          "description": "Include explanatory comments about WCAG improvements - Configure via Settings panel"
+        },
+        "wcagEnhancer.enableStatistics": {
+          "type": "boolean",
+          "default": true,
+          "description": "Track usage statistics and metrics - Configure via Settings panel"
+        },
+        "wcagEnhancer.shortcuts.analyzeOpenCode": {
+          "type": "string",
+          "default": "ctrl+alt+w",
+          "description": "Keyboard shortcut to analyze open code structures - Configure via Settings panel",
+          "scope": "window"
+        },
+        "wcagEnhancer.shortcuts.analyzeSelectedCode": {
+          "type": "string",
+          "default": "ctrl+alt+shift+w",
+          "description": "Keyboard shortcut to analyze selected code - Configure via Settings panel",
+          "scope": "window"
+        },
+        "wcagEnhancer.shortcuts.showInterface": {
+          "type": "string",
+          "default": "ctrl+alt+u",
+          "description": "Keyboard shortcut to show statistics interface - Configure via Settings panel",
+          "scope": "window"
+        },
+        "wcagEnhancer.customPrompt": {
+          "type": "string",
+          "default": "",
+          "description": "Custom prompt for WCAG improvements (optional) - Configure via Settings panel"
+        },
+        "wcagEnhancer.responseDetail": {
+          "type": "string",
+          "default": "summary",
+          "enum": [
+            "summary",
+            "detailed"
+          ],
+          "description": "Level of detail for AI responses (summary or detailed) - Configure via Settings panel"
+        },
+        "wcagEnhancer.interfacePreferences": {
+          "type": "object",
+          "title": "Interface Preferences",
+          "description": "Customize interface options such as theme, font size, and layout - Configure via Settings panel",
+          "properties": {
+            "theme": {
+              "type": "string",
+              "default": "auto",
+              "enum": [
+                "auto",
+                "light",
+                "dark"
+              ],
+              "description": "Interface theme"
+            },
+            "fontSize": {
+              "type": "string",
+              "default": "medium",
+              "enum": [
+                "small",
+                "medium",
+                "large"
+              ],
+              "description": "Font size for extension panels"
+            }
+          }
+        },
+        "wcagEnhancer.jira": {
+          "type": "object",
+          "title": "Jira Task Configuration",
+          "description": "Configuration for WCAG Jira task creation - Configure via Settings panel",
+          "properties": {
+            "customPrompt": {
+              "type": "string",
+              "default": "",
+              "description": "Custom prompt for Jira task generation (optional) - Configure via Settings panel"
+            },
+            "useCustomPrompt": {
+              "type": "boolean",
+              "default": false,
+              "description": "Always ask for custom prompt when creating Jira tasks - Configure via Settings panel"
+            },
+            "defaultPriority": {
+              "type": "string",
+              "enum": [
+                "Critical",
+                "High",
+                "Medium",
+                "Low"
+              ],
+              "default": "Medium",
+              "description": "Default priority for WCAG Jira tasks - Configure via Settings panel",
+              "enumDescriptions": [
+                "Critical - Blocks accessibility for many users",
+                "High - Significant accessibility barrier",
+                "Medium - Important accessibility improvement",
+                "Low - Nice-to-have accessibility enhancement"
+              ]
+            },
+            "defaultComponent": {
+              "type": "string",
+              "enum": [
+                "images",
+                "navigation",
+                "forms",
+                "color",
+                "keyboard",
+                "structure",
+                "responsive",
+                "media",
+                "other"
+              ],
+              "default": "other",
+              "description": "Default component/area for WCAG tasks - Configure via Settings panel",
+              "enumDescriptions": [
+                "Images & Media - Alt text, captions, audio descriptions",
+                "Navigation & Links - Link text, skip links, breadcrumbs",
+                "Forms & Input - Labels, validation, instructions",
+                "Color & Contrast - Color contrast, color-only information",
+                "Keyboard Access - Tab order, focus management",
+                "Structure & Semantics - Headings, landmarks, ARIA",
+                "Responsive & Mobile - Mobile accessibility, touch targets",
+                "Audio & Video - Captions, transcripts, controls",
+                "Other - General accessibility improvements"
+              ]
+            },
+            "includeCodeExamples": {
+              "type": "boolean",
+              "default": true,
+              "description": "Include code examples in Jira task descriptions - Configure via Settings panel"
+            },
+            "includeTestingSteps": {
+              "type": "boolean",
+              "default": true,
+              "description": "Include testing steps in Jira task descriptions - Configure via Settings panel"
+            }
+          }
+        },
+        "wcagEnhancer.wizardCompleted": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether the setup wizard has been completed - Configure via Settings panel"
+        }
+      }
+    }
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.30.0",
+    "@types/jest": "^29.5.8",
+    "@types/node": "18.x",
+    "@types/vscode": "^1.74.0",
+    "@typescript-eslint/eslint-plugin": "^6.4.1",
+    "@typescript-eslint/parser": "^6.4.1",
+    "@vscode/test-cli": "^0.0.4",
+    "@vscode/test-electron": "^2.3.4",
+    "@vscode/vsce": "^2.22.0",
+    "cross-env": "^7.0.3",
+    "eslint": "^8.47.0",
+    "jest": "^29.7.0",
+    "rimraf": "^6.0.1",
+    "ts-jest": "^29.1.1",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.1.6",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test",
+    "test:unit": "jest",
+    "test:coverage": "jest --coverage",
+    "webpack": "webpack",
+    "webpack-dev": "webpack --mode development --watch",
+    "webpack-prod": "cross-env NODE_ENV=production webpack --mode production",
+    "build": "npm run webpack-prod",
+    "package": "npm run build && vsce package",
+    "package-dev": "npm run webpack-dev && vsce package",
+    "clean": "rimraf out dist *.vsix",
+    "rebuild": "npm run clean && npm run build",
+    "publish": "vsce publish"
+  }
+}
