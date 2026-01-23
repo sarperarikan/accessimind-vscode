@@ -541,6 +541,9 @@ class HelpPanel {
                     <li class="toc-subitem">
                         <a href="#copilot-setup" class="toc-link" onclick="scrollToSection('copilot-setup')">GitHub Copilot</a>
                     </li>
+                    <li class="toc-subitem">
+                        <a href="#ollama-setup" class="toc-link" onclick="scrollToSection('ollama-setup')">Ollama (Local AI)</a>
+                    </li>
                 </ul>
             </li>
             <li class="toc-item">
@@ -589,14 +592,14 @@ class HelpPanel {
                 <ol>
                     <li>Open the Command Palette (<kbd class="kbd">Ctrl+Shift+P</kbd>)</li>
                     <li>Run <code>AccessiMind: Open Setup Wizard</code></li>
-                    <li>Select your AI provider (Gemini or VS Code Copilot)</li>
-                    <li>Configure your API key (for Gemini)</li>
+                    <li>Select your AI provider (Gemini, VS Code Copilot, or Ollama)</li>
+                    <li>Configure your API key (for Gemini), or local URL (for Ollama)</li>
                     <li>Start analyzing your code!</li>
                 </ol>
 
                 <div class="callout">
                     <div class="callout-title">💡 Tip</div>
-                    <p>For the best experience, ensure you have either Google Gemini API access or GitHub Copilot installed.</p>
+                    <p>For the best experience, choose the provider that fits your needs: Google Gemini for ease of use, GitHub Copilot for integrated workflow, or Ollama for 100% privacy.</p>
                 </div>
 
                 <div class="btn-group">
@@ -619,11 +622,15 @@ class HelpPanel {
                 <div class="feature-grid">
                     <div class="feature-card">
                         <h4>🔍 Code Analysis</h4>
-                        <p>Automatically analyze your HTML, JSX, and TSX code for WCAG compliance issues.</p>
+                        <p>Automatically analyze your HTML, JSX, and TSX code for WCAG conformance issues.</p>
                     </div>
                     <div class="feature-card">
                         <h4>🤖 AI-Powered Fixes</h4>
-                        <p>Get intelligent suggestions and auto-fixes powered by Gemini or Copilot.</p>
+                        <p>Get intelligent suggestions powered by Gemini, Copilot, or Ollama.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🏠 Local AI (Ollama)</h4>
+                        <p>Run powerful models like Llama 3 or Mistral locally for 100% privacy.</p>
                     </div>
                     <div class="feature-card">
                         <h4>💬 Accessibility Chat</h4>
@@ -631,15 +638,15 @@ class HelpPanel {
                     </div>
                     <div class="feature-card">
                         <h4>🎫 Jira Integration</h4>
-                        <p>Export accessibility findings directly to Jira-compatible JSON format.</p>
+                        <p>Export accessibility findings directly to Jira-compatible format.</p>
                     </div>
                     <div class="feature-card">
                         <h4>📊 Statistics</h4>
                         <p>Track your accessibility improvements over time with detailed analytics.</p>
                     </div>
                     <div class="feature-card">
-                        <h4>🌐 Multi-Language</h4>
-                        <p>Support for English and Turkish interface and AI responses.</p>
+                        <h4>🌍 Global Reach</h4>
+                        <p>Support for English/Turkish interface and next-gen models like GPT-5.2.</p>
                     </div>
                 </div>
 
@@ -661,7 +668,7 @@ class HelpPanel {
                 </p>
                 <ul>
                     <li>Ask accessibility questions about your code</li>
-                    <li>Get WCAG compliance recommendations</li>
+                    <li>Get WCAG conformance recommendations</li>
                     <li>Learn about ARIA best practices</li>
                     <li>Request code improvements with context awareness</li>
                 </ul>
@@ -754,11 +761,15 @@ class HelpPanel {
                 <div class="feature-grid">
                     <div class="feature-card">
                         <h4>🌟 Google Gemini</h4>
-                        <p>Powerful AI with free tier. Requires API key but offers excellent code analysis.</p>
+                        <p>Fast and reliable. Supports Gemini 2.0/2.5 Pro & Flash models.</p>
                     </div>
                     <div class="feature-card">
                         <h4>🤖 GitHub Copilot</h4>
-                        <p>Seamless VS Code integration. Uses your existing Copilot subscription.</p>
+                        <p>Seamless integration. Supports GPT-4o, GPT-5.2, and Claude 3.5.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🏠 Ollama</h4>
+                        <p>Local AI for total privacy. Run Llama 3, Mistral, and more on your CPU/GPU.</p>
                     </div>
                 </div>
 
@@ -798,8 +809,29 @@ class HelpPanel {
                 <div class="callout">
                     <div class="callout-title">🔧 Copilot Models</div>
                     <p>
-                        AccessiMind automatically detects available Copilot models including:<br>
-                        <strong>GPT-4o</strong>, <strong>GPT-4</strong>, <strong>Claude 3.5 Sonnet</strong>, and more.
+                        AccessiMind supports next-gen Copilot models including:<br>
+                        <strong>GPT-5.2 Preview</strong>, <strong>GPT-4o</strong>, <strong>Claude 3.5 Sonnet</strong>.
+                    </p>
+                </div>
+
+                <!-- Ollama Setup -->
+                <h3 id="ollama-setup">Ollama Local AI Setup</h3>
+                <p>
+                    Ollama allows you to run high-performance AI models locally on your machine:
+                </p>
+                <ol>
+                    <li>Download and install <a href="#" onclick="openExternal('https://ollama.com'); return false;">Ollama</a></li>
+                    <li>Open your terminal and run a model (e.g., <code>ollama run llama3</code>)</li>
+                    <li>Open AccessiMind Settings → Setup Wizard</li>
+                    <li>Select "Ollama" as your provider</li>
+                    <li>Enter your Ollama URL (default: <code>http://localhost:11434</code>)</li>
+                    <li>Enter the name of the model you have installed</li>
+                </ol>
+
+                <div class="callout">
+                    <div class="callout-title">🏠 Privacy Focus</div>
+                    <p>
+                        With Ollama, your code never leaves your computer. Perfect for sensitive enterprise environments.
                     </p>
                 </div>
 
@@ -810,6 +842,7 @@ class HelpPanel {
                             <th scope="col">Feature</th>
                             <th scope="col">Google Gemini</th>
                             <th scope="col">GitHub Copilot</th>
+                            <th scope="col">Ollama</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -817,26 +850,31 @@ class HelpPanel {
                             <td>Cost</td>
                             <td>Free tier available</td>
                             <td>Subscription required</td>
+                            <td>Free (Local)</td>
                         </tr>
                         <tr>
                             <td>Setup</td>
-                            <td>Requires API key</td>
-                            <td>Auto-detected</td>
+                            <td>API Key</td>
+                            <td>Subscription</td>
+                            <td>Local Server</td>
                         </tr>
                         <tr>
                             <td>Models</td>
-                            <td>Gemini 2.0/1.5 Flash/Pro</td>
-                            <td>GPT-4o, Claude, etc.</td>
+                            <td>Gemini 2.0/2.5</td>
+                            <td>GPT-4o, GPT-5.2, Claude</td>
+                            <td>Llama 3, Mistral, Phi</td>
                         </tr>
                         <tr>
-                            <td>Speed</td>
-                            <td>Very Fast</td>
-                            <td>Fast</td>
+                            <td>Privacy</td>
+                            <td>Cloud-based</td>
+                            <td>Cloud-based</td>
+                            <td>100% Local</td>
                         </tr>
                         <tr>
-                            <td>Best For</td>
-                            <td>Independent usage</td>
-                            <td>Copilot users</td>
+                            <td>Performance</td>
+                            <td>Very High</td>
+                            <td>Very High</td>
+                            <td>Depends on your hardware</td>
                         </tr>
                     </tbody>
                 </table>
@@ -959,7 +997,7 @@ class HelpPanel {
                     <div class="callout-title">🆘 Need More Help?</div>
                     <p>
                         If you're still having issues, please 
-                        <a href="#" onclick="openExternal('https://github.com/sarperarikan/wcag-enhancer/issues')">open an issue</a>
+                        <a href="#" onclick="openExternal('https://github.com/sarperarikan/accessimind-vscode/issues')">open an issue</a>
                         on our GitHub repository.
                     </p>
                 </div>
@@ -981,9 +1019,9 @@ class HelpPanel {
 
                 <h3>Links</h3>
                 <ul>
-                    <li><a href="#" onclick="openExternal('https://github.com/sarperarikan/wcag-enhancer')">GitHub Repository</a></li>
+                    <li><a href="#" onclick="openExternal('https://github.com/sarperarikan/accessimind-vscode')">GitHub Repository</a></li>
                     <li><a href="#" onclick="openExternal('https://marketplace.visualstudio.com/items?itemName=sarperarikan.accessimind')">VS Code Marketplace</a></li>
-                    <li><a href="#" onclick="openExternal('https://github.com/sarperarikan/wcag-enhancer/issues')">Report Issues</a></li>
+                    <li><a href="#" onclick="openExternal('https://github.com/sarperarikan/accessimind-vscode/issues')">Report Issues</a></li>
                 </ul>
 
                 <h3>License</h3>

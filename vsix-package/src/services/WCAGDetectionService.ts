@@ -21,7 +21,7 @@ export class WCAGDetectionService {
         this.settingsManager = settingsManager;
         this.aiServiceManager = aiServiceManager;
         this.diagnosticCollection = vscode.languages.createDiagnosticCollection('wcag-accessibility');
-        
+
         this.setupFileWatchers();
     }
 
@@ -81,31 +81,31 @@ export class WCAGDetectionService {
         try {
             const document = await vscode.workspace.openTextDocument(uri);
             const code = document.getText();
-            
+
             if (!code.trim()) {
                 return { issues: [], autoFixable: [], warnings: [], suggestions: [] };
             }
 
             // Use AI service for detection
             const analysisResult = await this.aiServiceManager.analyzeCode(code, uri.fsPath);
-            
+
             // Process and categorize issues
             const detectionResult = this.categorizeIssues(analysisResult.issues);
-            
+
             // Store result
             this.activeDetections.set(uri.fsPath, detectionResult);
-            
+
             // Update VS Code diagnostics
             await this.updateDiagnostics(uri, detectionResult);
-            
+
             // Show notification if needed
             await this.showNotificationIfNeeded(uri, detectionResult);
-            
+
             return detectionResult;
 
         } catch (error) {
             console.error('Error detecting WCAG issues:', error);
-            
+
             // Fallback to basic pattern-based detection
             return await this.basicPatternDetection(uri);
         }
@@ -165,7 +165,7 @@ export class WCAGDetectionService {
             }
         }
 
-        return 'Review accessibility compliance for this element';
+        return 'Review accessibility conformance for this element';
     }
 
     private async updateDiagnostics(uri: vscode.Uri, result: DetectionResult): Promise<void> {
@@ -177,16 +177,16 @@ export class WCAGDetectionService {
                 Math.max(0, issue.column + 10) // Approximate end position
             );
 
-            const severity = issue.severity === 'error' 
+            const severity = issue.severity === 'error'
                 ? vscode.DiagnosticSeverity.Error
                 : issue.severity === 'warning'
-                ? vscode.DiagnosticSeverity.Warning
-                : vscode.DiagnosticSeverity.Information;
+                    ? vscode.DiagnosticSeverity.Warning
+                    : vscode.DiagnosticSeverity.Information;
 
             const diagnostic = new vscode.Diagnostic(range, issue.message, severity);
             diagnostic.code = issue.rule;
             diagnostic.source = 'AccessiMind WCAG';
-            
+
             return diagnostic;
         });
 
@@ -195,15 +195,15 @@ export class WCAGDetectionService {
 
     private async showNotificationIfNeeded(uri: vscode.Uri, result: DetectionResult): Promise<void> {
         const settings = await this.settingsManager.getAccessibilitySettings();
-        
+
         if (result.issues.length > 0 && settings.enableVoiceAnnouncements) {
             const errorCount = result.issues.filter(i => i.severity === 'error').length;
             const warningCount = result.issues.filter(i => i.severity === 'warning').length;
-            
+
             const message = settings.language === 'en'
                 ? `Found ${errorCount} accessibility errors and ${warningCount} warnings`
                 : `${errorCount} erişilebilirlik hatası ve ${warningCount} uyarı bulundu`;
-            
+
             // Show as information message
             vscode.window.showInformationMessage(`♿ ${message}`);
         }
@@ -216,7 +216,7 @@ export class WCAGDetectionService {
             const issues: WCAGIssue[] = [];
 
             const lines = code.split('\n');
-            
+
             lines.forEach((line, index) => {
                 // Check for images without alt text
                 if (line.includes('<img') && !line.includes('alt=')) {
@@ -278,8 +278,8 @@ export class WCAGDetectionService {
             const code = document.getText();
 
             const improvement = await this.aiServiceManager.improveCode(
-                code, 
-                uri.fsPath, 
+                code,
+                uri.fsPath,
                 result.autoFixable
             );
 
@@ -292,16 +292,16 @@ export class WCAGDetectionService {
             edit.replace(uri, fullRange, improvement.improvedCode);
 
             const applied = await vscode.workspace.applyEdit(edit);
-            
+
             if (applied) {
                 // Re-detect to update diagnostics
                 await this.detectIssuesInFile(uri);
-                
+
                 const settings = await this.settingsManager.getAccessibilitySettings();
                 const message = settings.language === 'en'
                     ? `Auto-fixed ${result.autoFixable.length} accessibility issues`
                     : `${result.autoFixable.length} erişilebilirlik sorunu otomatik düzeltildi`;
-                
+
                 vscode.window.showInformationMessage(`♿ ${message}`);
             }
 

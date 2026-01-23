@@ -194,7 +194,7 @@ class StatsViewProvider {
         return last7Days;
     }
     updateStats() {
-        // Bu metod geriye uyumluluk için tutuldu
+        // Bu metod geriye dönük uyum için tutuldu
         // Gerçek istatistikler updateStatistics metodu ile güncellenir
         if (!this._view)
             return;

@@ -309,22 +309,22 @@ Sadece gerçek WCAG sorunlarını raporla. Özellikle şunlara odaklan:
         const criticalIssues = issues.filter(i => i.severity === "critical").length;
         const majorIssues = issues.filter(i => i.severity === "major").length;
         const minorIssues = issues.filter(i => i.severity === "minor").length;
-        let complianceLevel = "AAA";
+        let conformanceLevel = "AAA";
         if (criticalIssues > 0) {
-            complianceLevel = "Non-compliant";
+            conformanceLevel = "Non-conformant";
         }
         else if (majorIssues > 0) {
-            complianceLevel = "A";
+            conformanceLevel = "A";
         }
         else if (minorIssues > 0) {
-            complianceLevel = "AA";
+            conformanceLevel = "AA";
         }
         return {
             totalIssues: issues.length,
             criticalIssues,
             majorIssues,
             minorIssues,
-            complianceLevel
+            conformanceLevel
         };
     }
     generateRecommendations(issues) {

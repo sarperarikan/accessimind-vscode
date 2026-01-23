@@ -58,6 +58,9 @@ class AITestUtils {
             else if (currentProvider === "vscode-copilot") {
                 return await this.testCopilotProvider();
             }
+            else if (currentProvider === "ollama") {
+                return await this.testOllamaProvider();
+            }
             else {
                 return {
                     success: false,
@@ -235,6 +238,85 @@ class AITestUtils {
             };
         }
     }
+    async testOllamaProvider() {
+        const startTime = Date.now();
+        try {
+            // Ollama provider test
+            const provider = await this.aiProviderManager.getCurrentProviderInstance();
+            const isAvailable = await provider.isAvailable();
+            if (!isAvailable) {
+                return {
+                    success: false,
+                    message: "❌ Ollama servisine ulaşılamadı. Lütfen Ollama'nın çalıştığından ve URL'in doğru olduğundan emin olun.",
+                    provider: "ollama",
+                    responseTime: Date.now() - startTime,
+                    error: "Ollama servisi çevrimdışı",
+                    details: {
+                        apiKeyConfigured: true, // API key gerekmez
+                        connectionSuccessful: false,
+                        modelAvailable: false,
+                        responseReceived: false
+                    }
+                };
+            }
+            // Test simple code improvement to verify model works
+            const testResult = await provider.improveCode({
+                code: "<div>Test</div>",
+                fileType: "html",
+                language: "html",
+                wcagLevel: "AA",
+                includeComments: false
+            });
+            const responseTime = Date.now() - startTime;
+            if (testResult.success) {
+                return {
+                    success: true,
+                    message: `✅ Ollama bağlantısı başarılı! Model: ${testResult.model || "Bilinmeyen"}`,
+                    provider: "ollama",
+                    model: testResult.model,
+                    responseTime,
+                    details: {
+                        apiKeyConfigured: true,
+                        connectionSuccessful: true,
+                        modelAvailable: true,
+                        responseReceived: true
+                    }
+                };
+            }
+            else {
+                return {
+                    success: false,
+                    message: `❌ Ollama test hatası: ${testResult.error || "Bilinmeyen hata"}`,
+                    provider: "ollama",
+                    responseTime,
+                    error: testResult.error,
+                    details: {
+                        apiKeyConfigured: true,
+                        connectionSuccessful: true,
+                        modelAvailable: false,
+                        responseReceived: false
+                    }
+                };
+            }
+        }
+        catch (error) {
+            const responseTime = Date.now() - startTime;
+            const errorMessage = error instanceof Error ? error.message : "Bilinmeyen hata";
+            return {
+                success: false,
+                message: `❌ Ollama test hatası: ${errorMessage}`,
+                provider: "ollama",
+                responseTime,
+                error: errorMessage,
+                details: {
+                    apiKeyConfigured: true,
+                    connectionSuccessful: false,
+                    modelAvailable: false,
+                    responseReceived: false
+                }
+            };
+        }
+    }
     async showTestResult(result) {
         const panel = vscode.window.createWebviewPanel("aiTestResult", "🧪 AI Bağlantı Test Sonucu", vscode.ViewColumn.One, {
             enableScripts: true,
@@ -270,7 +352,13 @@ class AITestUtils {
     getTestResultHtml(result) {
         const statusIcon = result.success ? "✅" : "❌";
         // const statusColor = result.success ? "#28a745" : "#dc3545";
-        const providerName = result.provider === "gemini" ? "Google Gemini" : "GitHub Copilot";
+        let providerName = "Google Gemini";
+        if (result.provider === "vscode-copilot") {
+            providerName = "GitHub Copilot";
+        }
+        else if (result.provider === "ollama") {
+            providerName = "Ollama (Local)";
+        }
         return `
 <!DOCTYPE html>
 <html lang="tr">
@@ -584,11 +672,16 @@ class AITestUtils {
 				<li>• API anahtarının doğru formatta olduğunu kontrol edin (AIza ile başlamalı)</li>
 				<li>• İnternet bağlantınızı kontrol edin</li>
 				<li>• Gemini API limitlerini aşmadığınızdan emin olun</li>
-				` : `
+				` : result.provider === "vscode-copilot" ? `
 				<li>• GitHub Copilot aboneliğinizin aktif olduğunu kontrol edin</li>
 				<li>• VS Code'da GitHub hesabınızla giriş yaptığınızdan emin olun</li>
 				<li>• GitHub Copilot uzantısının yüklü ve etkin olduğunu kontrol edin</li>
 				<li>• VS Code'u yeniden başlatmayı deneyin</li>
+				` : `
+				<li>• Ollama servisinin çalıştığından emin olun (ollama serve)</li>
+				<li>• Ollama API URL'inin doğru olduğunu kontrol edin (Varsayılan: http://localhost:11434)</li>
+				<li>• Seçilen modelin Ollama'da yüklü olduğundan emin olun (ollama pull model_adı)</li>
+				<li>• Güvenlik duvarı ayarlarının bağlantıyı engellemediğinden emin olun</li>
 				`}
 			</ul>
 		</div>

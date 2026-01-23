@@ -1,12 +1,12 @@
 // debugController.ts
 import * as vscode from "vscode";
-import { analyzeWcagCompliance } from "./debugUtils";
-import { validateWcagCompliance } from "../utils/validationUtils";
+import { analyzeWcagConformance } from "./debugUtils";
+import { validateWcagConformance } from "../utils/validationUtils";
 import { logger } from "../utils/logger";
 import { StatisticsManager } from "../utils/statisticsManager";
 
 export class DebugController {
-	constructor() {}
+	constructor() { }
 
 	public async startDebugMode() {
 		vscode.window.showInformationMessage("Debug mode - coming soon!");
@@ -34,7 +34,7 @@ export async function activateDebugMode(context: vscode.ExtensionContext) {
 }
 
 async function showAnalysisResults(
-	compliance: { compliant: boolean; issues: string[] },
+	conformance: { conformant: boolean; issues: string[] },
 	detailedAnalysis: any,
 	editor: vscode.TextEditor,
 	selection: vscode.Selection,
@@ -43,7 +43,7 @@ async function showAnalysisResults(
 	// Sonuç paneli oluştur
 	const panel = vscode.window.createWebviewPanel(
 		"wcagAnalysis",
-		"WCAG 2.2 Uyumluluk Analizi",
+		"WCAG 2.2 Uyum Analizi",
 		vscode.ViewColumn.Beside,
 		{
 			enableScripts: true,
@@ -52,7 +52,7 @@ async function showAnalysisResults(
 	);
 
 	// HTML içeriği oluştur
-	const htmlContent = generateAnalysisHtml(compliance, detailedAnalysis);
+	const htmlContent = generateAnalysisHtml(conformance, detailedAnalysis);
 	panel.webview.html = htmlContent;
 
 	// Mesaj handler'ı
@@ -72,14 +72,14 @@ async function showAnalysisResults(
 	);
 
 	// Sonuç özeti göster
-	const summary = generateSummary(compliance, detailedAnalysis);
+	const summary = generateSummary(conformance, detailedAnalysis);
 	vscode.window.showInformationMessage(summary);
 }
 
-function generateAnalysisHtml(compliance: any, detailedAnalysis: any): string {
-	const issues = compliance.issues;
+function generateAnalysisHtml(conformance: any, detailedAnalysis: any): string {
+	const issues = conformance.issues;
 	const hasIssues = issues.length > 0;
-	
+
 	return `
 <!DOCTYPE html>
 <html lang="tr">
@@ -197,9 +197,9 @@ function generateAnalysisHtml(compliance: any, detailedAnalysis: any): string {
 </head>
 <body>
 	<div class="header">
-		<h1>WCAG 2.2 Uyumluluk Analizi</h1>
+		<h1>WCAG 2.2 Uyum Analizi</h1>
 		<div class="status ${hasIssues ? "non-compliant" : "compliant"}">
-			${hasIssues ? "Uyumluluk Sorunları Tespit Edildi" : "WCAG 2.2 Uyumlu"}
+			${hasIssues ? "Uyum Sorunları Tespit Edildi" : "WCAG 2.2 Uyumlu"}
 		</div>
 	</div>
 	
@@ -239,7 +239,7 @@ function generateAnalysisHtml(compliance: any, detailedAnalysis: any): string {
 	` : `
 		<div style="text-align: center; padding: 40px;">
 			<h2>🎉 Tebrikler!</h2>
-			<p>Kodunuz WCAG 2.2 standartlarına uygun görünüyor.</p>
+			<p>Kodunuz WCAG 2.2 standartlarına uyumlu görünüyor.</p>
 		</div>
 	`}
 	
@@ -264,21 +264,21 @@ function generateAnalysisHtml(compliance: any, detailedAnalysis: any): string {
 </html>`;
 }
 
-function generateSummary(compliance: any, detailedAnalysis: any): string {
-	const issues = compliance.issues;
-	
+function generateSummary(conformance: any, detailedAnalysis: any): string {
+	const issues = conformance.issues;
+
 	if (issues.length === 0) {
-		return "✅ Kod WCAG 2.2 standartlarına uygun!";
+		return "✅ Kod WCAG 2.2 standartlarına uyumlu!";
 	}
-	
-	return `⚠️ ${issues.length} WCAG 2.2 uyumluluk sorunu tespit edildi. Detaylar için paneli kontrol edin.`;
+
+	return `⚠️ ${issues.length} WCAG 2.2 uyum sorunu tespit edildi. Detaylar için paneli kontrol edin.`;
 }
 
 async function fixIssue(issue: string, editor: vscode.TextEditor, selection: vscode.Selection) {
 	try {
 		// Basit otomatik düzeltmeler
 		let fixedCode = editor.document.getText(selection);
-		
+
 		if (issue.includes("Form elementleri için label eksik")) {
 			fixedCode = addMissingLabels(fixedCode);
 		} else if (issue.includes("Butonlar için ARIA etiketleri eksik")) {
@@ -288,14 +288,14 @@ async function fixIssue(issue: string, editor: vscode.TextEditor, selection: vsc
 		} else if (issue.includes("Tablolar için başlık hücreleri eksik")) {
 			fixedCode = addMissingTableHeaders(fixedCode);
 		}
-		
+
 		// Düzeltilmiş kodu uygula
 		await editor.edit(editBuilder => {
 			editBuilder.replace(selection, fixedCode);
 		});
-		
+
 		vscode.window.showInformationMessage("Sorun otomatik olarak düzeltildi!");
-		
+
 	} catch (error) {
 		logger.error("Fix issue error:", error);
 		vscode.window.showErrorMessage("Otomatik düzeltme başarısız oldu.");
@@ -309,13 +309,13 @@ function addMissingLabels(code: string): string {
 			const idMatch = attributes.match(/id="([^"]*)"/);
 			const nameMatch = attributes.match(/name="([^"]*)"/);
 			const typeMatch = attributes.match(/type="([^"]*)"/);
-			
+
 			const id = idMatch ? idMatch[1] : nameMatch ? nameMatch[1] : "input";
 			const name = nameMatch ? nameMatch[1] : id;
 			const type = typeMatch ? typeMatch[1] : "text";
-			
+
 			const labelText = getLabelText(name, type);
-			
+
 			return `<label for="${id}">${labelText}</label>\n<input${attributes}>`;
 		}
 	);
@@ -326,7 +326,7 @@ function addMissingAriaLabels(code: string): string {
 		/<button([^>]*?)>([^<]*)<\/button>/g,
 		(match, attributes, text) => {
 			if (attributes.includes("aria-label")) return match;
-			
+
 			const ariaLabel = text.trim() || "Buton";
 			return `<button${attributes} aria-label="${ariaLabel}">${text}</button>`;
 		}
@@ -338,12 +338,12 @@ function addMissingAltText(code: string): string {
 		/<img([^>]*?)>/g,
 		(match, attributes) => {
 			if (attributes.includes("alt=")) return match;
-			
+
 			const srcMatch = attributes.match(/src="([^"]*)"/);
 			const src = srcMatch ? srcMatch[1] : "resim";
 			const fileName = src.split("/").pop()?.split(".")[0] || "resim";
 			const altText = fileName.replace(/[-_]/g, " ").replace(/\b\w/g, (l: string) => l.toUpperCase());
-			
+
 			return `<img${attributes} alt="${altText}">`;
 		}
 	);
@@ -351,7 +351,7 @@ function addMissingAltText(code: string): string {
 
 function addMissingTableHeaders(code: string): string {
 	let fixedCode = code;
-	
+
 	// Tablo başlık hücreleri için scope ekleme
 	fixedCode = fixedCode.replace(
 		/<th([^>]*?)>/g,
@@ -360,7 +360,7 @@ function addMissingTableHeaders(code: string): string {
 			return `<th${attributes} scope="col">`;
 		}
 	);
-	
+
 	return fixedCode;
 }
 
@@ -377,13 +377,13 @@ function getLabelText(name: string, type: string): string {
 		"username": "Kullanıcı Adı",
 		"search": "Arama"
 	};
-	
+
 	return labelMap[name] || name.charAt(0).toUpperCase() + name.slice(1);
 }
 
 async function showIssueDetails(issue: string) {
 	const details = getIssueDetails(issue);
-	
+
 	await vscode.window.showInformationMessage(
 		`Sorun Detayları: ${details}`,
 		"Anladım"
@@ -397,6 +397,6 @@ function getIssueDetails(issue: string): string {
 		"Resimler için alt text eksik": "Resimler için alternatif metin açıklamaları eklenmelidir.",
 		"Tablolar için başlık hücreleri eksik": "Tablolar için başlık hücreleri ve scope tanımları eklenmelidir."
 	};
-	
+
 	return detailsMap[issue] || "Bu sorun hakkında detaylı bilgi için WCAG 2.2 dokümantasyonunu inceleyin.";
 }

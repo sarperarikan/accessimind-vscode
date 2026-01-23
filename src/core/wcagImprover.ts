@@ -1,3 +1,4 @@
+import * as vscode from "vscode";
 import { AIProviderManager } from "../utils/aiProvider";
 import { logger } from "../utils/logger";
 
@@ -161,7 +162,7 @@ export class WcagImprover {
 
 		const contextType = isSelection ? "selected code snippet" : "file";
 
-		return `You are a WCAG 2.2 accessibility expert. Improve the following ${contextType} to WCAG ${wcagLevel} level compliance.
+		return `You are a WCAG 2.2 accessibility expert. Improve the following ${contextType} to WCAG ${wcagLevel} level conformance.
 
 File: ${fileName}
 Language: ${language}
@@ -389,13 +390,19 @@ Sadece iyileştirilmiş kodu döndür.`;
 
 	private extractWcagCriteriaFromCode(code: string): string[] {
 		const criteria = new Set<string>();
-
-		// Look for WCAG comments in the code
+		if (!code) return [];
+		const perf = vscode.workspace.getConfiguration("wcagEnhancer").get("performance") as any || {};
+		const MAX_SCAN_SIZE = typeof perf?.maxScanSize === "number" ? perf.maxScanSize : 500000;
+		const MAX_MATCHES = typeof perf?.maxRegexMatches === "number" ? perf.maxRegexMatches : 100;
+		if (code.length > MAX_SCAN_SIZE) return [];
 		const wcagRegex = /WCAG\s+(\d+\.\d+\.\d+)/gi;
-		let match;
-
-		while ((match = wcagRegex.exec(code)) !== null) {
-			criteria.add(match[1]);
+		let count = 0;
+		for (const m of code.matchAll(wcagRegex)) {
+			if (m[1]) {
+				criteria.add(m[1]);
+				count++;
+				if (count >= MAX_MATCHES) break;
+			}
 		}
 
 		// If no criteria found in comments, infer from code improvements

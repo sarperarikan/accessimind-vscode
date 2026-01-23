@@ -19,7 +19,7 @@ export class SettingsViewProvider implements vscode.TreeDataProvider<SettingItem
 		this.aiTestUtils = AITestUtils.getInstance();
 		this.aiProviderManager = AIProviderManager.getInstance();
 		this.refresh();
-		
+
 		// Configuration değişikliklerini dinle
 		vscode.workspace.onDidChangeConfiguration(e => {
 			if (e.affectsConfiguration("wcagEnhancer")) {
@@ -36,11 +36,11 @@ export class SettingsViewProvider implements vscode.TreeDataProvider<SettingItem
 		if (!element) {
 			return Promise.resolve(this.settings);
 		}
-		
+
 		if (element.children) {
 			return Promise.resolve(element.children);
 		}
-		
+
 		return Promise.resolve([]);
 	}
 
@@ -70,7 +70,7 @@ export class SettingsViewProvider implements vscode.TreeDataProvider<SettingItem
 		} catch (error) {
 			logger.error("Model listesi alınamadı:", error);
 		}
-		
+
 		this.settings = [
 			new SettingCategory("🤖 AI Provider Configuration", "ai-provider-config", [
 				new SettingItem(
@@ -108,7 +108,7 @@ export class SettingsViewProvider implements vscode.TreeDataProvider<SettingItem
 					]
 				)
 			]),
-			
+
 			new SettingCategory("🧠 AI Model Settings", "ai-model-settings", [
 				new SettingItem(
 					"Selected Model",
@@ -141,7 +141,7 @@ export class SettingsViewProvider implements vscode.TreeDataProvider<SettingItem
 				new SettingItem(
 					"WCAG Level",
 					`Level ${wcagLevel}`,
-					"Target WCAG compliance level",
+					"Target WCAG conformance level",
 					"wcagLevel",
 					"shield",
 					[
@@ -257,7 +257,7 @@ export class SettingsViewProvider implements vscode.TreeDataProvider<SettingItem
 				)
 			])
 		];
-		
+
 		this._onDidChangeTreeData.fire();
 	}
 
@@ -417,7 +417,7 @@ export class SettingsViewProvider implements vscode.TreeDataProvider<SettingItem
 		const config = vscode.workspace.getConfiguration("wcagEnhancer");
 		const aiConfig = config.get("ai") as any || {};
 		const currentKey = aiConfig.apiKey || "";
-		
+
 		const apiKey = await vscode.window.showInputBox({
 			title: "🔑 Gemini API Anahtarı",
 			prompt: "Google AI Studio'dan API anahtarınızı girin",
@@ -437,11 +437,11 @@ export class SettingsViewProvider implements vscode.TreeDataProvider<SettingItem
 				return null;
 			}
 		});
-		
+
 		if (apiKey !== undefined) {
 			aiConfig.apiKey = apiKey;
 			await config.update("ai", aiConfig, vscode.ConfigurationTarget.Global);
-			
+
 			vscode.window.showInformationMessage(
 				"✅ Gemini API anahtarı güncellendi!",
 				"🧪 Bağlantıyı Test Et"
@@ -505,7 +505,7 @@ export class SettingsViewProvider implements vscode.TreeDataProvider<SettingItem
 		const title = type === "quick" ? "Hızlı İyileştirmeler İçin Model" : "Karmaşık Analiz İçin Model";
 		const currentModel = type === "quick" ? preferences.forQuickImprovements : preferences.forComplexAnalysis;
 
-		const availableModels = type === "quick" 
+		const availableModels = type === "quick"
 			? [
 				{ id: "gemini-2.5-flash", name: "Gemini 2.5 Flash" },
 				{ id: "gpt-4o-mini", name: "GPT-4o Mini" },
@@ -556,7 +556,7 @@ export class SettingItem extends vscode.TreeItem {
 		this.description = value;
 		this.iconPath = new vscode.ThemeIcon(iconName);
 		this.contextValue = settingKey;
-		
+
 		if (actions && actions.length > 0) {
 			this.command = {
 				command: "wcagEnhancer.settings.itemClicked",
@@ -584,5 +584,5 @@ export class SettingAction {
 		public readonly label: string,
 		public readonly actionType: string,
 		public readonly data?: any
-	) {}
+	) { }
 }

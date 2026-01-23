@@ -1,6 +1,40 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.WcagImprover = void 0;
+const vscode = __importStar(require("vscode"));
 const aiProvider_1 = require("../utils/aiProvider");
 const logger_1 = require("../utils/logger");
 class WcagImprover {
@@ -106,7 +140,7 @@ class WcagImprover {
             return this.buildTurkishPrompt(code, language, fileName, wcagLevel, includeComments, isSelection);
         }
         const contextType = isSelection ? "selected code snippet" : "file";
-        return `You are a WCAG 2.2 accessibility expert. Improve the following ${contextType} to WCAG ${wcagLevel} level compliance.
+        return `You are a WCAG 2.2 accessibility expert. Improve the following ${contextType} to WCAG ${wcagLevel} level conformance.
 
 File: ${fileName}
 Language: ${language}
@@ -321,11 +355,22 @@ Sadece iyileştirilmiş kodu döndür.`;
     }
     extractWcagCriteriaFromCode(code) {
         const criteria = new Set();
-        // Look for WCAG comments in the code
+        if (!code)
+            return [];
+        const perf = vscode.workspace.getConfiguration("wcagEnhancer").get("performance") || {};
+        const MAX_SCAN_SIZE = typeof perf?.maxScanSize === "number" ? perf.maxScanSize : 500000;
+        const MAX_MATCHES = typeof perf?.maxRegexMatches === "number" ? perf.maxRegexMatches : 100;
+        if (code.length > MAX_SCAN_SIZE)
+            return [];
         const wcagRegex = /WCAG\s+(\d+\.\d+\.\d+)/gi;
-        let match;
-        while ((match = wcagRegex.exec(code)) !== null) {
-            criteria.add(match[1]);
+        let count = 0;
+        for (const m of code.matchAll(wcagRegex)) {
+            if (m[1]) {
+                criteria.add(m[1]);
+                count++;
+                if (count >= MAX_MATCHES)
+                    break;
+            }
         }
         // If no criteria found in comments, infer from code improvements
         if (criteria.size === 0) {

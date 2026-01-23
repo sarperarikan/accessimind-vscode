@@ -1,44 +1,61 @@
 {
   "version": "1.0.0",
   "createdAt": "2025-07-21T07:48:44.156Z",
-  "lastModified": "2025-07-21T08:46:08.621Z",
+  "lastModified": "2026-01-23T10:25:21.993Z",
   "wizard": {
-    "completed": false,
+    "completed": true,
     "steps": {
       "provider": {
-        "completed": false
+        "completed": true,
+        "value": "ollama"
       },
       "model": {
-        "completed": false
+        "completed": true,
+        "value": "qwen3-vl:235b-instruct-cloud"
       },
       "apiKey": {
         "completed": false,
         "hasValue": false
       },
       "wcagLevel": {
-        "completed": false
+        "completed": true,
+        "value": "AA"
       },
       "language": {
-        "completed": false
+        "completed": true,
+        "value": "en"
       },
       "jiraConfig": {
-        "completed": false
+        "completed": true,
+        "config": {
+          "customPrompt": "",
+          "useCustomPrompt": false,
+          "defaultPriority": "Medium",
+          "defaultComponent": "other",
+          "includeCodeExamples": true,
+          "includeTestingSteps": true
+        }
+      },
+      "ollamaUrl": {
+        "value": "http://accessiai.org:11434",
+        "completed": true
       }
-    }
+    },
+    "completedAt": "2026-01-23T10:25:21.987Z"
   },
   "settings": {
     "ai": {
-      "provider": "vscode-copilot",
-      "selectedModel": "gpt-4.1",
-      "apiKeyConfigured": false
+      "provider": "ollama",
+      "selectedModel": "qwen3-vl:235b-instruct-cloud",
+      "apiKeyConfigured": true
     },
     "aiModels": {
-      "selectedModel": "gpt-4.1"
+      "selectedModel": "qwen3-vl:235b-instruct-cloud"
     },
     "language": "en",
     "wcagLevel": "AA",
     "autoApply": false,
-    "includeComments": true,
+    "includeComments": false,
     "enableStatistics": true,
     "responseDetail": "summary",
     "interfacePreferences": {},

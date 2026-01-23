@@ -119,7 +119,7 @@ class SettingsViewProvider {
                 ])
             ]),
             new SettingCategory("♿ WCAG Configuration", "wcag-config", [
-                new SettingItem("WCAG Level", `Level ${wcagLevel}`, "Target WCAG compliance level", "wcagLevel", "shield", [
+                new SettingItem("WCAG Level", `Level ${wcagLevel}`, "Target WCAG conformance level", "wcagLevel", "shield", [
                     new SettingAction(`Level A${wcagLevel === "A" ? " ✅" : ""}`, "setWcagLevel", { level: "A" }),
                     new SettingAction(`Level AA${wcagLevel === "AA" ? " ✅" : ""}`, "setWcagLevel", { level: "AA" }),
                     new SettingAction(`Level AAA${wcagLevel === "AAA" ? " ✅" : ""}`, "setWcagLevel", { level: "AAA" })

@@ -64,13 +64,13 @@ export class CopilotService extends AIService {
         try {
             const language = this.getLanguageFromFilePath(filePath);
             const prompt = this.buildAccessibilityPrompt(code, language, 'analyze', detailLevel);
-            
+
             const result = await this.requestCopilotCompletion(prompt, language);
-            
+
             if (result) {
                 return this.parseAnalysisResult(result, detailLevel);
             }
-            
+
         } catch (error) {
             console.error('Error analyzing code with Copilot:', error);
         }
@@ -88,13 +88,13 @@ export class CopilotService extends AIService {
         try {
             const language = this.getLanguageFromFilePath(filePath);
             const prompt = this.buildAccessibilityPrompt(code, language, 'improve', 'detailed', issues);
-            
+
             const result = await this.requestCopilotCompletion(prompt, language);
-            
+
             if (result) {
                 return this.parseImprovementResult(code, result);
             }
-            
+
         } catch (error) {
             console.error('Error improving code with Copilot:', error);
         }
@@ -130,10 +130,10 @@ export class CopilotService extends AIService {
 
                 // Trigger Copilot suggestion
                 await vscode.commands.executeCommand('editor.action.inlineSuggest.trigger');
-                
+
                 // Wait a bit for suggestion to appear
                 await new Promise(resolve => setTimeout(resolve, 1000));
-                
+
                 return null; // Manual process, no direct result
             }
 
@@ -145,17 +145,17 @@ export class CopilotService extends AIService {
     }
 
     private buildAccessibilityPrompt(code: string, language: string, action: 'analyze' | 'improve', detailLevel: string, issues?: WCAGIssue[]): string {
-        const basePrompt = `Accessibility expert analyzing ${language} code for WCAG 2.2 compliance.\n\n`;
-        
+        const basePrompt = `Accessibility expert analyzing ${language} code for WCAG 2.2 conformance.\n\n`;
+
         if (action === 'analyze') {
             return `${basePrompt}Analyze this code for accessibility issues (${detailLevel} level):\n\n\`\`\`${language}\n${code}\n\`\`\`\n\nFind WCAG violations, missing ARIA attributes, keyboard navigation issues, and color contrast problems.`;
         } else {
-            let prompt = `${basePrompt}Improve this code for better accessibility:\n\n\`\`\`${language}\n${code}\n\`\`\`\n\nAdd proper ARIA labels, semantic HTML, keyboard support, and WCAG compliance.`;
-            
+            let prompt = `${basePrompt}Improve this code for better accessibility:\n\n\`\`\`${language}\n${code}\n\`\`\`\n\nAdd proper ARIA labels, semantic HTML, keyboard support, and WCAG conformance.`;
+
             if (issues && issues.length > 0) {
                 prompt += `\n\nFix these specific issues:\n${issues.map(issue => `- Line ${issue.line}: ${issue.message}`).join('\n')}`;
             }
-            
+
             return prompt;
         }
     }

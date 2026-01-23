@@ -7,7 +7,7 @@ export class StatsViewProvider implements vscode.WebviewViewProvider {
 	private _view?: vscode.WebviewView;
 	private _statisticsManager?: StatisticsManager;
 
-	constructor(private readonly _extensionUri: vscode.Uri) {}
+	constructor(private readonly _extensionUri: vscode.Uri) { }
 
 	public setStatisticsManager(statisticsManager: StatisticsManager): void {
 		this._statisticsManager = statisticsManager;
@@ -59,7 +59,7 @@ export class StatsViewProvider implements vscode.WebviewViewProvider {
 				case "openSettings":
 					await vscode.commands.executeCommand("workbench.view.extension.wcagEnhancer");
 					break;
-				
+
 				case "filterStats":
 					await this.filterStats(data.period, data.language);
 					break;
@@ -82,7 +82,7 @@ export class StatsViewProvider implements vscode.WebviewViewProvider {
 
 		try {
 			const processedStats = this.processStatistics(stats);
-			
+
 			this._view.webview.postMessage({
 				type: "updateStats",
 				stats: processedStats
@@ -93,7 +93,7 @@ export class StatsViewProvider implements vscode.WebviewViewProvider {
 	}
 
 	private processStatistics(stats: DetailedStatistics): any {
-		const successRate = stats.totalImprovements > 0 
+		const successRate = stats.totalImprovements > 0
 			? Math.round((stats.totalImprovements / (stats.totalImprovements + stats.errors.total)) * 100)
 			: 100;
 
@@ -113,11 +113,11 @@ export class StatsViewProvider implements vscode.WebviewViewProvider {
 
 		// En çok kullanılan dil
 		const topLanguage = Object.entries(stats.languageStats)
-			.sort(([,a], [,b]) => b.count - a.count)[0];
+			.sort(([, a], [, b]) => b.count - a.count)[0];
 
 		// En çok uygulanan WCAG kriteri
 		const topWcagCriteria = Object.entries(stats.wcagCriteriaStats)
-			.sort(([,a], [,b]) => b - a)[0];
+			.sort(([, a], [, b]) => b - a)[0];
 
 		return {
 			// Genel istatistikler
@@ -175,13 +175,13 @@ export class StatsViewProvider implements vscode.WebviewViewProvider {
 	private calculateWeeklyTrend(dailyStats: { [date: string]: any }): any[] {
 		const last7Days = [];
 		const today = new Date();
-		
+
 		for (let i = 6; i >= 0; i--) {
 			const date = new Date(today);
 			date.setDate(date.getDate() - i);
 			const dateStr = date.toISOString().split("T")[0];
 			const dayStats = dailyStats[dateStr] || { improvements: 0, linesImproved: 0, processingTime: 0 };
-			
+
 			last7Days.push({
 				date: dateStr,
 				dayName: date.toLocaleDateString("en-US", { weekday: "short" }),
@@ -189,12 +189,12 @@ export class StatsViewProvider implements vscode.WebviewViewProvider {
 				linesImproved: dayStats.linesImproved
 			});
 		}
-		
+
 		return last7Days;
 	}
 
 	private updateStats() {
-		// Bu metod geriye uyumluluk için tutuldu
+		// Bu metod geriye dönük uyum için tutuldu
 		// Gerçek istatistikler updateStatistics metodu ile güncellenir
 		if (!this._view) return;
 
@@ -228,13 +228,13 @@ export class StatsViewProvider implements vscode.WebviewViewProvider {
 			const config = vscode.workspace.getConfiguration("wcagEnhancer");
 			const language = config.get("language") || "en";
 			const isEnglish = language === "en";
-			
+
 			const warningMessage = isEnglish ?
 				"⚠️ All statistics will be deleted. This action cannot be undone!" :
 				"⚠️ Tüm istatistikler silinecek. Bu işlem geri alınamaz!";
-			
+
 			const buttonText = isEnglish ? "Delete Statistics" : "İstatistikleri Sil";
-			
+
 			const confirm = await vscode.window.showWarningMessage(
 				warningMessage,
 				{ modal: true },
@@ -243,12 +243,12 @@ export class StatsViewProvider implements vscode.WebviewViewProvider {
 
 			if (confirm === buttonText) {
 				await vscode.commands.executeCommand("wcagEnhancer.resetStatistics");
-				
+
 				if (this._view) {
 					const successMessage = isEnglish ?
 						"✅ Statistics reset successfully!" :
 						"✅ İstatistikler başarıyla sıfırlandı!";
-					
+
 					this._view.webview.postMessage({
 						type: "showMessage",
 						message: successMessage,
@@ -262,11 +262,11 @@ export class StatsViewProvider implements vscode.WebviewViewProvider {
 				const config = vscode.workspace.getConfiguration("wcagEnhancer");
 				const language = config.get("language") || "en";
 				const isEnglish = language === "en";
-				
+
 				const errorMessage = isEnglish ?
 					"❌ Error occurred while resetting statistics!" :
 					"❌ İstatistikler sıfırlanırken hata oluştu!";
-				
+
 				this._view.webview.postMessage({
 					type: "showMessage",
 					message: errorMessage,
@@ -309,22 +309,22 @@ export class StatsViewProvider implements vscode.WebviewViewProvider {
 				const config = vscode.workspace.getConfiguration("wcagEnhancer");
 				const language = config.get("language") || "en";
 				const isEnglish = language === "en";
-				
+
 				const successMessage = isEnglish ?
 					`✅ Statistics exported successfully as ${format.toUpperCase()}!` :
 					`✅ İstatistikler ${format.toUpperCase()} formatında başarıyla dışa aktarıldı!`;
-				
+
 				vscode.window.showInformationMessage(successMessage);
 			}
 		} catch (error) {
 			const config = vscode.workspace.getConfiguration("wcagEnhancer");
 			const language = config.get("language") || "en";
 			const isEnglish = language === "en";
-			
+
 			const errorMessage = isEnglish ?
 				`❌ Export failed: ${error}` :
 				`❌ Dışa aktarma başarısız: ${error}`;
-			
+
 			vscode.window.showErrorMessage(errorMessage);
 		}
 	}
@@ -333,7 +333,7 @@ export class StatsViewProvider implements vscode.WebviewViewProvider {
 		try {
 			const filteredStats = this.getFilteredStats(period, language);
 			const processedStats = this.processStatistics(filteredStats);
-			
+
 			if (this._view) {
 				this._view.webview.postMessage({
 					type: "updateStats",
@@ -397,7 +397,7 @@ export class StatsViewProvider implements vscode.WebviewViewProvider {
 		const seconds = Math.floor(milliseconds / 1000);
 		const minutes = Math.floor(seconds / 60);
 		const hours = Math.floor(minutes / 60);
-		
+
 		if (hours > 0) {
 			return `${hours}h ${minutes % 60}m ${seconds % 60}s`;
 		} else if (minutes > 0) {
@@ -409,7 +409,7 @@ export class StatsViewProvider implements vscode.WebviewViewProvider {
 
 	private sendTokenAnalytics(): void {
 		if (!this._statisticsManager || !this._view) return;
-		
+
 		try {
 			const tokenAnalytics = this._statisticsManager.getTokenAnalytics();
 			this._view.webview.postMessage({
@@ -436,7 +436,7 @@ export class StatsViewProvider implements vscode.WebviewViewProvider {
 			if (!this._statisticsManager) return;
 
 			const prediction = this._statisticsManager.predictTokenUsage(code, language, "improvement");
-			
+
 			const message = `🔮 Token Prediction for ${document.fileName.split('/').pop()}
 
 Estimated Tokens: ${prediction.estimatedTokens}
@@ -458,7 +458,7 @@ ${prediction.reasoning.join('\n')}`;
 		const config = vscode.workspace.getConfiguration("wcagEnhancer");
 		const language = config.get("language", "en");
 		const isEnglish = language === "en";
-		
+
 		return `
 <!DOCTYPE html>
 <html lang="${language}">

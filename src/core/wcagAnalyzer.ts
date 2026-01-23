@@ -20,7 +20,7 @@ export interface WcagAnalysisResult {
 		criticalIssues: number;
 		majorIssues: number;
 		minorIssues: number;
-		complianceLevel: "A" | "AA" | "AAA" | "Non-compliant";
+		conformanceLevel: "A" | "AA" | "AAA" | "Non-conformant";
 	};
 	recommendations: string[];
 	wcagCriteria: string[];
@@ -59,7 +59,7 @@ export class WcagAnalyzer {
 
 			// Combine results
 			const allIssues = [...staticIssues, ...aiAnalysis.issues];
-			
+
 			const summary = this.generateSummary(allIssues);
 			const recommendations = this.generateRecommendations(allIssues);
 			const wcagCriteria = this.extractWcagCriteria(allIssues);
@@ -81,7 +81,7 @@ export class WcagAnalyzer {
 
 	async generateDetailedReport(code: string, language: string, fileName: string): Promise<WcagAnalysisResult> {
 		const analysisResult = await this.analyzeCode(code, language, fileName);
-		
+
 		// Add additional details for report
 		analysisResult.recommendations.push(
 			"📋 Düzenli WCAG testleri yapın",
@@ -147,7 +147,7 @@ export class WcagAnalyzer {
 			const headingLevels = headings.map(h => parseInt(h.match(/h([1-6])/)?.[1] || "1"));
 			if (headingLevels.length > 1) {
 				for (let i = 1; i < headingLevels.length; i++) {
-					if (headingLevels[i] - headingLevels[i-1] > 1) {
+					if (headingLevels[i] - headingLevels[i - 1] > 1) {
 						issues.push({
 							id: "heading-hierarchy",
 							severity: "major",
@@ -198,7 +198,7 @@ export class WcagAnalyzer {
 		// Check for low contrast colors (basic check)
 		const colorProperties = code.match(/color\s*:\s*#[0-9a-f]{3,6}/gi);
 		const backgroundProperties = code.match(/background-color\s*:\s*#[0-9a-f]{3,6}/gi);
-		
+
 		if (colorProperties && backgroundProperties) {
 			// This is a simplified check - in production, you'd want proper contrast calculation
 			issues.push({
@@ -231,7 +231,7 @@ export class WcagAnalyzer {
 		// Check for click-only event handlers
 		const clickOnlyEvents = code.match(/onclick\s*=/gi);
 		const keyboardEvents = code.match(/onkey(down|up|press)\s*=/gi);
-		
+
 		if (clickOnlyEvents && !keyboardEvents) {
 			issues.push({
 				id: "keyboard-navigation",
@@ -334,7 +334,7 @@ Sadece gerçek WCAG sorunlarını raporla. Özellikle şunlara odaklan:
 
 		} catch (error) {
 			logger.error("AI analizi hatası:", error);
-			
+
 			// Hata türüne göre daha spesifik mesajlar
 			if (error instanceof Error) {
 				if (error.message.includes("API") || error.message.includes("sağlayıcısı")) {
@@ -345,14 +345,14 @@ Sadece gerçek WCAG sorunlarını raporla. Özellikle şunlara odaklan:
 					throw new Error("WCAG analizi sırasında hata: " + error.message);
 				}
 			}
-			
+
 			throw new Error("Bilinmeyen WCAG analizi hatası");
 		}
 	}
 
 	private parseTextAnalysis(text: string): { issues: WcagIssue[] } {
 		const issues: WcagIssue[] = [];
-		
+
 		// Simple text parsing for common WCAG issues mentioned in AI response
 		if (text.toLowerCase().includes("alt")) {
 			issues.push({
@@ -382,14 +382,14 @@ Sadece gerçek WCAG sorunlarını raporla. Özellikle şunlara odaklan:
 		const majorIssues = issues.filter(i => i.severity === "major").length;
 		const minorIssues = issues.filter(i => i.severity === "minor").length;
 
-		let complianceLevel: "A" | "AA" | "AAA" | "Non-compliant" = "AAA";
-		
+		let conformanceLevel: "A" | "AA" | "AAA" | "Non-conformant" = "AAA";
+
 		if (criticalIssues > 0) {
-			complianceLevel = "Non-compliant";
+			conformanceLevel = "Non-conformant";
 		} else if (majorIssues > 0) {
-			complianceLevel = "A";
+			conformanceLevel = "A";
 		} else if (minorIssues > 0) {
-			complianceLevel = "AA";
+			conformanceLevel = "AA";
 		}
 
 		return {
@@ -397,7 +397,7 @@ Sadece gerçek WCAG sorunlarını raporla. Özellikle şunlara odaklan:
 			criticalIssues,
 			majorIssues,
 			minorIssues,
-			complianceLevel
+			conformanceLevel
 		};
 	}
 

@@ -305,7 +305,7 @@ You are a WCAG accessibility expert. Analyze the provided code and create a comp
 - Priority: ${taskDetails.priority}
 
 **Requirements:**
-1. Analyze the code for WCAG 2.2 Level AA compliance issues
+1. Analyze the code for WCAG 2.2 Level AA conformance issues
 2. Identify specific ARIA techniques that should be implemented
 3. Create a detailed Jira task with clear acceptance criteria
 4. Include specific code examples and recommendations

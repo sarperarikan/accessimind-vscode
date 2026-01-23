@@ -7,14 +7,14 @@ AccessiMind is a powerful VS Code extension that helps developers create more ac
 ## 🌟 Features
 
 ### 🤖 AI-Powered Analysis
-- **Multi-AI Support**: Choose between Google Gemini 2.0 Flash or VS Code Copilot
-- **WCAG 2.2 Compliance**: Comprehensive analysis targeting A, AA, and AAA levels
+- **Multi-AI Support**: Integrated with Google Gemini 2.5, VS Code Copilot (GPT-5.2), and Ollama (Local AI)
+- **WCAG 2.2 Conformance**: Comprehensive analysis targeting A, AA, and AAA levels
 - **Smart Detection**: Automatic issue detection in HTML, CSS, JavaScript, TypeScript, and more
 
 ### ♿ Accessibility First
 - **Real-time Detection**: Auto-detect WCAG issues as you code
 - **Configurable Detail Levels**: Basic, Detailed, or Comprehensive analysis
-- **Screen Reader Support**: Full ARIA compliance and screen reader optimization
+- **Screen Reader Support**: Full ARIA conformance and screen reader optimization
 - **Keyboard Navigation**: Complete keyboard accessibility
 
 ### 🛠️ Advanced Capabilities
@@ -125,7 +125,7 @@ AccessiMind is a powerful VS Code extension that helps developers create more ac
 ### Setup
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/ai-accessibility-enhancer.git
+git clone https://github.com/sarperarikan/accessimind-vscode.git
 
 # Install dependencies
 npm install
@@ -174,9 +174,9 @@ All data is stored locally and never transmitted externally.
 
 ### Getting Help
 
-- 📖 [Documentation](https://github.com/your-username/ai-accessibility-enhancer/wiki)
-- 🐛 [Report Issues](https://github.com/your-username/ai-accessibility-enhancer/issues)
-- 💬 [Discussions](https://github.com/your-username/ai-accessibility-enhancer/discussions)
+- 📖 [Documentation](https://github.com/sarperarikan/accessimind-vscode/wiki)
+- 🐛 [Report Issues](https://github.com/sarperarikan/accessimind-vscode/issues)
+- 💬 [Discussions](https://github.com/sarperarikan/accessimind-vscode/discussions)
 
 ## 📄 License
 

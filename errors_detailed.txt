@@ -1,0 +1,1449 @@
+﻿node.exe :     
+[webpack-cli] Compiler 
+starting... 
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo 
+...
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: (    [webpack-   
+ cli] Compiler star    
+ting... :String) [    
+], RemoteException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+    [webpack-cli] 
+Compiler is using 
+config: 'C:\Users\sarpe
+\workspace\accessi-mind
+\webpack.config.js'
+assets by status 402 KiB [1m[32m[cached][39m[22m 1 asset
+orphan modules 430 KiB [1m[33m[orphan][39m[22m 26 modules
+runtime modules 937 bytes 4 modules
+built modules 744 KiB [1m[33m[built][39m[22m
+  modules by path [1m./src/[39m[22m 743 KiB
+    cacheable modules 133 KiB
+      [1m./src/utils/logger.ts[39m[22m 1.93 KiB [1m[33m[built][39m[22m [1m[33m[code generated][39m[22m
+      [1m./src/utils/aiTestUtils.ts[39m[22m 17.7 KiB [1m[33m[built][39m[22m [1m[33m[code generated][39m[22m
+      [1m./src/wizardManager.ts[39m[22m 113 KiB [1m[33m[built][39m[22m [1m[33m[code generated][39m[22m [1m[31m[230 errors][39m[22m
+    [1m./src/extension.ts + 20 modules[39m[22m 532 KiB [1m[31m[not cacheable][39m[22m [1m[33m[built][39m[22m [1m[33m[code generated][39m[22m
+    [1m./src/utils/aiProvider.ts + 6 modules[39m[22m 78.7 KiB [1m[31m[not cacheable][39m[22m [1m[33m[built][39m[22m [1m[33m[code generated][39m[22m
+  [1mexternal "vscode"[39m[22m 42 bytes [1m[33m[built][39m[22m [1m[33m[code generated][39m[22m
+  [1mexternal "path"[39m[22m 42 bytes [1m[33m[built][39m[22m [1m[33m[code generated][39m[22m
+
+[1m[33mWARNING[39m[22m in [1mDefinePlugin
+[1m[31mConflicting[39m[22m[1m values for 'process.env.NODE_ENV'[39m[22m
+
+1 warning has detailed information that is not shown.
+Use 'stats.errorDetails: true' resp. '--stats-error-details' to show it.
+
+[1m[31mERROR[39m[22m in [1m./src/wizardManager.ts[39m[22m [1m[32m2420:14[39m[22m
+[1mModule parse [1m[31mfailed[39m[22m[1m: [1m[31mUnexpected[39m[22m[1m token (2420:14)
+File was processed with these loaders:
+ * ./node_modules/ts-loader/index.js
+You may need an additional loader to handle the result of these loaders.
+| 				geminiGrid.innerHTML = models.gemini.map((model, index) => `
+|             < div;
+>         class {
+|         }
+|         "model-card ${model.recommended ? 'recommended' : ''}";[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2540:9-14[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2540,10)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2540:14-15[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2540,15)
+      TS1005: '{' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2541:14-15[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2541,15)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2542:17-18[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2542,18)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2545:14-15[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2545,15)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2545:68-73[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2545,69)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2545:78-81[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2545,79)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2545:116-123[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2545,117)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2545:128-134[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2545,129)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2545:197-208[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2545,198)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2545:213-221[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2545,214)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2546:16-17[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2546,17)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2547:8-13[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2547,9)
+      TS1005: '>' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2547:13-14[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2547,14)
+      TS1005: '{' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2547:30-31[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2547,31)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2547:46-47[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2547,47)
+      TS1110: Type expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2548:10-15[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2548,11)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2548:15-16[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2548,16)
+      TS1005: '{' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2548:39-40[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2548,40)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2548:62-63[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2548,63)
+      TS1110: Type expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2549:11-16[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2549,12)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2549:16-17[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2549,17)
+      TS1005: '{' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2549:32-36[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2549,33)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2549:45-46[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2549,46)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2550:12-17[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2550,13)
+      TS1005: '>' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2550:17-18[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2550,18)
+      TS1005: '{' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2550:50-51[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2550,51)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2550:67-68[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2550,68)
+      TS1110: Type expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2551:14-19[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2551,15)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2551:19-20[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2551,20)
+      TS1005: '{' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2551:56-57[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2551,57)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2551:75-76[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2551,76)
+      TS1110: Type expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2552:9-14[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2552,10)
+      TS1161: Unterminated regular expression literal.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2553:9-14[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2553,10)
+      TS1161: Unterminated regular expression literal.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2561:14-19[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2561,15)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2561:19-20[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2561,20)
+      TS1005: '{' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2562:14-15[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2562,15)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2563:17-18[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2563,18)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2566:14-15[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2566,15)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2566:68-73[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2566,69)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2566:78-81[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2566,79)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2566:116-123[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2566,117)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2566:128-134[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2566,129)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2566:197-208[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2566,198)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2566:213-221[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2566,214)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2566:271-282[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2566,272)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2566:287-301[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2566,288)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2567:16-17[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2567,17)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2568:6-7[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2568,7)
+      TS1434: [1m[31mUnexpected[39m[22m[1m keyword or identifier.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2568:57-58[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2568,58)
+      TS1109: Expression expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2569:8-13[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2569,9)
+      TS1005: '>' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2569:13-14[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2569,14)
+      TS1005: '{' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2569:30-31[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2569,31)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2569:45-46[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2569,46)
+      TS1434: [1m[31mUnexpected[39m[22m[1m keyword or identifier.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2569:134-135[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2569,135)
+      TS1110: Type expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2570:10-15[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2570,11)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2570:15-16[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2570,16)
+      TS1005: '{' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2570:39-40[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2570,40)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2570:62-63[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2570,63)
+      TS1110: Type expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2571:11-16[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2571,12)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2571:16-17[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2571,17)
+      TS1005: '{' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2571:32-36[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2571,33)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2571:45-46[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2571,46)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2572:12-17[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2572,13)
+      TS1005: '>' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2572:17-18[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2572,18)
+      TS1005: '{' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2572:50-51[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2572,51)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2572:67-68[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2572,68)
+      TS1110: Type expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2573:14-19[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2573,15)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2573:19-20[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2573,20)
+      TS1005: '{' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2573:56-57[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2573,57)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2573:75-76[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2573,76)
+      TS1110: Type expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2574:7-8[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2574,8)
+      TS1434: [1m[31mUnexpected[39m[22m[1m keyword or identifier.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2575:3-4[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2575,4)
+      TS1110: Type expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2576:4-9[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2576,5)
+      TS1161: Unterminated regular expression literal.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2584:9-14[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2584,10)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2584:14-15[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2584,15)
+      TS1005: '{' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2585:14-15[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2585,15)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2586:17-18[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2586,18)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2589:14-15[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2589,15)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2589:68-73[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2589,69)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2589:78-81[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2589,79)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2589:116-123[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2589,117)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2589:128-134[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2589,129)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2589:197-208[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2589,198)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2589:213-221[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2589,214)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2589:271-282[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2589,272)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2589:287-301[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2589,288)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2590:16-17[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2590,17)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2591:6-7[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2591,7)
+      TS1434: [1m[31mUnexpected[39m[22m[1m keyword or identifier.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2591:57-58[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2591,58)
+      TS1109: Expression expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2592:8-13[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2592,9)
+      TS1005: '>' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2592:13-14[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2592,14)
+      TS1005: '{' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2592:30-31[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2592,31)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2592:45-46[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2592,46)
+      TS1434: [1m[31mUnexpected[39m[22m[1m keyword or identifier.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2592:134-135[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2592,135)
+      TS1110: Type expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2593:10-15[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2593,11)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2593:15-16[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2593,16)
+      TS1005: '{' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2593:39-40[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2593,40)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2593:62-63[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2593,63)
+      TS1110: Type expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2594:11-16[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2594,12)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2594:16-17[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2594,17)
+      TS1005: '{' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2594:32-36[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2594,33)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2594:45-46[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2594,46)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2595:12-17[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2595,13)
+      TS1005: '>' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2595:17-18[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2595,18)
+      TS1005: '{' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2595:50-51[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2595,51)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2595:67-68[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2595,68)
+      TS1110: Type expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2596:14-19[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2596,15)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2596:19-20[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2596,20)
+      TS1005: '{' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2596:56-57[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2596,57)
+      TS1005: ';' expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2596:75-76[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2596,76)
+      TS1110: Type expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2597:7-8[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2597,8)
+      TS1434: [1m[31mUnexpected[39m[22m[1m keyword or identifier.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2598:3-4[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2598,4)
+      TS1110: Type expected.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2599:4-9[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2599,5)
+      TS1161: Unterminated regular expression literal.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m956:2-8[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(956,3)
+      TS2322: Type 'boolean' is not assignable to type 'string'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2540:5-8[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2540,6)
+      TS2304: Cannot find name 'div'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2541:2-6[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2541,3)
+      TS2304: Cannot find name 'data'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2541:9-14[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2541,10)
+      TS2304: Cannot find name 'model'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2542:2-6[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2542,3)
+      TS2304: Cannot find name 'data'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2542:9-17[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2542,10)
+      TS2304: Cannot find name 'provider'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2543:2-6[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2543,3)
+      TS2304: Cannot find name 'role'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2544:2-10[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2544,3)
+      TS2304: Cannot find name 'tabindex'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2545:2-6[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2545,3)
+      TS2304: Cannot find name 'aria'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2545:9-14[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2545,10)
+      TS2552: Cannot find name 'label'. [1m[32mDid you mean 'babel'?[39m[22m[1m[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2545:68-73[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2545,69)
+      TS2304: Cannot find name 'Speed'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2545:78-81[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2545,79)
+      TS2304: Cannot find name 'H─▒z'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2545:116-123[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2545,117)
+      TS2304: Cannot find name 'Quality'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2545:128-134[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2545,129)
+      TS2304: Cannot find name 'Kalite'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2545:197-208[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2545,198)
+      TS2304: Cannot find name 'Recommended'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2545:213-221[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2545,214)
+      TS2304: Cannot find name '├ûnerilen'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2546:2-6[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2546,3)
+      TS2304: Cannot find name 'aria'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2546:9-16[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2546,10)
+      TS2304: Cannot find name 'checked'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2547:4-7[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2547,5)
+      TS2304: Cannot find name 'div'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2547:29-30[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2547,30)
+      TS2581: Cannot find name '$'. Do you need to install type definitions for jQuery? Try `npm i --save-dev @types/jquery`.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2547:32-37[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2547,33)
+      TS2304: Cannot find name 'model'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2548:6-9[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2548,7)
+      TS2304: Cannot find name 'div'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2548:38-39[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2548,39)
+      TS2581: Cannot find name '$'. Do you need to install type definitions for jQuery? Try `npm i --save-dev @types/jquery`.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2548:41-46[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2548,42)
+      TS2304: Cannot find name 'model'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2549:7-10[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2549,8)
+      TS2304: Cannot find name 'div'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2549:32-36[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2549,33)
+      TS2304: Cannot find name 'aria'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2549:39-45[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2549,40)
+      TS2304: Cannot find name 'hidden'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2550:7-11[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2550,8)
+      TS2304: Cannot find name 'span'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2550:49-50[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2550,50)
+      TS2581: Cannot find name '$'. Do you need to install type definitions for jQuery? Try `npm i --save-dev @types/jquery`.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2550:52-57[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2550,53)
+      TS2304: Cannot find name 'model'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2551:9-13[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2551,10)
+      TS2304: Cannot find name 'span'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2551:55-56[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2551,56)
+      TS2581: Cannot find name '$'. Do you need to install type definitions for jQuery? Try `npm i --save-dev @types/jquery`.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2551:58-63[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2551,59)
+      TS2304: Cannot find name 'model'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2553:9-14[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2553,10)
+      TS2349: This expression is not callable.
+  Type 'RegExp' has no call signatures.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2561:10-13[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2561,11)
+      TS2304: Cannot find name 'div'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2562:2-6[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2562,3)
+      TS2304: Cannot find name 'data'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2562:9-14[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2562,10)
+      TS2304: Cannot find name 'model'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2563:2-6[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2563,3)
+      TS2304: Cannot find name 'data'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2563:9-17[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2563,10)
+      TS2304: Cannot find name 'provider'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2564:2-6[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2564,3)
+      TS2304: Cannot find name 'role'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2565:2-10[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2565,3)
+      TS2304: Cannot find name 'tabindex'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2566:2-6[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2566,3)
+      TS2304: Cannot find name 'aria'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2566:9-14[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2566,10)
+      TS2304: Cannot find name 'label'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2566:68-73[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2566,69)
+      TS2304: Cannot find name 'Speed'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2566:78-81[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2566,79)
+      TS2304: Cannot find name 'H─▒z'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2566:116-123[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2566,117)
+      TS2304: Cannot find name 'Quality'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2566:128-134[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2566,129)
+      TS2304: Cannot find name 'Kalite'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2566:197-208[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2566,198)
+      TS2304: Cannot find name 'Recommended'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2566:213-221[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2566,214)
+      TS2304: Cannot find name '├ûnerilen'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2566:271-282[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2566,272)
+      TS2304: Cannot find name 'Unavailable'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2566:287-301[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2566,288)
+      TS2304: Cannot find name 'Kullan─▒lam─▒yor'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2567:2-6[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2567,3)
+      TS2304: Cannot find name 'aria'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2567:9-16[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2567,10)
+      TS2304: Cannot find name 'checked'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2568:6-7[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2568,7)
+      TS2581: Cannot find name '$'. Do you need to install type definitions for jQuery? Try `npm i --save-dev @types/jquery`.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2568:10-15[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2568,11)
+      TS2304: Cannot find name 'model'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2569:4-7[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2569,5)
+      TS2304: Cannot find name 'div'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2569:29-30[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2569,30)
+      TS2581: Cannot find name '$'. Do you need to install type definitions for jQuery? Try `npm i --save-dev @types/jquery`.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2569:32-37[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2569,33)
+      TS2304: Cannot find name 'model'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2569:45-46[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2569,46)
+      TS2581: Cannot find name '$'. Do you need to install type definitions for jQuery? Try `npm i --save-dev @types/jquery`.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2569:49-54[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2569,50)
+      TS2304: Cannot find name 'model'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2570:6-9[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2570,7)
+      TS2304: Cannot find name 'div'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2570:38-39[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2570,39)
+      TS2581: Cannot find name '$'. Do you need to install type definitions for jQuery? Try `npm i --save-dev @types/jquery`.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2570:41-46[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2570,42)
+      TS2304: Cannot find name 'model'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2571:7-10[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2571,8)
+      TS2304: Cannot find name 'div'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2571:32-36[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2571,33)
+      TS2304: Cannot find name 'aria'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2571:39-45[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2571,40)
+      TS2304: Cannot find name 'hidden'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2572:7-11[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2572,8)
+      TS2304: Cannot find name 'span'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2572:49-50[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2572,50)
+      TS2581: Cannot find name '$'. Do you need to install type definitions for jQuery? Try `npm i --save-dev @types/jquery`.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2572:52-57[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2572,53)
+      TS2304: Cannot find name 'model'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2573:9-13[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2573,10)
+      TS2304: Cannot find name 'span'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2573:55-56[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2573,56)
+      TS2581: Cannot find name '$'. Do you need to install type definitions for jQuery? Try `npm i --save-dev @types/jquery`.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2573:58-63[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2573,59)
+      TS2304: Cannot find name 'model'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2574:7-8[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2574,8)
+      TS2581: Cannot find name '$'. Do you need to install type definitions for jQuery? Try `npm i --save-dev @types/jquery`.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2574:11-16[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2574,12)
+      TS2304: Cannot find name 'model'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2576:4-9[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2576,5)
+      TS2349: This expression is not callable.
+  Type 'RegExp' has no call signatures.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2584:5-8[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2584,6)
+      TS2304: Cannot find name 'div'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2585:2-6[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2585,3)
+      TS2304: Cannot find name 'data'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2585:9-14[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2585,10)
+      TS2304: Cannot find name 'model'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2586:2-6[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2586,3)
+      TS2304: Cannot find name 'data'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2586:9-17[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2586,10)
+      TS2304: Cannot find name 'provider'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2587:2-6[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2587,3)
+      TS2304: Cannot find name 'role'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2588:2-10[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2588,3)
+      TS2304: Cannot find name 'tabindex'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2589:2-6[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2589,3)
+      TS2304: Cannot find name 'aria'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2589:9-14[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2589,10)
+      TS2304: Cannot find name 'label'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2589:68-73[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2589,69)
+      TS2304: Cannot find name 'Speed'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2589:78-81[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2589,79)
+      TS2304: Cannot find name 'H─▒z'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2589:116-123[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2589,117)
+      TS2304: Cannot find name 'Quality'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2589:128-134[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2589,129)
+      TS2304: Cannot find name 'Kalite'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2589:197-208[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2589,198)
+      TS2304: Cannot find name 'Recommended'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2589:213-221[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2589,214)
+      TS2304: Cannot find name '├ûnerilen'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2589:271-282[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2589,272)
+      TS2304: Cannot find name 'Unavailable'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2589:287-301[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2589,288)
+      TS2304: Cannot find name 'Kullan─▒lam─▒yor'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2590:2-6[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2590,3)
+      TS2304: Cannot find name 'aria'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2590:9-16[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2590,10)
+      TS2304: Cannot find name 'checked'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2591:6-7[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2591,7)
+      TS2581: Cannot find name '$'. Do you need to install type definitions for jQuery? Try `npm i --save-dev @types/jquery`.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2591:10-15[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2591,11)
+      TS2304: Cannot find name 'model'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2592:4-7[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2592,5)
+      TS2304: Cannot find name 'div'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2592:29-30[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2592,30)
+      TS2581: Cannot find name '$'. Do you need to install type definitions for jQuery? Try `npm i --save-dev @types/jquery`.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2592:32-37[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2592,33)
+      TS2304: Cannot find name 'model'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2592:45-46[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2592,46)
+      TS2581: Cannot find name '$'. Do you need to install type definitions for jQuery? Try `npm i --save-dev @types/jquery`.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2592:49-54[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2592,50)
+      TS2304: Cannot find name 'model'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2593:6-9[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2593,7)
+      TS2304: Cannot find name 'div'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2593:38-39[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2593,39)
+      TS2581: Cannot find name '$'. Do you need to install type definitions for jQuery? Try `npm i --save-dev @types/jquery`.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2593:41-46[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2593,42)
+      TS2304: Cannot find name 'model'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2594:7-10[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2594,8)
+      TS2304: Cannot find name 'div'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2594:32-36[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2594,33)
+      TS2304: Cannot find name 'aria'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2594:39-45[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2594,40)
+      TS2304: Cannot find name 'hidden'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2595:7-11[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2595,8)
+      TS2304: Cannot find name 'span'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2595:49-50[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2595,50)
+      TS2581: Cannot find name '$'. Do you need to install type definitions for jQuery? Try `npm i --save-dev @types/jquery`.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2595:52-57[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2595,53)
+      TS2304: Cannot find name 'model'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2596:9-13[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2596,10)
+      TS2304: Cannot find name 'span'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2596:55-56[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2596,56)
+      TS2581: Cannot find name '$'. Do you need to install type definitions for jQuery? Try `npm i --save-dev @types/jquery`.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2596:58-63[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2596,59)
+      TS2304: Cannot find name 'model'.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2597:7-8[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2597,8)
+      TS2581: Cannot find name '$'. Do you need to install type definitions for jQuery? Try `npm i --save-dev @types/jquery`.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2597:11-16[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2597,12)
+      TS2304: Cannot find name 'model'.[39m[22m
+    [webpack-cli] 
+Compiler finished
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[31mERROR[39m[22m in [1mC:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts[39m[22m
+[1m./src/wizardManager.ts[39m[22m [1m[32m2599:4-9[39m[22m
+[1m[tsl] [1m[31mERROR[39m[22m[1m in C:\Users\sarpe\workspace\accessi-mind\src\wizardManager.ts(2599,5)
+      TS2349: This expression is not callable.
+  Type 'RegExp' has no call signatures.[39m[22m
+ @ ./src/extension.ts 21:0-48 43:24-49
+
+[1m[33m230 errors have detailed information that is not shown.
+Use 'stats.errorDetails: true' resp. '--stats-error-details' to show it.[39m[22m
+
+webpack 5.99.9 compiled with [1m[31m231 errors[39m[22m and [1m[33m1 warning[39m[22m in 3934 ms

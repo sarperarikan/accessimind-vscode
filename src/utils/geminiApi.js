@@ -1,18 +1,18 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function (o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
     if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
+        desc = { enumerable: true, get: function () { return m[k]; } };
     }
     Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
+}) : (function (o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
 }));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function (o, v) {
     Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
+}) : function (o, v) {
     o["default"] = v;
 });
 var __importStar = (this && this.__importStar) || function (mod) {
@@ -122,7 +122,7 @@ WCAG Seviyesi: ${wcagLevel}
 
 ${mode === "ask" ? "Sadece soruyu yanıtla ve öneriler ver." : ""}
 ${mode === "agent" ? "Kodu analiz et ve WCAG iyileştirme önerileri sun." : ""}
-${mode === "edit" ? "Kodu WCAG uyumlu hale getir ve iyileştirilmiş versiyonu döndür." : ""}
+${mode === "edit" ? "Kodu WCAG uyumuna sadık kalarak iyileştir ve iyileştirilmiş versiyonu döndür." : ""}
 
 ${selectedText ? `Seçili Kod:\n\`\`\`${language}\n${selectedText}\n\`\`\`` : ""}
 
@@ -140,7 +140,7 @@ WCAG 2.2 kriterlerine odaklan:
 - Görsel (1.x): Kontrast, metin alternatifi, renk kullanımı
 - İşlevsel (2.x): Klavye erişimi, navigasyon, zaman sınırları
 - Anlaşılabilir (3.x): Okunabilirlik, tahmin edilebilirlik, hata tanımlama
-- Sağlam (4.x): Uyumluluk, ARIA kullanımı, semantik HTML
+- Sağlam (4.x): Uyum, ARIA kullanımı, semantik HTML
 
 Yanıtını Türkçe olarak ver.`;
         return prompt;
@@ -153,10 +153,10 @@ Yanıtını Türkçe olarak ver.`;
                 const temperature = yield this.getTemperature();
                 const requestBody = {
                     contents: [{
-                            parts: [{
-                                    text: prompt
-                                }]
-                        }],
+                        parts: [{
+                            text: prompt
+                        }]
+                    }],
                     generationConfig: {
                         maxOutputTokens: maxTokens,
                         temperature: temperature,

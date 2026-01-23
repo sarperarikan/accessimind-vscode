@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import * as https from "https";
+import * as http from "http";
 import * as zlib from "zlib";
 import { RequestCache, CacheEntry } from "./requestCache";
 import { logger } from "./logger";
@@ -52,29 +53,36 @@ export abstract class AIProvider {
 
 	protected buildWCAGPrompt(request: WCAGRequest): string {
 		const { code, fileType, language, selectedText, wcagLevel = "AA", includeComments = true, responseLanguage = "en" } = request;
+		const perf = vscode.workspace.getConfiguration("wcagEnhancer").get("performance") as any || {};
+		const fastMode = perf?.fastMode !== false;
+		const maxChars = typeof perf?.promptMaxChars === "number" ? perf.promptMaxChars : 8000;
+		const codeForPrompt = fastMode ? PromptOptimizer.truncateCode(PromptOptimizer.compressCode(code), maxChars) : code;
+		const selectedForPrompt = selectedText ? (fastMode ? PromptOptimizer.truncateCode(PromptOptimizer.compressCode(selectedText), Math.min(maxChars, 4000)) : selectedText) : undefined;
 
 		const langMap = {
 			en: {
-				title: "You are a WCAG 2.2 accessibility expert.",
+				title: "You are an Enterprise-grade WCAG 2.2 accessibility expert.",
 				fileType: "File Type",
 				language: "Language",
 				wcagLevel: "WCAG Level",
 				selectedCode: "Selected Code",
 				currentCode: "Current Code",
-				instructions: "Please improve this code to meet WCAG 2.2 accessibility standards.",
-				format: "Response format:\n- Return improved code\n- Explain each change\n- Specify WCAG criteria applied",
-				criteria: "Focus on WCAG 2.2 criteria:\n- Perceivable (1.x): Contrast, text alternatives, color usage\n- Operable (2.x): Keyboard access, navigation, timing\n- Understandable (3.x): Readability, predictability, error identification\n- Robust (4.x): Compatibility, ARIA usage, semantic HTML"
+				instructions: "Please improve this code to be PRODUCTION-READY, ZERO-DEFECT and fully functional. Ensure CSS and JS support for a complete, working structure.",
+				format: "Response format:\n- Return modular, scalable, and optimized 'Enterprise Grade' code\n- Include detailed logic explanations in code comments\n- Explain the benefits of each change\n- Specify WCAG criteria applied",
+				criteria: "Focus on WCAG 2.2 criteria:\n- Perceivable (1.x): Contrast, text alternatives, color usage\n- Operable (2.x): Keyboard access, navigation, timing\n- Understandable (3.x): Readability, predictability, error identification\n- Robust (4.x): Compatibility, ARIA usage, semantic HTML",
+				enterprise: "Adhere to SOLID principles, Factory patterns if applicable, and clean architecture."
 			},
 			tr: {
-				title: "Sen bir WCAG 2.2 erişilebilirlik uzmanısın.",
+				title: "Sen kurumsal düzeyde (Enterprise) bir WCAG 2.2 erişilebilirlik uzmanısın.",
 				fileType: "Dosya Türü",
 				language: "Dil",
 				wcagLevel: "WCAG Seviyesi",
 				selectedCode: "Seçili Kod",
 				currentCode: "Mevcut Kod",
-				instructions: "Lütfen bu kodu WCAG 2.2 erişilebilirlik standartlarını karşılayacak şekilde iyileştir.",
-				format: "Yanıt formatı:\n- İyileştirilmiş kodu döndür\n- Her değişikliği açıkla\n- Uygulanan WCAG kriterlerini belirt",
-				criteria: "WCAG 2.2 kriterlerine odaklan:\n- Algılanabilir (1.x): Kontrast, metin alternatifleri, renk kullanımı\n- İşletilebilir (2.x): Klavye erişimi, navigasyon, zamanlama\n- Anlaşılabilir (3.x): Okunabilirlik, öngörülebilirlik, hata tanımlama\n- Sağlam (4.x): Uyumluluk, ARIA kullanımı, semantik HTML"
+				instructions: "Lütfen bu kodu PRODUCTION-READY (yayına hazır), ZERO-DEFECT (sıfır hata) ve tam çalışan bir yapı şeklinde iyileştir. CSS ve JS desteğiyle eksiksiz, fonksiyonel bir yapı sağla.",
+				format: "Yanıt formatı:\n- Modüler, ölçeklenebilir ve optimize edilmiş 'Kurumsal Düzeyde' kod döndür\n- Kod içerisinde neyin ne işe yaradığını ve ne sağladığını açıklayan TÜRKÇE yorum satırları (// veya /* */) ekle\n- Her değişikliğin faydasını ve ne kattığını açıkla\n- Uygulanan WCAG kriterlerini belirt",
+				criteria: "WCAG 2.2 kriterlerine odaklan:\n- Algılanabilir (1.x): Kontrast, metin alternatifleri, renk kullanımı\n- İşletilebilir (2.x): Klavye erişimi, navigasyon, zamanlama\n- Anlaşılabilir (3.x): Okunabilirlik, öngörülebilirlik, hata tanımlama\n- Sağlam (4.x): Uyum, ARIA kullanımı, semantik HTML",
+				enterprise: "SOLID prensiplerine, uygun yerlerde Factory desenlerine ve temiz mimariye (Clean Architecture) sadık kal."
 			}
 		};
 
@@ -86,14 +94,16 @@ ${strings.fileType}: ${fileType}
 ${strings.language}: ${language}
 ${strings.wcagLevel}: ${wcagLevel}
 
-${selectedText ? `${strings.selectedCode}:\n\`\`\`${language}\n${selectedText}\n\`\`\`\n\n` : ""}
+${selectedForPrompt ? `${strings.selectedCode}:\n\`\`\`${language}\n${selectedForPrompt}\n\`\`\`\n\n` : ""}
 
 ${strings.currentCode}:
 \`\`\`${language}
-${code}
+${codeForPrompt}
 \`\`\`
 
-${includeComments ? "Please include explanatory comments about the improvements made." : ""}
+${strings.enterprise}
+
+${includeComments ? "Please include detailed explanatory comments (in Turkish for Turkish responses) about the improvements made, what they do, and what value they provide." : ""}
 
 ${strings.format}
 
@@ -114,7 +124,7 @@ Analiz sonucunda şunları sağlayın:
 1. Genel erişilebilirlik skoru (0-100)
 2. Tespit edilen erişilebilirlik sorunları
 3. Her sorun için öneriler
-4. WCAG uygunluk seviyesi (A, AA, AAA)
+4. WCAG uyum seviyesi (A, AA, AAA)
 5. Kod kalitesi değerlendirmesi
 
 Format: JSON formatında yanıt verin:
@@ -130,7 +140,7 @@ Please provide:
 1. Overall accessibility score (0-100)
 2. Identified accessibility issues
 3. Recommendations for each issue
-4. WCAG compliance level (A, AA, AAA)
+4. WCAG conformance level (A, AA, AAA)
 5. Code quality assessment
 
 Format: Respond in JSON format:
@@ -273,7 +283,9 @@ export class GeminiProvider extends AIProvider {
 					const aName = a.name?.toLowerCase() || "";
 					const bName = b.name?.toLowerCase() || "";
 
-					// Prioritize 2.5 > 2.0 > 1.5
+					// Prioritize 3 > 2.5 > 2.0 > 1.5
+					if (aName.includes("3") && !bName.includes("3")) return -1;
+					if (!aName.includes("3") && bName.includes("3")) return 1;
 					if (aName.includes("2.5") && !bName.includes("2.5")) return -1;
 					if (!aName.includes("2.5") && bName.includes("2.5")) return 1;
 					if (aName.includes("2.0") && !bName.includes("2.0")) return -1;
@@ -746,12 +758,25 @@ export class VSCodeCopilotProvider extends AIProvider {
 
 	private async fetchAvailableModels(): Promise<void> {
 		try {
-			// Tek bir çağrıda tüm mevcut modelleri al - en güvenilir yöntem
-			const allModels = await vscode.lm.selectChatModels();
+			logger.info("🔍 Copilot modelleri keşfediliyor...");
+
+			// Strateji 1: Sadece Copilot vendor'u olanları al
+			let allModels = await vscode.lm.selectChatModels({ vendor: "copilot" });
+
+			// Strateji 2: Eğer hiç bulunamadıysa, tüm modelleri al ve filtrele
+			if (allModels.length === 0) {
+				logger.info("⚠️ Vendor:copilot ile model bulunamadı, tüm modeller taranıyor...");
+				const generalModels = await vscode.lm.selectChatModels();
+				allModels = generalModels.filter(model =>
+					(model.vendor && model.vendor.toLowerCase().includes("copilot")) ||
+					(model.id && model.id.toLowerCase().includes("copilot")) ||
+					(model.family && (model.family.toLowerCase().includes("gpt") || model.family.toLowerCase().includes("claude")))
+				);
+			}
 
 			if (allModels.length === 0) {
-				logger.warn("⚠️ VS Code Language Model API: Hiç model bulunamadı");
-				logger.info("💡 İpucu: GitHub Copilot aboneliğinizin aktif olduğundan emin olun");
+				logger.warn("⚠️ VS Code Language Model API: Hiç uygun model bulunamadı");
+				logger.info("💡 İpucu: GitHub Copilot aboneliğinizin aktif olduğundan ve giriş yaptığınızdan emin olun");
 				this.availableModels = [];
 				return;
 			}
@@ -784,18 +809,35 @@ export class VSCodeCopilotProvider extends AIProvider {
 	 * Modelleri kalite sırasına göre sıralar (düşük değer = daha iyi)
 	 */
 	private getModelPriority(model: vscode.LanguageModelChat): number {
-		const family = model.family.toLowerCase();
-		const name = model.name.toLowerCase();
+		try {
+			const family = (model.family || "").toLowerCase();
+			const name = (model.name || "").toLowerCase();
 
-		// En yeni/iyi modeller önce
-		if (family.includes("gpt-4o") || name.includes("gpt-4o")) return 1;
-		if (family.includes("claude-3.5") || family.includes("claude-3-5") || name.includes("claude-3.5")) return 2;
-		if (family.includes("o1") || name.includes("o1")) return 3;
-		if (family.includes("gpt-4") || name.includes("gpt-4")) return 4;
-		if (family.includes("claude-3") || name.includes("claude-3")) return 5;
-		if (family.includes("gemini") || name.includes("gemini")) return 6;
-		if (family.includes("gpt-3.5") || name.includes("gpt-3.5")) return 7;
-		return 10;
+			// En yeni/iyi modeller önce (düşük değer daha yüksek öncelik)
+			if (family.includes("gpt-5.2-codex") || name.includes("gpt-5.2-codex")) return 0;
+			if (family.includes("gpt-5.2") || name.includes("gpt-5.2")) return 0;
+			if (family.includes("gpt-5.1-codex") || name.includes("gpt-5.1-codex")) return 1;
+			if (family.includes("gpt-5") || name.includes("gpt-5")) return 1;
+			if (family.includes("gpt-4.1") || name.includes("gpt-4.1")) return 1;
+			if (family.includes("gpt-4o") || name.includes("gpt-4o")) return 2;
+			if (family.includes("claude sonnet 4.5") || name.includes("claude sonnet 4.5")) return 2;
+			if (family.includes("claude sonnet 4") || name.includes("claude sonnet 4")) return 3;
+			if (family.includes("claude opus 4.5") || name.includes("claude opus 4.5")) return 3;
+			if (family.includes("claude opus 4") || name.includes("claude opus 4")) return 3;
+			if (family.includes("gemini 3") || name.includes("gemini 3")) return 3;
+			if (family.includes("o4") || name.includes("o4")) return 3;
+			if (family.includes("o3") || name.includes("o3")) return 4;
+			if (family.includes("claude-3.7") || name.includes("claude sonnet 3.7")) return 4;
+			if (family.includes("claude-3.5") || family.includes("claude-3-5") || name.includes("claude-3.5") || name.includes("claude sonnet 3.5")) return 5;
+			if (family.includes("gpt-4") || name.includes("gpt-4")) return 6;
+			if (family.includes("gemini 2.5") || name.includes("gemini 2.5")) return 6;
+			if (family.includes("gemini 2.0") || name.includes("gemini 2.0")) return 7;
+			if (family.includes("gemini") || name.includes("gemini")) return 8;
+			if (family.includes("gpt-3.5") || name.includes("gpt-3.5")) return 9;
+			return 10;
+		} catch (e) {
+			return 20; // Hata durumunda en düşük öncelik
+		}
 	}
 
 	public async refreshModels(): Promise<void> {
@@ -946,8 +988,9 @@ export class VSCodeCopilotProvider extends AIProvider {
 			await new Promise(resolve => setTimeout(resolve, 500));
 
 			// 4. Language Models API erişimini test et
+			// Sadece Copilot modellerini kontrol et
 			try {
-				const testModels = await vscode.lm.selectChatModels();
+				const testModels = await vscode.lm.selectChatModels({ vendor: "copilot" });
 
 				if (testModels.length > 0) {
 					logger.info(`  ✅ ${testModels.length} language model erişilebilir`);
@@ -962,7 +1005,7 @@ export class VSCodeCopilotProvider extends AIProvider {
 					logger.warn("  ⚠️ Hiç model bulunamadı");
 					return {
 						available: false,
-						reason: "Language Model bulunamadı. GitHub Copilot aboneliğinizin aktif olduğundan ve VS Code'a giriş yaptığınızdan emin olun.",
+						reason: "Language Model bulunamadı. GitHub Copilot aboneliğiniz aktif olduğundan ve VS Code'a giriş yaptığınızdan emin olun.",
 						details: {
 							copilotInstalled: !!copilotExtension,
 							copilotChatInstalled: !!copilotChatExtension,
@@ -979,8 +1022,7 @@ export class VSCodeCopilotProvider extends AIProvider {
 					details: { error: modelError.message }
 				};
 			}
-
-		} catch (error) {
+		} catch (error: any) {
 			logger.error("❌ Copilot durum kontrolü hatası:", error);
 			return {
 				available: false,
@@ -1019,12 +1061,27 @@ export class VSCodeCopilotProvider extends AIProvider {
 	private getBestAvailableModel(): vscode.LanguageModelChat | undefined {
 		if (this.availableModels.length === 0) return undefined;
 
-		// Öncelik sırası: GPT-4o > GPT-4 > Claude 3.5 > Claude 3 > Diğerleri
+		// Öncelik sırası: GPT-5.2/Codex > GPT-5.1/Codex > GPT-5 > GPT-4.1 > GPT-4o > Claude 4.5/4 > Gemini 3 > o4/o3 > Claude 3.7/3.5 > GPT-4 > Gemini 2.x
 		const priorityModels = [
+			"gpt-5.2-codex",
+			"gpt-5.2",
+			"gpt-5.1-codex",
+			"gpt-5",
+			"gpt-4.1",
 			"gpt-4o",
-			"gpt-4",
+			"claude sonnet 4.5",
+			"claude sonnet 4",
+			"claude opus 4.5",
+			"claude opus 4",
+			"gemini 3",
+			"o4",
+			"o3",
+			"claude-3.7",
+			"claude sonnet 3.7",
 			"claude-3.5",
-			"claude-3",
+			"gpt-4",
+			"gemini 2.5",
+			"gemini 2.0",
 			"gpt-3.5"
 		];
 
@@ -1441,6 +1498,210 @@ User message: ${message}`;
 		};
 	}
 }
+export class OllamaProvider extends AIProvider {
+	private cache: RequestCache<AIResponse>;
+
+	constructor() {
+		super();
+		this.cache = RequestCache.getInstance<AIResponse>("ollama");
+	}
+
+	private getBaseUrl(): string {
+		try {
+			const config = vscode.workspace.getConfiguration("wcagEnhancer");
+			const aiConfig = config.get("ai") as any;
+			return aiConfig?.ollamaUrl || "http://localhost:11434";
+		} catch {
+			return "http://localhost:11434";
+		}
+	}
+
+	private getModel(): string {
+		try {
+			const config = vscode.workspace.getConfiguration("wcagEnhancer");
+			const aiModelConfig = config.get("aiModels") as any;
+			return aiModelConfig?.selectedModel || "llama3";
+		} catch {
+			return "llama3";
+		}
+	}
+
+	async isAvailable(): Promise<boolean> {
+		try {
+			const baseUrl = this.getBaseUrl();
+			const url = new URL(`${baseUrl}/api/tags`);
+			const response = await this.makeSimpleGetRequest(url);
+			return !!response;
+		} catch {
+			return false;
+		}
+	}
+
+	getDisplayName(): string {
+		return "Ollama (Local)";
+	}
+
+	async getAvailableModels(): Promise<any[]> {
+		try {
+			const baseUrl = this.getBaseUrl();
+			const url = new URL(`${baseUrl}/api/tags`);
+			const response = await this.makeSimpleGetRequest(url);
+			if (response && response.models) {
+				return response.models.map((m: any) => ({
+					id: m.name,
+					name: m.name,
+					description: `${m.details?.family || 'Ollama'} - ${this.formatSize(m.size)}`,
+					speed: "fast",
+					quality: "medium"
+				}));
+			}
+		} catch (error) {
+			logger.error("Error fetching Ollama models:", error);
+		}
+		return [];
+	}
+
+	private formatSize(bytes: number): string {
+		if (!bytes) return "Unknown size";
+		const gb = bytes / (1024 * 1024 * 1024);
+		if (gb < 1) {
+			const mb = bytes / (1024 * 1024);
+			return `${mb.toFixed(1)} MB`;
+		}
+		return `${gb.toFixed(1)} GB`;
+	}
+
+	async improveCode(request: WCAGRequest): Promise<AIResponse> {
+		const startTime = Date.now();
+		const model = this.getModel();
+		const prompt = this.buildWCAGPrompt(request);
+
+		// Cache check
+		const cacheKey = this.cache.generateKey(model, prompt);
+		if (!request.forceRefresh) {
+			const cachedResponse = this.cache.get(cacheKey);
+			if (cachedResponse) return cachedResponse;
+		}
+
+		try {
+			const result = await this.makeApiCall(model, prompt);
+			const responseTime = Date.now() - startTime;
+			const wcagCriteria = this.extractWCAGCriteria(result);
+
+			const aiResponse: AIResponse = {
+				success: true,
+				content: result,
+				improvedCode: result,
+				summary: "WCAG improvements applied via Ollama",
+				wcagCriteria,
+				responseTime,
+				model,
+				provider: "ollama" as any
+			};
+
+			this.cache.set(cacheKey, aiResponse);
+			return aiResponse;
+		} catch (error) {
+			return {
+				success: false,
+				error: `Ollama error: ${error instanceof Error ? error.message : String(error)}`,
+				provider: "ollama" as any
+			};
+		}
+	}
+
+	async analyzeCode(request: WCAGRequest): Promise<AIResponse> {
+		const startTime = Date.now();
+		const model = this.getModel();
+		const prompt = this.buildWCAGAnalysisPrompt(request);
+
+		try {
+			const result = await this.makeApiCall(model, prompt);
+			const responseTime = Date.now() - startTime;
+			const wcagCriteria = this.extractWCAGCriteria(result);
+
+			return {
+				success: true,
+				content: result,
+				summary: "WCAG analysis completed via Ollama",
+				wcagCriteria,
+				responseTime,
+				model,
+				provider: "ollama" as any
+			};
+		} catch (error) {
+			return {
+				success: false,
+				error: `Ollama analysis error: ${error instanceof Error ? error.message : String(error)}`,
+				provider: "ollama" as any
+			};
+		}
+	}
+
+	private async makeSimpleGetRequest(url: URL): Promise<any> {
+		return new Promise((resolve, reject) => {
+			const lib = url.protocol === "https:" ? https : http;
+			lib.get(url, (res: any) => {
+				let data = "";
+				res.on("data", (chunk: any) => data += chunk);
+				res.on("end", () => {
+					try {
+						resolve(JSON.parse(data));
+					} catch (e) {
+						reject(e);
+					}
+				});
+			}).on("error", (err: any) => reject(err));
+		});
+	}
+
+	private async makeApiCall(model: string, prompt: string): Promise<string> {
+		return new Promise((resolve, reject) => {
+			const baseUrl = this.getBaseUrl();
+			const url = new URL(`${baseUrl}/api/generate`);
+			const lib = url.protocol === "https:" ? https : http;
+
+			const postData = JSON.stringify({
+				model,
+				prompt,
+				stream: false
+			});
+
+			const options = {
+				hostname: url.hostname,
+				port: url.port || (url.protocol === "https:" ? 443 : 80),
+				path: url.pathname,
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					"Content-Length": Buffer.byteLength(postData)
+				}
+			};
+
+			const req = lib.request(options, (res: any) => {
+				let data = "";
+				res.on("data", (chunk: any) => data += chunk);
+				res.on("end", () => {
+					try {
+						if (res.statusCode && res.statusCode >= 400) {
+							reject(new Error(`Ollama API Error: ${res.statusCode} - ${data}`));
+							return;
+						}
+						const response = JSON.parse(data);
+						resolve(response.response || "");
+					} catch (e) {
+						reject(new Error(`Failed to parse Ollama response: ${data}`));
+					}
+				});
+			});
+
+			req.on("error", (err: any) => reject(err));
+			req.write(postData);
+			req.end();
+		});
+	}
+}
+
 
 export class AIProviderManager {
 	private static instance: AIProviderManager;
@@ -1466,6 +1727,7 @@ export class AIProviderManager {
 	private initializeProviders() {
 		this.providers.set("gemini", new GeminiProvider());
 		this.providers.set("vscode-copilot", new VSCodeCopilotProvider());
+		this.providers.set("ollama", new OllamaProvider());
 
 		// Load current provider from settings
 		this.loadCurrentProvider();
@@ -1495,6 +1757,14 @@ export class AIProviderManager {
 			const copilotProvider = this.providers.get("vscode-copilot") as unknown as VSCodeCopilotProvider;
 			if (copilotProvider) {
 				await copilotProvider.initializeModels();
+			}
+		}
+
+		if (this.currentProvider === "ollama") {
+			const ollamaProvider = this.providers.get("ollama") as unknown as OllamaProvider;
+			if (ollamaProvider) {
+				// Refresh Ollama models if needed (this might be handled by wizard too)
+				await ollamaProvider.getAvailableModels();
 			}
 		}
 
@@ -1623,5 +1893,23 @@ export class AIProviderManager {
 			return false;
 		}
 	}
-	// End of file
+
+	public getCurrentModelName(): string {
+		try {
+			const config = vscode.workspace.getConfiguration("wcagEnhancer");
+			const aiModelConfig = config.get("aiModels") as any;
+			const modelId = aiModelConfig?.selectedModel || "unknown";
+
+			// Format model ID for display if possible
+			if (modelId === "unknown") return "Default Model";
+
+			// Simple formatting: gemini-1.5-flash -> Gemini 1.5 Flash
+			return modelId
+				.replace(/-/g, " ")
+				.replace(/\b\w/g, (l: string) => l.toUpperCase());
+		} catch {
+			return "AI Model";
+		}
+	}
 }
+// End of file

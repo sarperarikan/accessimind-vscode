@@ -75,8 +75,8 @@ describe("WcagAnalyzer", () => {
             const result = await wcagAnalyzer.analyzeCode(htmlCode, "html", "test.html");
             expect(result.summary.totalIssues).toBeGreaterThan(0);
             expect(result.summary.criticalIssues).toBeGreaterThan(0);
-            expect(result.summary.complianceLevel).toBeDefined();
-            expect(["A", "AA", "AAA", "Non-compliant"]).toContain(result.summary.complianceLevel);
+            expect(result.summary.conformanceLevel).toBeDefined();
+            expect(["A", "AA", "AAA", "Non-conformant"]).toContain(result.summary.conformanceLevel);
         });
     });
     describe("generateDetailedReport", () => {

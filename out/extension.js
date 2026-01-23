@@ -220,10 +220,10 @@ async function analyzeOpenCodeStructures() {
             const wcagLevel = config.get("wcagLevel") || "AA";
             const includeComments = config.get("includeComments") !== false;
             const currentProviderName = aiProviderManager.getCurrentProviderName();
-            progress.report({ increment: 60, message: `Performing WCAG compliance check with ${currentProviderName}...` });
+            progress.report({ increment: 60, message: `Performing WCAG conformance check with ${currentProviderName}...` });
             // WCAG analysis and implementation
             const analysisPrompt = `
-Analyze all structures in the following ${language} code and add necessary ARIA implementations for WCAG ${wcagLevel} compliance:
+Analyze all structures in the following ${language} code and add necessary ARIA implementations for WCAG ${wcagLevel} conformance:
 
 FILE: ${fileName}
 LANGUAGE: ${language}
@@ -348,7 +348,7 @@ async function analyzeSelectedCodeStructure() {
             progress.report({ increment: 60, message: `Applying WCAG implementation with ${currentProviderName}...` });
             // WCAG analizi ve implementasyonu için özel prompt
             const analysisPrompt = `
-Aşağıdaki ${language} kod parçasını WCAG ${wcagLevel} uyumluluğu için analiz et ve iyileştir:
+Aşağıdaki ${language} kod parçasını WCAG ${wcagLevel} uyumu için analiz et ve iyileştir:
 
 DOSYA: ${fileName}
 LANGUAGE: ${language}
@@ -519,19 +519,29 @@ Return ONLY the modified code without markdown code blocks if possible, or insid
 }
 function extractWcagCriteriaFromCode(code) {
     const criteria = [];
+    if (!code)
+        return criteria;
+    const perf = vscode.workspace.getConfiguration("wcagEnhancer").get("performance") || {};
+    const MAX_SCAN_SIZE = typeof perf?.maxScanSize === "number" ? perf.maxScanSize : 500000;
+    const MAX_MATCHES = typeof perf?.maxRegexMatches === "number" ? perf.maxRegexMatches : 100;
+    if (code.length > MAX_SCAN_SIZE)
+        return criteria;
     const wcagPatterns = [
         /\/\*\s*WCAG:\s*([^*]+)\*\//gi,
         /\/\/\s*WCAG:\s*(.+)/gi,
         /<!--\s*WCAG:\s*([^-]+)-->/gi
     ];
-    wcagPatterns.forEach(pattern => {
-        let match;
-        while ((match = pattern.exec(code)) !== null) {
+    for (const pattern of wcagPatterns) {
+        let count = 0;
+        for (const match of code.matchAll(pattern)) {
             if (match[1]) {
                 criteria.push(match[1].trim());
+                count++;
+                if (count >= MAX_MATCHES)
+                    break;
             }
         }
-    });
+    }
     return criteria;
 }
 async function showDetailedStatistics() {

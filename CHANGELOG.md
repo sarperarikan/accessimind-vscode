@@ -5,6 +5,19 @@ All notable changes to the AccessiMind extension will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2] - 2026-01-23
+
+### Added
+- **Ollama Support** - Added support for local AI models via Ollama for 100% privacy
+- **Next-Gen AI Models** - Support for GPT-5.2 Codex, Gemini 2.5, and Claude 3.5 Sonnet
+- **Terminology Update** - Replaced "compliance" with "conformance" to align with official WCAG terminology
+- **New Repository** - Updated project links to the new repository: `https://github.com/sarperarikan/accessimind-vscode`
+
+### Improved
+- Updated internal Help & Documentation with Ollama setup guides
+- Refined AI prompts for better enterprise-grade code suggestions
+- Improved UI accessibility and screen reader announcements
+
 ## [1.1.0] - 2024-12-23
 
 ### Added
@@ -48,7 +61,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Initial release of AccessiMind
-- **AI Code Analysis** - WCAG 2.2 compliance checking
+- **AI Code Analysis** - WCAG 2.2 conformance checking
 - **Multi-Provider Support** - Google Gemini and GitHub Copilot
 - **AI Chat** - Interactive accessibility assistant
 - **Statistics Dashboard** - Track improvements over time
@@ -84,6 +97,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Links
 
-- [GitHub Repository](https://github.com/sarperarikan/accessi-mind)
-- [Report Issues](https://github.com/sarperarikan/accessi-mind/issues)
+- [GitHub Repository](https://github.com/sarperarikan/accessimind-vscode)
+- [Report Issues](https://github.com/sarperarikan/accessimind-vscode/issues)
 - [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=sarperarikan.accessimind)

@@ -48,7 +48,7 @@ async function generateAccessibleCode(prompt, existingCode = "") {
 
 **Talimat:** ${prompt}${codeContext}
 
-Lütfen WCAG 2.2 standartlarına uygun, erişilebilir kod üret. Kod şu özelliklere sahip olmalı:
+Lütfen WCAG 2.2 standartlarına uyumlu, erişilebilir kod üret. Kod şu özelliklere sahip olmalı:
 - Uygun ARIA etiketleri
 - Semantik HTML yapısı
 - Klavye navigasyonu desteği
@@ -247,7 +247,7 @@ async function generateCodeFromTemplate(template, analysis, existingCode) {
     if (existingCode.trim()) {
         code = adaptExistingCode(existingCode, template.template);
     }
-    // WCAG 2.2 uyumluluğu için ek özellikler ekle
+    // WCAG 2.2 uyumu için ek özellikler ekle
     code = addWcagEnhancements(code, analysis);
     return code;
 }

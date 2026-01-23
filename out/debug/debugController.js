@@ -62,14 +62,14 @@ async function activateDebugMode(context) {
     const controller = new DebugController();
     await controller.startDebugMode();
 }
-async function showAnalysisResults(compliance, detailedAnalysis, editor, selection, context) {
+async function showAnalysisResults(conformance, detailedAnalysis, editor, selection, context) {
     // Sonuç paneli oluştur
-    const panel = vscode.window.createWebviewPanel("wcagAnalysis", "WCAG 2.2 Uyumluluk Analizi", vscode.ViewColumn.Beside, {
+    const panel = vscode.window.createWebviewPanel("wcagAnalysis", "WCAG 2.2 Uyum Analizi", vscode.ViewColumn.Beside, {
         enableScripts: true,
         retainContextWhenHidden: true
     });
     // HTML içeriği oluştur
-    const htmlContent = generateAnalysisHtml(compliance, detailedAnalysis);
+    const htmlContent = generateAnalysisHtml(conformance, detailedAnalysis);
     panel.webview.html = htmlContent;
     // Mesaj handler'ı
     panel.webview.onDidReceiveMessage(message => {
@@ -83,11 +83,11 @@ async function showAnalysisResults(compliance, detailedAnalysis, editor, selecti
         }
     }, undefined, context.subscriptions);
     // Sonuç özeti göster
-    const summary = generateSummary(compliance, detailedAnalysis);
+    const summary = generateSummary(conformance, detailedAnalysis);
     vscode.window.showInformationMessage(summary);
 }
-function generateAnalysisHtml(compliance, detailedAnalysis) {
-    const issues = compliance.issues;
+function generateAnalysisHtml(conformance, detailedAnalysis) {
+    const issues = conformance.issues;
     const hasIssues = issues.length > 0;
     return `
 <!DOCTYPE html>
@@ -206,9 +206,9 @@ function generateAnalysisHtml(compliance, detailedAnalysis) {
 </head>
 <body>
 	<div class="header">
-		<h1>WCAG 2.2 Uyumluluk Analizi</h1>
+		<h1>WCAG 2.2 Uyum Analizi</h1>
 		<div class="status ${hasIssues ? "non-compliant" : "compliant"}">
-			${hasIssues ? "Uyumluluk Sorunları Tespit Edildi" : "WCAG 2.2 Uyumlu"}
+			${hasIssues ? "Uyum Sorunları Tespit Edildi" : "WCAG 2.2 Uyumlu"}
 		</div>
 	</div>
 	
@@ -248,7 +248,7 @@ function generateAnalysisHtml(compliance, detailedAnalysis) {
 	` : `
 		<div style="text-align: center; padding: 40px;">
 			<h2>🎉 Tebrikler!</h2>
-			<p>Kodunuz WCAG 2.2 standartlarına uygun görünüyor.</p>
+			<p>Kodunuz WCAG 2.2 standartlarına uyumlu görünüyor.</p>
 		</div>
 	`}
 	
@@ -272,12 +272,12 @@ function generateAnalysisHtml(compliance, detailedAnalysis) {
 </body>
 </html>`;
 }
-function generateSummary(compliance, detailedAnalysis) {
-    const issues = compliance.issues;
+function generateSummary(conformance, detailedAnalysis) {
+    const issues = conformance.issues;
     if (issues.length === 0) {
-        return "✅ Kod WCAG 2.2 standartlarına uygun!";
+        return "✅ Kod WCAG 2.2 standartlarına uyumlu!";
     }
-    return `⚠️ ${issues.length} WCAG 2.2 uyumluluk sorunu tespit edildi. Detaylar için paneli kontrol edin.`;
+    return `⚠️ ${issues.length} WCAG 2.2 uyum sorunu tespit edildi. Detaylar için paneli kontrol edin.`;
 }
 async function fixIssue(issue, editor, selection) {
     try {

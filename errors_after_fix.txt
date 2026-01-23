@@ -1,0 +1,34 @@
+﻿node.exe : 
+[webpack-cli] 
+[31mUnexpected non 
+object in path 'auto' 
+for the '--stats-error-
+details' option[39m
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo 
+...
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: ([webpack-cli]   
+  ...ls' option[3    
+9m:String) [], Rem    
+oteException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+[webpack-cli] 
+[31mInvalid value 
+'auto' for the '--stats
+-error-details' 
+option[39m
+[webpack-cli] 
+[31mExpected: 'true | 
+false'[39m

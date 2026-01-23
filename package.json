@@ -2,7 +2,7 @@
   "name": "accessimind",
   "displayName": "AccessiMind - AI WCAG Accessibility",
   "description": "AI-powered WCAG 2.2 accessibility analyzer with Gemini & Copilot integration. Real-time code improvement, Jira export, and comprehensive statistics.",
-  "version": "1.1.0",
+  "version": "1.1.2",
   "publisher": "sarperarikan",
   "icon": "accessi-mind.jpg",
   "galleryBanner": {
@@ -13,17 +13,17 @@
     {
       "url": "https://img.shields.io/badge/WCAG-2.2-green",
       "href": "https://www.w3.org/WAI/WCAG22/quickref/",
-      "description": "WCAG 2.2 Compliant"
+      "description": "WCAG 2.2 Conformant"
     },
     {
       "url": "https://img.shields.io/badge/AI-Gemini%20%26%20Copilot-blue",
-      "href": "https://github.com/sarperarikan/accessi-mind",
+      "href": "https://github.com/sarperarikan/accessimind-vscode",
       "description": "AI Powered"
     }
   ],
-  "homepage": "https://github.com/sarperarikan/accessi-mind",
+  "homepage": "https://github.com/sarperarikan/accessimind-vscode",
   "bugs": {
-    "url": "https://github.com/sarperarikan/accessi-mind/issues"
+    "url": "https://github.com/sarperarikan/accessimind-vscode/issues"
   },
   "preview": false,
   "pricing": "Free",
@@ -33,7 +33,7 @@
   "type": "commonjs",
   "repository": {
     "type": "git",
-    "url": "https://github.com/sarperarikan/accessi-mind.git"
+    "url": "https://github.com/sarperarikan/accessimind-vscode.git"
   },
   "author": {
     "name": "Sarper Arıkan",
@@ -311,13 +311,15 @@
               "type": "string",
               "enum": [
                 "gemini",
-                "vscode-copilot"
+                "vscode-copilot",
+                "ollama"
               ],
               "default": "gemini",
               "description": "AI provider for WCAG improvements - Configure via Settings panel",
               "enumDescriptions": [
                 "Google Gemini API (requires API key)",
-                "VS Code Copilot (uses GitHub Copilot subscription)"
+                "VS Code Copilot (uses GitHub Copilot subscription)",
+                "Ollama (Local AI models)"
               ]
             },
             "apiKey": {
@@ -335,6 +337,16 @@
               "type": "boolean",
               "default": true,
               "description": "Automatically test connection when API key or provider changes - Configure via Settings panel"
+            },
+            "ollamaUrl": {
+              "type": "string",
+              "default": "http://localhost:11434",
+              "description": "Ollama API URL (default: http://localhost:11434)"
+            },
+            "ollamaModel": {
+              "type": "string",
+              "default": "llama3",
+              "description": "Selected Ollama model"
             }
           }
         },
@@ -348,25 +360,53 @@
               "default": "gemini-2.5-flash",
               "description": "Currently selected AI model - Configure via Settings panel",
               "enum": [
+                "gpt-5.2",
+                "gpt-5.2-codex",
+                "gemini-3-flash",
+                "gemini-3-pro",
                 "gemini-2.5-flash",
                 "gemini-2.5-pro",
+                "gemini-2.0-flash",
                 "gpt-4o",
                 "gpt-4o-mini",
+                "gpt-4.1",
+                "gpt-5",
+                "gpt-5-mini",
+                "gpt-5.1-codex",
                 "gpt-4",
                 "gpt-3.5-turbo",
+                "o3-mini",
+                "o4-mini",
                 "claude-3.5-sonnet",
+                "claude-3.7-sonnet",
+                "claude-4.5-sonnet",
+                "claude-4.5-opus",
                 "claude-3-opus",
                 "claude-3-sonnet",
                 "claude-3-haiku"
               ],
               "enumDescriptions": [
+                "GPT-5.2 - Latest general",
+                "GPT-5.2 Codex - Latest code-optimized",
+                "Gemini 3 Flash - Next-gen multimodal",
+                "Gemini 3 Pro - Higher quality",
                 "Gemini 2.5 Flash - Fastest response time",
                 "Gemini 2.5 Pro - Highest quality",
+                "Gemini 2.0 Flash - Fast multimodal",
                 "GPT-4o - Latest OpenAI model",
                 "GPT-4o Mini - Fast and efficient",
+                "GPT-4.1 - High quality completions",
+                "GPT-5 - Advanced reasoning",
+                "GPT-5 Mini - Efficient variant",
+                "GPT-5.1 Codex - Code-optimized",
                 "GPT-4 - High quality responses",
                 "GPT-3.5 Turbo - Fast and reliable",
+                "OpenAI o3 Mini - Low latency",
+                "OpenAI o4 Mini - Efficient",
                 "Claude 3.5 Sonnet - Advanced reasoning",
+                "Claude Sonnet 3.7 - Improved reasoning",
+                "Claude Sonnet 4.5 - Latest sonnet",
+                "Claude Opus 4.5 - Highest capability",
                 "Claude 3 Opus - Most capable",
                 "Claude 3 Sonnet - Balanced performance",
                 "Claude 3 Haiku - Fast and efficient"
@@ -445,7 +485,7 @@
             "AAA"
           ],
           "default": "AA",
-          "description": "Target WCAG compliance level - Configure via Settings panel",
+          "description": "Target WCAG conformance level - Configure via Settings panel",
           "enumDescriptions": [
             "Level A - Basic accessibility",
             "Level AA - Standard accessibility (Recommended)",
@@ -466,6 +506,46 @@
           "type": "boolean",
           "default": true,
           "description": "Track usage statistics and metrics - Configure via Settings panel"
+        },
+        "wcagEnhancer.performance": {
+          "type": "object",
+          "title": "Performance",
+          "description": "Performance-related settings",
+          "properties": {
+            "fastMode": {
+              "type": "boolean",
+              "default": true,
+              "description": "Optimize prompts by compressing/truncating code before sending to AI"
+            },
+            "promptMaxChars": {
+              "type": "number",
+              "default": 8000,
+              "minimum": 1000,
+              "maximum": 200000,
+              "description": "Maximum characters to include in AI prompts"
+            },
+            "maxScanSize": {
+              "type": "number",
+              "default": 500000,
+              "minimum": 10000,
+              "maximum": 5000000,
+              "description": "Maximum characters to scan when extracting WCAG metadata from code"
+            },
+            "maxRegexMatches": {
+              "type": "number",
+              "default": 100,
+              "minimum": 10,
+              "maximum": 10000,
+              "description": "Maximum number of regex matches to process per scan"
+            },
+            "backoffBaseMs": {
+              "type": "number",
+              "default": 1000,
+              "minimum": 100,
+              "maximum": 60000,
+              "description": "Base delay for exponential backoff between retries"
+            }
+          }
         },
         "wcagEnhancer.shortcuts.analyzeOpenCode": {
           "type": "string",
@@ -614,7 +694,7 @@
     "@typescript-eslint/parser": "^6.4.1",
     "@vscode/test-cli": "^0.0.4",
     "@vscode/test-electron": "^2.3.4",
-    "@vscode/vsce": "^2.22.0",
+    "@vscode/vsce": "^3.7.1",
     "cross-env": "^7.0.3",
     "eslint": "^8.47.0",
     "jest": "^29.7.0",

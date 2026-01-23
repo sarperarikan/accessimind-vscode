@@ -2,7 +2,7 @@
   "name": "wcag-enhancer",
   "displayName": "AccessiMind",
   "description": "AI-powered WCAG accessibility enhancement tool with wizard configuration and persistent settings",
-  "version": "1.0.0",
+  "version": "1.1.2",
   "publisher": "wcag-enhancer",
   "engines": {
     "vscode": "^1.101.0"
@@ -108,7 +108,7 @@
             "AA",
             "AAA"
           ],
-          "description": "WCAG compliance level"
+          "description": "WCAG conformance level"
         },
         "wcagEnhancer.enhancementMode": {
           "type": "string",
@@ -138,12 +138,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wcag-enhancer/vscode-extension.git"
+    "url": "git+https://github.com/sarperarikan/accessimind-vscode.git"
   },
   "license": "MIT",
   "author": "",
   "bugs": {
-    "url": "https://github.com/wcag-enhancer/vscode-extension/issues"
+    "url": "https://github.com/sarperarikan/accessimind-vscode/issues"
   },
-  "homepage": "https://github.com/wcag-enhancer/vscode-extension#readme"
+  "homepage": "https://github.com/sarperarikan/accessimind-vscode#readme"
 }

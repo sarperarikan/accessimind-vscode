@@ -632,8 +632,8 @@ class LocalizationManager {
                 tr: "🚀 Ana Özellikler"
             },
             "welcome.features.file": {
-                en: "📄 **Improve Entire File** - Analyze and improve whole files for WCAG compliance",
-                tr: "📄 **Dosyanın Tamamını İyileştir** - WCAG uyumluluğu için tüm dosyaları analiz edin ve iyileştirin"
+                en: "📄 **Improve Entire File** - Analyze and improve whole files for WCAG conformance",
+                tr: "📄 **Dosyanın Tamamını İyileştir** - WCAG uyumu için tüm dosyaları analiz edin ve iyileştirin"
             },
             "welcome.features.selection": {
                 en: "📋 **Improve Code Selection** - Target specific code blocks for focused improvements",
@@ -696,8 +696,8 @@ class LocalizationManager {
                 tr: "HTML, CSS, JavaScript, TypeScript, React (JSX/TSX), Vue, Angular, SCSS, LESS"
             },
             "welcome.wcag.title": {
-                en: "♿ WCAG Compliance Levels",
-                tr: "♿ WCAG Uyumluluk Seviyeleri"
+                en: "♿ WCAG Conformance Levels",
+                tr: "♿ WCAG Uyum Seviyeleri"
             },
             "welcome.wcag.level.a": {
                 en: "**Level A** - Basic accessibility requirements",
@@ -965,8 +965,8 @@ class LocalizationManager {
                 tr: "Erişilebilirlik gereksinimlerinize göre ayarları yapılandırın"
             },
             "wizard.wcag.level.label": {
-                en: "WCAG Compliance Level",
-                tr: "WCAG Uyumluluk Seviyesi"
+                en: "WCAG Conformance Level",
+                tr: "WCAG Uyum Seviyesi"
             },
             "wizard.wcag.level.help": {
                 en: "Level AA is sufficient for most legal requirements",

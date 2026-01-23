@@ -13,7 +13,7 @@ export interface WcagAnalysisResult {
 	keyboardIssues: number
 }
 
-export async function analyzeWcagCompliance(code: string): Promise<WcagAnalysisResult> {
+export async function analyzeWcagConformance(code: string): Promise<WcagAnalysisResult> {
 	const result: WcagAnalysisResult = {
 		totalElements: 0,
 		accessibleElements: 0,
@@ -77,12 +77,12 @@ export async function analyzeWcagCompliance(code: string): Promise<WcagAnalysisR
 	}
 
 	// Erişilebilir element sayısı
-	result.accessibleElements = result.totalElements - 
-		result.missingLabels - 
-		result.missingAriaLabels - 
-		result.missingAltText - 
-		result.missingTableHeaders - 
-		result.contrastIssues - 
+	result.accessibleElements = result.totalElements -
+		result.missingLabels -
+		result.missingAriaLabels -
+		result.missingAltText -
+		result.missingTableHeaders -
+		result.contrastIssues -
 		result.keyboardIssues;
 
 	return result;
@@ -91,11 +91,11 @@ export async function analyzeWcagCompliance(code: string): Promise<WcagAnalysisR
 export function getWcagScore(analysis: WcagAnalysisResult): number {
 	if (analysis.totalElements === 0) return 100;
 
-	const totalIssues = analysis.missingLabels + 
-		analysis.missingAriaLabels + 
-		analysis.missingAltText + 
-		analysis.missingTableHeaders + 
-		analysis.contrastIssues + 
+	const totalIssues = analysis.missingLabels +
+		analysis.missingAriaLabels +
+		analysis.missingAltText +
+		analysis.missingTableHeaders +
+		analysis.contrastIssues +
 		analysis.keyboardIssues;
 
 	const score = Math.max(0, 100 - (totalIssues / analysis.totalElements) * 100);
@@ -106,7 +106,7 @@ export function getWcagLevel(score: number): string {
 	if (score >= 95) return "AAA";
 	if (score >= 85) return "AA";
 	if (score >= 70) return "A";
-	return "Non-Compliant";
+	return "Non-Conformant";
 }
 
 export function generateWcagReport(analysis: WcagAnalysisResult): string {
@@ -114,7 +114,7 @@ export function generateWcagReport(analysis: WcagAnalysisResult): string {
 	const level = getWcagLevel(score);
 
 	return `
-# WCAG 2.2 Uyumluluk Raporu
+# WCAG 2.2 Uyum Raporu
 
 ## Genel Skor: ${score}/100 (Seviye: ${level})
 
@@ -167,7 +167,7 @@ function generateRecommendations(analysis: WcagAnalysisResult): string {
 	}
 
 	if (recommendations.length === 0) {
-		return "- Kodunuz WCAG 2.2 standartlarina uygun gorunuyor!";
+		return "- Kodunuz WCAG 2.2 standartlarina uyumlu gorunuyor!";
 	}
 
 	return recommendations.join("\n");

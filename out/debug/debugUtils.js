@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.analyzeWcagCompliance = analyzeWcagCompliance;
+exports.analyzeWcagConformance = analyzeWcagConformance;
 exports.getWcagScore = getWcagScore;
 exports.getWcagLevel = getWcagLevel;
 exports.generateWcagReport = generateWcagReport;
-async function analyzeWcagCompliance(code) {
+async function analyzeWcagConformance(code) {
     const result = {
         totalElements: 0,
         accessibleElements: 0,
@@ -84,13 +84,13 @@ function getWcagLevel(score) {
         return "AA";
     if (score >= 70)
         return "A";
-    return "Non-Compliant";
+    return "Non-Conformant";
 }
 function generateWcagReport(analysis) {
     const score = getWcagScore(analysis);
     const level = getWcagLevel(score);
     return `
-# WCAG 2.2 Uyumluluk Raporu
+# WCAG 2.2 Uyum Raporu
 
 ## Genel Skor: ${score}/100 (Seviye: ${level})
 
@@ -135,7 +135,7 @@ function generateRecommendations(analysis) {
         recommendations.push("- Klavye navigasyonu icin tabindex ekleyin");
     }
     if (recommendations.length === 0) {
-        return "- Kodunuz WCAG 2.2 standartlarina uygun gorunuyor!";
+        return "- Kodunuz WCAG 2.2 standartlarina uyumlu gorunuyor!";
     }
     return recommendations.join("\n");
 }

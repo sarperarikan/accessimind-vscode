@@ -76,7 +76,8 @@ class WizardManager {
         setTimeout(() => {
             panel.webview.postMessage({
                 command: "loadCurrentSettings",
-                settings: currentSettings
+                settings: currentSettings,
+                models: availableModels
             });
         }, 1000);
         panel.webview.onDidReceiveMessage(async (message) => {
@@ -169,6 +170,16 @@ class WizardManager {
                     }
                     break;
                 }
+                case "setupOllamaUrl": {
+                    await this.setupOllamaUrl(message.url);
+                    const refreshedModels = await this.getAvailableModelsForWizard();
+                    panel.webview.postMessage({
+                        command: "ollamaUrlSetup",
+                        success: true,
+                        models: refreshedModels
+                    });
+                    break;
+                }
             }
         });
     }
@@ -181,6 +192,7 @@ class WizardManager {
         const models = {
             gemini: [],
             copilot: [],
+            ollama: [],
             all: []
         };
         // Gemini models - dinamik olarak API'den yükle
@@ -224,7 +236,16 @@ class WizardManager {
             logger_1.logger.error("Sihirbaz için Copilot modelleri yüklenemedi:", error);
             models.copilot = await this.getDefaultCopilotModels(true);
         }
-        models.all = [...models.gemini, ...models.copilot];
+        // Ollama models - dinamik olarak API'den yükle
+        try {
+            const ollamaModels = await this.getAvailableOllamaModels();
+            models.ollama = ollamaModels;
+        }
+        catch (error) {
+            logger_1.logger.warn("Ollama modelleri yüklenemedi, varsayılan modeller kullanılıyor:", error);
+            models.ollama = await this.getDefaultOllamaModels();
+        }
+        models.all = [...models.gemini, ...models.copilot, ...models.ollama];
         logger_1.logger.info("Sihirbaz modelleri yüklendi:", {
             gemini: models.gemini.length,
             copilot: models.copilot.length,
@@ -272,33 +293,34 @@ class WizardManager {
         const localization = LocalizationManager.getInstance();
         const isEnglish = localization.getCurrentLanguage() === "en";
         return [
-            {
-                id: "gemini-2.5-flash",
-                name: "Gemini 2.5 Flash",
-                description: isEnglish ? "Latest & fastest - Best for quick improvements" : "En yeni ve en hızlı - Hızlı iyileştirmeler için en iyi",
-                speed: "fast",
-                quality: "very-high",
-                recommended: true
-            },
-            {
-                id: "gemini-2.5-pro",
-                name: "Gemini 2.5 Pro",
-                description: isEnglish ? "Most capable - Best for complex analysis" : "En yetenekli - Karmaşık analizler için en iyi",
-                speed: "medium",
-                quality: "very-high"
-            },
             // Gemini 3 Series (Latest)
             {
                 id: "gemini-3-flash",
                 name: "Gemini 3 Flash",
                 description: isEnglish ? "Next-gen speed - Ultra fast responses" : "Yeni nesil hız - Ultra hızlı yanıtlar",
                 speed: "fast",
-                quality: "very-high"
+                quality: "very-high",
+                recommended: true
             },
             {
                 id: "gemini-3-pro",
                 name: "Gemini 3 Pro",
                 description: isEnglish ? "Next-gen intelligence - Breakthrough capabilities" : "Yeni nesil zeka - Çığır açan yetenekler",
+                speed: "medium",
+                quality: "very-high"
+            },
+            // Gemini 2.5 Series
+            {
+                id: "gemini-2.5-flash",
+                name: "Gemini 2.5 Flash",
+                description: isEnglish ? "Latest & fastest - Best for quick improvements" : "En yeni ve en hızlı - Hızlı iyileştirmeler için en iyi",
+                speed: "fast",
+                quality: "very-high"
+            },
+            {
+                id: "gemini-2.5-pro",
+                name: "Gemini 2.5 Pro",
+                description: isEnglish ? "Most capable - Best for complex analysis" : "En yetenekli - Karmaşık analizler için en iyi",
                 speed: "medium",
                 quality: "very-high"
             },
@@ -347,10 +369,17 @@ class WizardManager {
             // VS Code Language Models API ile Copilot modellerini kontrol et
             try {
                 const models = await vscode.lm.selectChatModels();
-                const copilotModels = models.filter(model => model.vendor === "copilot" ||
-                    model.id.includes("copilot") ||
-                    model.family.includes("gpt") ||
-                    model.family.includes("claude"));
+                const copilotModels = models.filter(model => {
+                    const vendor = (model.vendor || "").toLowerCase();
+                    const family = (model.family || "").toLowerCase();
+                    const id = (model.id || "").toLowerCase();
+                    return vendor.includes("copilot") ||
+                        id.includes("copilot") ||
+                        family.includes("gpt") ||
+                        family.includes("claude") ||
+                        family.includes("o1") ||
+                        family.includes("o3");
+                });
                 if (copilotModels.length > 0) {
                     return { available: true };
                 }
@@ -394,10 +423,11 @@ class WizardManager {
     isRecommendedModel(modelId) {
         const recommendedModels = [
             // Latest models
-            "gpt-5", "gpt-5-mini",
+            "gpt-5.2", "gpt-5.2-codex",
+            "gpt-5.1", "gpt-5", "gpt-5-mini",
+            "gemini-3-flash", "gemini-3-pro",
             "claude-4.5", "claude-4.5-sonnet", "claude-4.5-haiku",
             "o3", "o3-mini", "o4-mini",
-            "gemini-3-flash", "gemini-3-pro",
             // Current top models
             "gemini-2.5-flash", "gemini-2.5-pro",
             "claude-sonnet-4", "claude-4",
@@ -411,14 +441,31 @@ class WizardManager {
         const localization = (await Promise.resolve().then(() => __importStar(require("./utils/localizationManager")))).LocalizationManager.getInstance();
         const isEnglish = localization.getCurrentLanguage() === "en";
         return [
-            // GPT-5 Series (Latest)
+            // GPT-5.2 Series (Production Ready)
+            {
+                id: "gpt-5.2-codex",
+                name: "GPT-5.2 Codex",
+                description: isEnglish ? "Latest coding expert - Production ready" : "En yeni kodlama uzmanı - Yayına hazır",
+                speed: "fast",
+                quality: "very-high",
+                recommended: true,
+                available
+            },
+            {
+                id: "gpt-5.2",
+                name: "GPT-5.2",
+                description: isEnglish ? "Latest flagship - Breakthrough intelligence" : "En yeni amiral gemisi - Çığır açan zeka",
+                speed: "medium",
+                quality: "very-high",
+                available
+            },
+            // GPT-5 Series
             {
                 id: "gpt-5",
                 name: "GPT-5",
-                description: isEnglish ? "Most advanced GPT - Breakthrough capabilities" : "En gelişmiş GPT - Çığır açan yetenekler",
+                description: isEnglish ? "Advanced GPT - Next-gen capabilities" : "Gelişmiş GPT - Yeni nesil yetenekler",
                 speed: "medium",
                 quality: "very-high",
-                recommended: true,
                 available
             },
             {
@@ -548,7 +595,13 @@ class WizardManager {
         const localization = LocalizationManager.getInstance();
         const currentLang = localization.getCurrentLanguage();
         const isEnglish = currentLang === "en";
-        const providerName = provider === "gemini" ? "Google Gemini" : "GitHub Copilot";
+        let providerName = "Google Gemini";
+        if (provider === "vscode-copilot") {
+            providerName = "GitHub Copilot";
+        }
+        else if (provider === "ollama") {
+            providerName = "Ollama (Local)";
+        }
         const message = isEnglish
             ? `✅ AI Provider set: ${providerName}`
             : `✅ AI Sağlayıcı ayarlandı: ${providerName}`;
@@ -556,7 +609,7 @@ class WizardManager {
     }
     async setupModel(modelId) {
         const config = vscode.workspace.getConfiguration("wcagEnhancer");
-        // Model ayarını hem ai config'e hem de aiModels config'e kaydet (geriye uyumluluk için)
+        // Model ayarını hem ai config'e hem de aiModels config'e kaydet (geriye dönük uyum için)
         const aiConfig = config.get("ai") || {};
         aiConfig.selectedModel = modelId;
         await config.update("ai", aiConfig, vscode.ConfigurationTarget.Global);
@@ -1027,7 +1080,34 @@ class WizardManager {
 
 		.model-card.selected {
 			border-color: var(--primary-color);
-			background: var(--secondary-color);
+			background: var(--vscode-button-secondaryBackground, var(--secondary-color));
+		}
+
+		.selection-indicator {
+			position: absolute;
+			top: 10px;
+			right: 10px;
+			width: 24px;
+			height: 24px;
+			background: var(--success-color);
+			color: white;
+			border-radius: 50%;
+			display: none;
+			align-items: center;
+			justify-content: center;
+			font-size: 14px;
+			font-weight: bold;
+			box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+			z-index: 2;
+		}
+
+		.selected .selection-indicator {
+			display: flex;
+		}
+
+		.provider-card.selected .selection-indicator {
+			top: 10px;
+			right: 10px;
 		}
 
 		.model-card.recommended::before {
@@ -1411,18 +1491,27 @@ class WizardManager {
             : "Seçilen sağlayıcı ve model ile üretilen tüm çıktılar WCAG ve ARIA erişilebilirlik standartlarına tam uyumlu olacaktır. Böylece kodunuz tüm engelli kullanıcılar için erişilebilir olur."}
 			</div>
 
-			<fieldset class="provider-selection" aria-label="Select AI Provider">
+			<fieldset class="provider-selection" id="providerSelectionGroup" role="radiogroup" aria-label="Select AI Provider">
 				<legend class="screen-reader-only">Choose your AI provider for WCAG improvements</legend>
-				<div class="provider-card" data-provider="gemini" role="radio" tabindex="0" aria-label="${localization.getString("wizard.provider.gemini.select")}" aria-describedby="gemini-desc">
+				<div class="provider-card" data-provider="gemini" role="radio" tabindex="0" aria-checked="false" aria-label="${localization.getString("wizard.provider.gemini.select")}" aria-describedby="gemini-desc">
+					<div class="selection-indicator" aria-hidden="true">✓</div>
 					<div class="provider-icon" aria-hidden="true">🚀</div>
 					<div class="provider-name">${localization.getString("provider.gemini.name")}</div>
 					<div id="gemini-desc" class="provider-description">${localization.getString("provider.gemini.description")}</div>
 				</div>
 				
-				<div class="provider-card" data-provider="vscode-copilot" role="radio" tabindex="0" aria-label="${localization.getString("wizard.provider.copilot.select")}" aria-describedby="copilot-desc">
+				<div class="provider-card" data-provider="vscode-copilot" role="radio" tabindex="0" aria-checked="false" aria-label="${localization.getString("wizard.provider.copilot.select")}" aria-describedby="copilot-desc">
+					<div class="selection-indicator" aria-hidden="true">✓</div>
 					<div class="provider-icon" aria-hidden="true">🤖</div>
 					<div class="provider-name">${localization.getString("provider.vscode-copilot.name")}</div>
 					<div id="copilot-desc" class="provider-description">${localization.getString("provider.vscode-copilot.description")}</div>
+				</div>
+
+				<div class="provider-card" data-provider="ollama" role="radio" tabindex="0" aria-checked="false" aria-label="${isEnglish ? "Select Ollama (Local)" : "Ollama (Yerel) Seç"}" aria-describedby="ollama-desc">
+					<div class="selection-indicator" aria-hidden="true">✓</div>
+					<div class="provider-icon" aria-hidden="true">🦙</div>
+					<div class="provider-name">Ollama (Local)</div>
+					<div id="ollama-desc" class="provider-description">${isEnglish ? "Run open-source models locally on your machine" : "Açık kaynaklı modelleri makinenizde yerel olarak çalıştırın"}</div>
 				</div>
 			</fieldset>
 
@@ -1465,6 +1554,35 @@ class WizardManager {
 				</div>
 			</div>
 
+			<!-- Ollama URL Input (shown when Ollama is selected) -->
+			<div id="ollamaUrlSection" class="ollama-url-section" style="display: none; margin-top: 20px;">
+				<div class="alert alert-info" role="status" style="margin-bottom: 15px;">
+					<strong>🌐 ${isEnglish ? "Ollama Connection" : "Ollama Bağlantısı"}:</strong>
+					${isEnglish
+            ? "Make sure Ollama is running on your machine. Default URL is http://localhost:11434"
+            : "Ollama'nın makinenizde çalıştığından emin olun. Varsayılan URL: http://localhost:11434"}
+				</div>
+				<div class="form-group">
+					<label class="form-label" for="step1OllamaUrl">
+						${isEnglish ? "Ollama API URL" : "Ollama API URL'i"}
+					</label>
+					<input type="text" 
+						id="step1OllamaUrl" 
+						class="form-input" 
+						placeholder="http://localhost:11434"
+						value="http://localhost:11434"
+						aria-describedby="step1OllamaUrlHelp"
+						style="width: 100%; padding: 12px; font-size: 14px;">
+					<div id="step1OllamaUrlHelp" class="form-text">
+						${isEnglish ? "The URL where your Ollama API is listening." : "Ollama API'nizin dinlediği URL."}
+					</div>
+				</div>
+				<button type="button" class="btn btn-secondary" onclick="saveOllamaUrlFromStep1()" style="margin-top: 10px;">
+					🔄 ${isEnglish ? "Fetch Models" : "Modelleri Getir"}
+				</button>
+				<div id="step1OllamaStatus" class="ollama-status" style="margin-top: 10px; display: none;"></div>
+			</div>
+
 			<div class="button-group" role="navigation" aria-label="Step navigation">
 				<button class="btn btn-primary" onclick="submitStep(1)" disabled id="submitStep1" aria-describedby="submit-help">
 					${isEnglish ? "Submit & Continue" : "Gönder ve Devam Et"} <span aria-hidden="true">→</span>
@@ -1498,7 +1616,8 @@ class WizardManager {
 				<legend class="screen-reader-only">Choose your preferred AI model</legend>
 				<div id="geminiModels" class="model-grid" style="display: none;" role="radiogroup" aria-label="Gemini Models">
 					${availableModels.gemini.map((model) => `
-						<div class="model-card ${model.recommended ? "recommended" : ""}" data-model="${model.id}" data-provider="gemini" role="radio" tabindex="0" aria-label="${localization.getString("wizard.model.select.aria").replace("%MODEL%", model.name)}" aria-describedby="model-${model.id}-desc">
+						<div class="model-card ${model.recommended ? "recommended" : ""}" data-model="${model.id}" data-provider="gemini" role="radio" tabindex="0" aria-checked="false" aria-label="${localization.getString("wizard.model.select.aria").replace("%MODEL%", model.name)}" aria-describedby="model-${model.id}-desc">
+							<div class="selection-indicator" aria-hidden="true">✓</div>
 							<div class="model-name">${model.name}</div>
 							<div id="model-${model.id}-desc" class="model-description">${model.description}</div>
 							<div class="model-badges" aria-label="Model characteristics">
@@ -1509,15 +1628,33 @@ class WizardManager {
 					`).join("")}
 				</div>
 				
-				<div id="copilotModels" class="model-grid" style="display: none;" role="radiogroup" aria-label="Copilot Models">
+				<!-- Copilot Models -->
+				<div id="copilotModels" class="model-grid" role="radiogroup" aria-label="Select GitHub Copilot Model" style="display: none;">
 					${availableModels.copilot.map((model) => `
-						<div class="model-card ${model.recommended ? "recommended" : ""} ${!model.available ? "unavailable" : ""}" data-model="${model.id}" data-provider="vscode-copilot" role="radio" tabindex="0" aria-label="${localization.getString("wizard.model.select.aria").replace("%MODEL%", model.name)}" aria-describedby="model-${model.id}-desc" ${!model.available ? "aria-disabled=\"true\"" : ""}>
-							<div class="model-name">${model.name} ${!model.available ? "(" + localization.getString("wizard.model.unavailable") + ")" : ""}</div>
-							<div id="model-${model.id}-desc" class="model-description">${model.description}</div>
-							<div class="model-badges" aria-label="Model characteristics">
-								<span class="badge speed-${model.speed}" aria-label="Speed: ${localization.getString("wizard.model.speed." + model.speed) || model.speed}">${localization.getString("wizard.model.speed." + model.speed) || model.speed}</span>
-								<span class="badge quality-${model.quality}" aria-label="Quality: ${localization.getString("wizard.model.quality." + model.quality) || model.quality}">${localization.getString("wizard.model.quality." + model.quality) || model.quality}</span>
-								${!model.available ? "<span class=\"badge unavailable\" aria-label=\"Model unavailable\">" + localization.getString("wizard.model.unavailable") + "</span>" : ""}
+						<div class="model-card ${model.recommended ? "recommended" : ""} ${!model.available ? "unavailable" : ""}" data-model="${model.id}" data-provider="vscode-copilot" role="radio" tabindex="0" aria-label="${model.name}. ${model.description}. ${isEnglish ? "Speed" : "Hız"}: ${model.speed}, ${isEnglish ? "Quality" : "Kalite"}: ${model.quality}${model.recommended ? ". " + (isEnglish ? "Recommended" : "Önerilen") : ""}${!model.available ? ". " + (isEnglish ? "Unavailable" : "Kullanılamıyor") : ""}" aria-checked="false" ${!model.available ? 'aria-disabled="true"' : ""}>
+							<div class="selection-indicator" aria-hidden="true">✓</div>
+							<div class="model-name">${model.name} ${!model.available ? "(" + (isEnglish ? "Unavailable" : "Kullanılamıyor") + ")" : ""}</div>
+							<div class="model-description">${model.description}</div>
+							<div class="model-badges" aria-hidden="true">
+								<span class="badge speed-${model.speed}">${model.speed}</span>
+								<span class="badge quality-${model.quality}">${model.quality}</span>
+								${!model.available ? '<span class="badge unavailable">' + (isEnglish ? "Unavailable" : "Kullanılamıyor") + "</span>" : ""}
+							</div>
+						</div>
+					`).join("")}
+				</div>
+
+				<!-- Ollama Models -->
+				<div id="ollamaModels" class="model-grid" role="radiogroup" aria-label="Select Ollama Model" style="display: none;">
+					${availableModels.ollama.map((model) => `
+						<div class="model-card ${model.recommended ? "recommended" : ""} ${!model.available ? "unavailable" : ""}" data-model="${model.id}" data-provider="ollama" role="radio" tabindex="0" aria-label="${model.name}. ${model.description}. ${isEnglish ? "Speed" : "Hız"}: ${model.speed}, ${isEnglish ? "Quality" : "Kalite"}: ${model.quality}${model.recommended ? ". " + (isEnglish ? "Recommended" : "Önerilen") : ""}${!model.available ? ". " + (isEnglish ? "Unavailable" : "Kullanılamıyor") : ""}" aria-checked="false" ${!model.available ? 'aria-disabled="true"' : ""}>
+							<div class="selection-indicator" aria-hidden="true">✓</div>
+							<div class="model-name">${model.name} ${!model.available ? "(" + (isEnglish ? "Unavailable" : "Kullanılamıyor") + ")" : ""}</div>
+							<div class="model-description">${model.description}</div>
+							<div class="model-badges" aria-hidden="true">
+								<span class="badge speed-${model.speed}">${model.speed}</span>
+								<span class="badge quality-${model.quality}">${model.quality}</span>
+								${!model.available ? '<span class="badge unavailable">' + (isEnglish ? "Unavailable" : "Kullanılamıyor") + "</span>" : ""}
 							</div>
 						</div>
 					`).join("")}
@@ -1613,14 +1750,25 @@ class WizardManager {
 				</button>
 			</div>
 			
+			<!-- Copilot Config Info -->
 			<div id="copilotApiConfig" style="display: none;">
-				<div class="alert alert-success">
-					<strong>✅ ${localization.getString("wizard.api.success.title") || "Perfect"}!</strong> ${localization.getString("wizard.api.success.copilot") || "You are ready if you have a GitHub Copilot subscription."}
+				<div class="alert alert-success" role="status">
+					<strong>✅ GitHub Copilot</strong>
+					<p>${isEnglish ? "Configured via VS Code Language Models API." : "VS Code Language Models API üzerinden yapılandırıldı."}</p>
 				</div>
-				
-				<p>${localization.getString("wizard.api.copilot.info") || "GitHub Copilot is automatically configured in VS Code. No additional setup required."}</p>
-				
 				<button class="btn btn-primary" onclick="testCopilotConnection()" id="testCopilotButton">
+					🧪 ${localization.getString("wizard.button.test")}
+				</button>
+			</div>
+
+			<!-- Ollama Config Info -->
+			<div id="ollamaApiConfig" style="display: none;">
+				<div class="alert alert-success" role="status">
+					<strong>✅ Ollama (Local)</strong>
+					<p>${isEnglish ? "Ollama is running locally." : "Ollama yerel olarak çalışıyor."}</p>
+					<p id="ollamaUrlDisplay" style="font-family: monospace; font-size: 0.9rem; margin-top: 5px;"></p>
+				</div>
+				<button class="btn btn-primary" onclick="testConnection()" id="testOllamaButton">
 					🧪 ${localization.getString("wizard.button.test")}
 				</button>
 			</div>
@@ -1651,8 +1799,9 @@ class WizardManager {
 				
 				<div class="form-group">
 					<div class="checkbox-group">
-						<input type="checkbox" id="useCustomPrompt" class="form-checkbox">
-						<label for="useCustomPrompt" class="checkbox-label">Always ask for custom prompt when creating Jira tasks</label>
+						<input type="checkbox" id="useCustomPrompt" class="form-checkbox" aria-describedby="useCustomPrompt-desc">
+						<label for="useCustomPrompt" class="checkbox-label" id="useCustomPrompt-label">Always ask for custom prompt when creating Jira tasks</label>
+						<div id="useCustomPrompt-desc" class="screen-reader-only">Enabling this will prompt for details every time a Jira task is being created.</div>
 					</div>
 				</div>
 				
@@ -1685,15 +1834,17 @@ class WizardManager {
 				
 				<div class="form-group">
 					<div class="checkbox-group">
-						<input type="checkbox" id="includeCodeExamples" class="form-checkbox" checked>
-						<label for="includeCodeExamples" class="checkbox-label">Include code examples in Jira task descriptions</label>
+						<input type="checkbox" id="includeCodeExamples" class="form-checkbox" checked aria-describedby="includeCodeExamples-desc">
+						<label for="includeCodeExamples" class="checkbox-label" id="includeCodeExamples-label">Include code examples in Jira task descriptions</label>
+						<div id="includeCodeExamples-desc" class="screen-reader-only">The generated Jira task will include snippets of the code that needs accessibility improvements.</div>
 					</div>
 				</div>
 				
 				<div class="form-group">
 					<div class="checkbox-group">
-						<input type="checkbox" id="includeTestingSteps" class="form-checkbox" checked>
-						<label for="includeTestingSteps" class="checkbox-label">Include testing steps in Jira task descriptions</label>
+						<input type="checkbox" id="includeTestingSteps" class="form-checkbox" checked aria-describedby="includeTestingSteps-desc">
+						<label for="includeTestingSteps" class="checkbox-label" id="includeTestingSteps-label">Include testing steps in Jira task descriptions</label>
+						<div id="includeTestingSteps-desc" class="screen-reader-only">The generated Jira task will include specific steps for QA to verify the accessibility fixes.</div>
 					</div>
 				</div>
 			</form>
@@ -1834,20 +1985,30 @@ class WizardManager {
 				card.setAttribute('aria-checked', 'false');
 			});
 			const selectedCard = document.querySelector(\`[data-provider="\${provider}"]\`);
-			selectedCard.classList.add('selected');
-			selectedCard.setAttribute('aria-checked', 'true');
+			if (selectedCard) {
+				selectedCard.classList.add('selected');
+				selectedCard.setAttribute('aria-checked', 'true');
+			}
 			
 			// API Key ve Copilot bilgi bölümlerini göster/gizle
 			const geminiApiSection = document.getElementById('geminiApiKeySection');
 			const copilotInfoSection = document.getElementById('copilotInfoSection');
+			const ollamaUrlSection = document.getElementById('ollamaUrlSection');
 			
 			if (provider === 'gemini') {
 				geminiApiSection.style.display = 'block';
 				copilotInfoSection.style.display = 'none';
+				ollamaUrlSection.style.display = 'none';
 				announceToScreenReader('${isEnglish ? "Gemini selected. Please enter your API key." : "Gemini seçildi. Lütfen API anahtarınızı girin."}');
+			} else if (provider === 'ollama') {
+				geminiApiSection.style.display = 'none';
+				copilotInfoSection.style.display = 'none';
+				ollamaUrlSection.style.display = 'block';
+				announceToScreenReader('${isEnglish ? "Ollama selected. Please configure your local URL." : "Ollama seçildi. Lütfen yerel URL'nizi yapılandırın."}');
 			} else {
 				geminiApiSection.style.display = 'none';
 				copilotInfoSection.style.display = 'block';
+				ollamaUrlSection.style.display = 'none';
 				announceToScreenReader('${isEnglish ? "GitHub Copilot selected. No API key required." : "GitHub Copilot seçildi. API anahtarı gerekmez."}');
 			}
 			
@@ -1885,6 +2046,30 @@ class WizardManager {
 			statusDiv.textContent = '${isEnglish ? "API key saved successfully!" : "API anahtarı başarıyla kaydedildi!"}';
 			announceToScreenReader('${isEnglish ? "API key saved successfully!" : "API anahtarı başarıyla kaydedildi!"}');
 		}
+
+		function saveOllamaUrlFromStep1() {
+			const urlInput = document.getElementById('step1OllamaUrl');
+			const statusDiv = document.getElementById('step1OllamaStatus');
+			const url = urlInput.value.trim();
+			
+			if (!url) {
+				statusDiv.style.display = 'block';
+				statusDiv.className = 'ollama-status alert alert-warning';
+				statusDiv.textContent = '${isEnglish ? "Please enter an Ollama URL." : "Lütfen bir Ollama URL'i girin."}';
+				announceToScreenReader('${isEnglish ? "Please enter an Ollama URL." : "Lütfen bir Ollama URL'i girin."}');
+				return;
+			}
+			
+			statusDiv.style.display = 'block';
+			statusDiv.className = 'ollama-status alert alert-info';
+			statusDiv.innerHTML = '<span class="loading"></span> ${isEnglish ? "Connecting to Ollama..." : "Ollama'ya bağlanılıyor..."}';
+			
+			// Ollama URL'ini kaydet ve modelleri yenile
+			vscode.postMessage({
+				command: 'setupOllamaUrl',
+				url: url
+			});
+		}
 		
 		function testConnectionFromStep2() {
 			const testButton = document.getElementById('testConnectionStep2Button');
@@ -1921,8 +2106,16 @@ class WizardManager {
 			// UI güncellemesi
 			document.querySelectorAll('.model-card').forEach(card => {
 				card.classList.remove('selected');
+				card.setAttribute('aria-checked', 'false');
 			});
-			modelCard.classList.add('selected');
+			if (modelCard) {
+				modelCard.classList.add('selected');
+				modelCard.setAttribute('aria-checked', 'true');
+			}
+			
+			// Model adını bul ve anons et
+			const modelName = modelCard.querySelector('.model-name')?.textContent || model;
+			announceToScreenReader(\`${isEnglish ? "Model selected" : "Model seçildi"}: \${modelName}\`);
 			
 			// Submit butonunu etkinleştir
 			document.getElementById('submitStep2').disabled = false;
@@ -2087,11 +2280,13 @@ class WizardManager {
 		function showModelsForProvider(provider) {
 			document.getElementById('geminiModels').style.display = provider === 'gemini' ? 'grid' : 'none';
 			document.getElementById('copilotModels').style.display = provider === 'vscode-copilot' ? 'grid' : 'none';
+			document.getElementById('ollamaModels').style.display = provider === 'ollama' ? 'grid' : 'none';
 		}
 		
 		function showApiConfigForProvider(provider) {
 			document.getElementById('geminiApiConfig').style.display = provider === 'gemini' ? 'block' : 'none';
 			document.getElementById('copilotApiConfig').style.display = provider === 'vscode-copilot' ? 'block' : 'none';
+			document.getElementById('ollamaApiConfig').style.display = provider === 'ollama' ? 'block' : 'none';
 		}
 		
 		
@@ -2208,6 +2403,9 @@ class WizardManager {
 			switch (message.command) {
 				case 'loadCurrentSettings':
 					// Mevcut ayarları wizard'a yükle
+					if (message.models) {
+						updateModelGrids(message.models);
+					}
 					loadExistingSettings(message.settings);
 					break;
 				case 'providerSetup':
@@ -2254,21 +2452,25 @@ class WizardManager {
 					const step2TestResult = document.getElementById('step2TestResult');
 					const apiTestResult = document.getElementById('apiTestResult');
 					const mainTestResult = document.getElementById('testResult');
+					const statusText = message.success ? '${isEnglish ? "Success" : "Başarılı"}' : '${isEnglish ? "Failed" : "Başarısız"}';
+					const fullAnnouncement = \`\${statusText}: \${message.message}\`;
 					
 					// Aktif step'e göre doğru result alanını göster
 					if (currentStep === 2 && step2TestResult) {
 						step2TestResult.style.display = 'block';
 						step2TestResult.className = \`test-result alert \${message.success ? 'alert-success' : 'alert-danger'}\`;
 						step2TestResult.textContent = message.message;
-						announceToScreenReader(message.message);
+						announceToScreenReader(fullAnnouncement, 'assertive');
 					} else if (apiTestResult) {
 						apiTestResult.style.display = 'block';
 						apiTestResult.className = \`test-result alert \${message.success ? 'alert-success' : 'alert-danger'}\`;
 						apiTestResult.textContent = message.message;
+						announceToScreenReader(fullAnnouncement, 'assertive');
 					} else if (mainTestResult) {
 						mainTestResult.style.display = 'block';
 						mainTestResult.className = \`test-result alert \${message.success ? 'alert-success' : 'alert-danger'}\`;
 						mainTestResult.textContent = message.message;
+						announceToScreenReader(fullAnnouncement, 'assertive');
 					}
 					break;
 					
@@ -2313,21 +2515,41 @@ class WizardManager {
 						showAlert('Failed to save Jira configuration. Please try again.', 'danger');
 					}
 					break;
+					
+				case 'ollamaUrlSetup':
+					const ollamaStatus = document.getElementById('step1OllamaStatus');
+					if (ollamaStatus) {
+						if (message.success) {
+							ollamaStatus.className = 'ollama-status alert alert-success';
+							ollamaStatus.textContent = '${isEnglish ? "Ollama URL saved and models fetched!" : "Ollama URL'i kaydedildi ve modeller getirildi!"}';
+							if (message.models) {
+								updateModelGrids(message.models);
+							}
+						} else {
+							ollamaStatus.className = 'ollama-status alert alert-danger';
+							ollamaStatus.textContent = '${isEnglish ? "Failed to connect to Ollama. Please check the URL." : "Ollama'ya bağlanılamadı. Lütfen URL'i kontrol edin."}';
+						}
+					}
+					break;
 			}
 		});
 		
 		function updateModelGrids(models) {
+			console.log('UpdateModelGrids called with models:', models);
+			
 			// Gemini modelleri güncelle
 			const geminiGrid = document.getElementById('geminiModels');
 			if (geminiGrid && models.gemini) {
+				console.log('Updating Gemini grid, count:', models.gemini.length);
 				geminiGrid.innerHTML = models.gemini.map((model, index) => \`
 					<div class="model-card \${model.recommended ? 'recommended' : ''}" 
 						data-model="\${model.id}" 
 						data-provider="gemini" 
 						role="radio" 
-						tabindex="0"
-						aria-label="\${model.name}. \${model.description}. ${isEnglish ? "Speed" : "Hız"}: \${model.speed}, ${isEnglish ? "Quality" : "Kalite"}: \${model.quality}\${model.recommended ? '. ${isEnglish ? "Recommended" : "Önerilen"}' : ''}"
+						tabindex="0" 
+						aria-label="\${model.name}. \${model.description}. \${isEnglish ? "Speed" : "Hız"}: \${model.speed}, \${isEnglish ? "Quality" : "Kalite"}: \${model.quality}\${model.recommended ? '. ' + (isEnglish ? "Recommended" : "Önerilen") : ''}" 
 						aria-checked="false">
+						<div class="selection-indicator" aria-hidden="true">✓</div>
 						<div class="model-name">\${model.name}</div>
 						<div class="model-description">\${model.description}</div>
 						<div class="model-badges" aria-hidden="true">
@@ -2341,21 +2563,48 @@ class WizardManager {
 			// Copilot modelleri güncelle
 			const copilotGrid = document.getElementById('copilotModels');
 			if (copilotGrid && models.copilot) {
+				console.log('Updating Copilot grid, count:', models.copilot.length);
 				copilotGrid.innerHTML = models.copilot.map((model, index) => \`
 					<div class="model-card \${model.recommended ? 'recommended' : ''} \${!model.available ? 'unavailable' : ''}" 
 						data-model="\${model.id}" 
 						data-provider="vscode-copilot" 
 						role="radio" 
-						tabindex="0"
-						aria-label="\${model.name}. \${model.description}. ${isEnglish ? "Speed" : "Hız"}: \${model.speed}, ${isEnglish ? "Quality" : "Kalite"}: \${model.quality}\${model.recommended ? '. ${isEnglish ? "Recommended" : "Önerilen"}' : ''}\${!model.available ? '. ${isEnglish ? "Unavailable" : "Kullanılamıyor"}' : ''}"
+						tabindex="0" 
+						aria-label="\${model.name}. \${model.description}. \${isEnglish ? "Speed" : "Hız"}: \${model.speed}, \${isEnglish ? "Quality" : "Kalite"}: \${model.quality}\${model.recommended ? '. ' + (isEnglish ? "Recommended" : "Önerilen") : ''}\${!model.available ? '. ' + (isEnglish ? "Unavailable" : "Kullanılamıyor") : ''}" 
 						aria-checked="false"
 						\${!model.available ? 'aria-disabled="true"' : ''}>
-						<div class="model-name">\${model.name} \${!model.available ? '(${isEnglish ? "Unavailable" : "Kullanılamıyor"})' : ''}</div>
+						<div class="selection-indicator" aria-hidden="true">✓</div>
+						<div class="model-name">\${model.name} \${!model.available ? '(' + (isEnglish ? "Unavailable" : "Kullanılamıyor") + ')' : ''}</div>
 						<div class="model-description">\${model.description}</div>
 						<div class="model-badges" aria-hidden="true">
 							<span class="badge speed-\${model.speed}">\${model.speed}</span>
 							<span class="badge quality-\${model.quality}">\${model.quality}</span>
-							\${!model.available ? '<span class="badge unavailable">${isEnglish ? "Unavailable" : "Kullanılamıyor"}</span>' : ''}
+							\${!model.available ? '<span class="badge unavailable">' + (isEnglish ? "Unavailable" : "Kullanılamıyor") + '</span>' : ''}
+						</div>
+					</div>
+				\`).join('');
+			}
+
+			// Ollama modelleri güncelle
+			const ollamaGrid = document.getElementById('ollamaModels');
+			if (ollamaGrid && models.ollama) {
+				console.log('Updating Ollama grid, count:', models.ollama.length);
+				ollamaGrid.innerHTML = models.ollama.map((model, index) => \`
+					<div class="model-card \${model.recommended ? 'recommended' : ''} \${!model.available ? 'unavailable' : ''}" 
+						data-model="\${model.id}" 
+						data-provider="ollama" 
+						role="radio" 
+						tabindex="0" 
+						aria-label="\${model.name}. \${model.description}. \${isEnglish ? "Speed" : "Hız"}: \${model.speed}, \${isEnglish ? "Quality" : "Kalite"}: \${model.quality}\${model.recommended ? '. ' + (isEnglish ? "Recommended" : "Önerilen") : ''}\${!model.available ? '. ' + (isEnglish ? "Unavailable" : "Kullanılamıyor") : ''}" 
+						aria-checked="false"
+						\${!model.available ? 'aria-disabled="true"' : ''}>
+						<div class="selection-indicator" aria-hidden="true">✓</div>
+						<div class="model-name">\${model.name} \${!model.available ? '(' + (isEnglish ? "Unavailable" : "Kullanılamıyor") + ')' : ''}</div>
+						<div class="model-description">\${model.description}</div>
+						<div class="model-badges" aria-hidden="true">
+							<span class="badge speed-\${model.speed}">\${model.speed}</span>
+							<span class="badge quality-\${model.quality}">\${model.quality}</span>
+							\${!model.available ? '<span class="badge unavailable">' + (isEnglish ? "Unavailable" : "Kullanılamıyor") + '</span>' : ''}
 						</div>
 					</div>
 				\`).join('');
@@ -2372,156 +2621,179 @@ class WizardManager {
 				});
 			});
 		}
-		
-		// Gelişmiş klavye navigasyonu
-		document.addEventListener('keydown', (e) => {
-			// Adım navigasyonu için ok tuşları
-			if (e.key === 'ArrowLeft' && currentStep > 1 && !e.target.matches('input, select, textarea')) {
-				e.preventDefault();
-				prevStep();
-			} else if (e.key === 'ArrowRight' && currentStep < 6 && !e.target.matches('input, select, textarea')) {
-				e.preventDefault();
-				nextStep();
-			}
-			
-			// Escape tuşu ile sihirbazı kapat
-			if (e.key === 'Escape') {
-				const confirmed = confirm('Are you sure you want to exit the setup wizard?');
-				if (confirmed) {
-					window.close();
-				}
-			}
-			
-			// Tab trapping için (modal davranışı)
-			if (e.key === 'Tab') {
-				const focusableElements = document.querySelectorAll(
-					'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])'
-				);
-				const firstElement = focusableElements[0];
-				const lastElement = focusableElements[focusableElements.length - 1];
-				
-				if (e.shiftKey && document.activeElement === firstElement) {
-					e.preventDefault();
-					lastElement.focus();
-				} else if (!e.shiftKey && document.activeElement === lastElement) {
-					e.preventDefault();
-					firstElement.focus();
-				}
+
+// Gelişmiş klavye navigasyonu
+document.addEventListener('keydown', (e) => {
+	// Adım navigasyonu için ok tuşları
+	if (e.key === 'ArrowLeft' && currentStep > 1 && !e.target.matches('input, select, textarea')) {
+		e.preventDefault();
+		prevStep();
+	} else if (e.key === 'ArrowRight' && currentStep < 6 && !e.target.matches('input, select, textarea')) {
+		e.preventDefault();
+		nextStep();
+	}
+
+	// Escape tuşu ile sihirbazı kapat
+	if (e.key === 'Escape') {
+		const confirmed = confirm('Are you sure you want to exit the setup wizard?');
+		if (confirmed) {
+			window.close();
+		}
+	}
+
+	// Tab trapping için (modal davranışı)
+	if (e.key === 'Tab') {
+		const focusableElements = document.querySelectorAll(
+			'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])'
+		);
+		const firstElement = focusableElements[0];
+		const lastElement = focusableElements[focusableElements.length - 1];
+
+		if (e.shiftKey && document.activeElement === firstElement) {
+			e.preventDefault();
+			lastElement.focus();
+		} else if (!e.shiftKey && document.activeElement === lastElement) {
+			e.preventDefault();
+			firstElement.focus();
+		}
+	}
+});
+
+// Mevcut ayarları yükle
+function loadExistingSettings(settings) {
+	console.log('Loading existing settings:', settings);
+
+	// Eğer ayarlar mevcutsa wizard'ı doldur
+	if (settings.isProviderConfigured && settings.provider) {
+		selectedProvider = settings.provider;
+
+		// Provider kartını seçili göster
+		document.querySelectorAll('.provider-card').forEach(card => {
+			if (card.dataset.provider === settings.provider) {
+				card.classList.add('selected');
+				card.setAttribute('aria-checked', 'true');
 			}
 		});
-		
-		// Mevcut ayarları yükle
-		function loadExistingSettings(settings) {
-			console.log('Loading existing settings:', settings);
-			
-			// Eğer ayarlar mevcutsa wizard'ı doldur
-			if (settings.isProviderConfigured && settings.provider) {
-				selectedProvider = settings.provider;
-				
-				// Provider kartını seçili göster
-				document.querySelectorAll('.provider-card').forEach(card => {
-					if (card.dataset.provider === settings.provider) {
-						card.classList.add('selected');
-						card.setAttribute('aria-selected', 'true');
-					}
-				});
-				
-				// Provider'a göre model ve API bölümlerini göster
-				showModelsForProvider(settings.provider);
-				showApiConfigForProvider(settings.provider);
-			}
 
-			if (settings.isModelConfigured && settings.model) {
-				selectedModel = settings.model;
-				
-				// Model kartını seçili göster (modeller yüklendikten sonra)
-				setTimeout(() => {
-					document.querySelectorAll('.model-card').forEach(card => {
-						if (card.dataset.model === settings.model) {
-							card.classList.add('selected');
-							card.setAttribute('aria-selected', 'true');
-						}
-					});
-				}, 500);
-			}
+		// Provider'a göre model ve API bölümlerini göster
+		showModelsForProvider(settings.provider);
+		showApiConfigForProvider(settings.provider);
+	}
 
-			if (settings.isApiKeyConfigured) {
-				// API key alanını doldur (güvenlik için gizli)
-				const apiKeyInput = document.getElementById('geminiApiKey');
-				if (apiKeyInput && settings.provider === 'gemini') {
-					if (settings.apiKey === "***CONFIGURED***") {
-						apiKeyInput.placeholder = "${isEnglish ? "API Key configured (hidden for security)" : "API Anahtarı yapılandırıldı (güvenlik için gizli)"}";
-						apiKeyInput.style.backgroundColor = 'var(--vscode-input-placeholderForeground)';
-					}
+	if (settings.isModelConfigured && settings.model) {
+		selectedModel = settings.model;
+
+		// Model kartını seçili göster (modeller yüklendikten sonra)
+		setTimeout(() => {
+			document.querySelectorAll('.model-card').forEach(card => {
+				if (card.dataset.model === settings.model) {
+					card.classList.add('selected');
+					card.setAttribute('aria-checked', 'true');
 				}
-			}
+			});
+		}, 500);
+	}
 
-			// WCAG seviyesi seç
-			if (settings.wcagLevel) {
-				const wcagSelect = document.getElementById('wcagLevel');
-				if (wcagSelect) {
-					wcagSelect.value = settings.wcagLevel;
-				}
-			}
-
-			// Dil seç
-			if (settings.language) {
-				const languageSelect = document.getElementById('language');
-				if (languageSelect) {
-					languageSelect.value = settings.language;
-				}
-			}
-
-			// Eğer tamamen yapılandırılmışsa, adım göstergelerini güncelle
-			if (settings.isFullyConfigured) {
-				completedSteps = [1, 2, 3, 4, 5];
-				updateStepIndicators();
-				
-				announceToScreenReader("${isEnglish ? "Previous settings loaded. You can review or modify your configuration." : "Önceki ayarlar yüklendi. Yapılandırmanızı gözden geçirebilir veya değiştirebilirsiniz."}");
-			} else {
-				announceToScreenReader("${isEnglish ? "Some settings loaded. Please complete the remaining configuration." : "Bazı ayarlar yüklendi. Lütfen kalan yapılandırmayı tamamlayın."}");
+	if (settings.isApiKeyConfigured) {
+		// API key alanını doldur (güvenlik için gizli)
+		const apiKeyInput = document.getElementById('geminiApiKey');
+		if (apiKeyInput && settings.provider === 'gemini') {
+			if (settings.apiKey === "***CONFIGURED***") {
+				apiKeyInput.placeholder = "${isEnglish ? "API Key configured(hidden for security)" : "API Anahtarı yapılandırıldı(güvenlik için gizli)"}";
+				apiKeyInput.style.backgroundColor = 'var(--vscode-input-placeholderForeground)';
 			}
 		}
-		
-		// ARIA live region'lar için yardımcı fonksiyon
-		function announceToScreenReader(message, priority = 'polite') {
-			const announcement = document.createElement('div');
-			announcement.setAttribute('aria-live', priority);
-			announcement.setAttribute('aria-atomic', 'true');
-			announcement.className = 'screen-reader-only';
-			announcement.textContent = message;
-			
-			document.body.appendChild(announcement);
-			
+	}
+
+	// Ollama URL'ini yükle
+	if (settings.ollamaUrl) {
+		const ollamaUrlInput = document.getElementById('step1OllamaUrl');
+		if (ollamaUrlInput) {
+			ollamaUrlInput.value = settings.ollamaUrl;
+		}
+		const ollamaUrlDisplay = document.getElementById('ollamaUrlDisplay');
+		if (ollamaUrlDisplay) {
+			ollamaUrlDisplay.textContent = settings.ollamaUrl;
+		}
+	}
+
+	// WCAG seviyesi seç
+	if (settings.wcagLevel) {
+		const wcagSelect = document.getElementById('wcagLevel');
+		if (wcagSelect) {
+			wcagSelect.value = settings.wcagLevel;
+		}
+	}
+
+	// Dil seç
+	if (settings.language) {
+		const languageSelect = document.getElementById('language');
+		if (languageSelect) {
+			languageSelect.value = settings.language;
+		}
+	}
+
+	// Eğer tamamen yapılandırılmışsa, adım göstergelerini güncelle
+	if (settings.isFullyConfigured) {
+		completedSteps = [1, 2, 3, 4, 5];
+		updateStepDisplay(); // updateStepIndicators yerine updateStepDisplay kullanıyoruz
+
+		announceToScreenReader("${isEnglish ? "Previous settings loaded. You can review or modify your configuration." : "Önceki ayarlar yüklendi. Yapılandırmanızı gözden geçirebilir veya değiştirebilirsiniz."}");
+	} else {
+		announceToScreenReader("${isEnglish ? "Some settings loaded. Please complete the remaining configuration." : "Bazı ayarlar yüklendi. Lütfen kalan yapılandırmayı tamamlayın."}");
+	}
+}
+
+// Adım göstergelerini güncelle (alias for compatibility)
+function updateStepIndicators() {
+	updateStepDisplay();
+}
+
+// ARIA live region'lar için yardımcı fonksiyon
+function announceToScreenReader(message, priority = 'polite') {
+	let liveRegion = document.getElementById('a11y-announcer');
+	if (!liveRegion) {
+		liveRegion = document.createElement('div');
+		liveRegion.id = 'a11y-announcer';
+		liveRegion.setAttribute('aria-live', priority);
+		liveRegion.setAttribute('aria-atomic', 'true');
+		liveRegion.className = 'screen-reader-only';
+		document.body.appendChild(liveRegion);
+	} else {
+		liveRegion.setAttribute('aria-live', priority);
+	}
+
+	// Aynı mesajın tekrar duyurulması için textContent'i temizleyip tekrar yazıyoruz
+	liveRegion.textContent = '';
+	setTimeout(() => {
+		liveRegion.textContent = message;
+	}, 50);
+}
+
+// Erişilebilirlik: Gelişmiş Focus management
+function focusCurrentStep() {
+	const activeStep = document.querySelector('.step-content.active');
+	if (activeStep) {
+		// Önce başlığa odaklan ki kullanıcı hangi adımda olduğunu bilsin
+		const stepTitle = activeStep.querySelector('.step-title');
+		if (stepTitle) {
+			stepTitle.setAttribute('tabindex', '-1');
+			stepTitle.focus();
+
+			// Sonra ilk etkileşimli elemana geç
 			setTimeout(() => {
-				document.body.removeChild(announcement);
-			}, 1000);
-		}
-		
-		// Erişilebilirlik: Gelişmiş Focus management
-		function focusCurrentStep() {
-			const activeStep = document.querySelector('.step-content.active');
-			if (activeStep) {
-				// Önce başlığa odaklan ki kullanıcı hangi adımda olduğunu bilsin
-				const stepTitle = activeStep.querySelector('.step-title');
-				if (stepTitle) {
-					stepTitle.setAttribute('tabindex', '-1');
-					stepTitle.focus();
-					
-					// Sonra ilk etkileşimli elemana geç
-					setTimeout(() => {
-						const focusable = activeStep.querySelector('button, input, select, [tabindex]:not([tabindex="-1"])');
-						if (focusable) {
-							focusable.focus();
-						}
-					}, 100);
+				const focusable = activeStep.querySelector('button, input, select, [tabindex]:not([tabindex="-1"])');
+				if (focusable) {
+					focusable.focus();
 				}
-			}
+			}, 100);
 		}
-		
-		// Form doğrulama ile erişilebilirlik
-		function validateStep(stepNumber) {
-			const currentContent = document.querySelector(\`.step-content[data-step="\${stepNumber}"]\`);
+	}
+}
+
+// Form doğrulama ile erişilebilirlik
+function validateStep(stepNumber) {
+	const currentContent = document.querySelector(\`.step-content[data-step="\${stepNumber}"]\`);
 			if (!currentContent) return true;
 			
 			const requiredFields = currentContent.querySelectorAll('[aria-required="true"], [required]');
@@ -2572,6 +2844,74 @@ class WizardManager {
         };
         logger_1.logger.info("Mevcut wizard ayarları yüklendi:", currentSettings);
         return currentSettings;
+    }
+    async setupOllamaUrl(url) {
+        const config = vscode.workspace.getConfiguration("wcagEnhancer");
+        const aiConfig = config.get("ai") || {};
+        aiConfig.ollamaUrl = url;
+        await config.update("ai", aiConfig, vscode.ConfigurationTarget.Global);
+        if (this.persistentSettingsManager) {
+            await this.persistentSettingsManager.persistSetting("ai", aiConfig);
+        }
+        if (this.jsonManager) {
+            await this.jsonManager.updateWizardStep("ollamaUrl", {
+                value: url,
+                completed: true
+            });
+            await this.jsonManager.syncFromVSCodeConfiguration();
+        }
+        logger_1.logger.info(`Ollama URL set to: ${url}`);
+    }
+    async getAvailableOllamaModels() {
+        try {
+            // Ollama provider'ı doğrudan oluşturup modelleri çek
+            // Import'u burada yaparak sadece ihtiyaç olduğunda yüklenmesini sağlarız
+            const { OllamaProvider } = await Promise.resolve().then(() => __importStar(require("./utils/aiProvider")));
+            const tempOllama = new OllamaProvider();
+            const models = await tempOllama.getAvailableModels();
+            if (models && models.length > 0) {
+                return models.map((model) => ({
+                    ...model,
+                    available: true
+                }));
+            }
+        }
+        catch (error) {
+            logger_1.logger.warn("Ollama modelleri çekilemedi:", error);
+        }
+        return await this.getDefaultOllamaModels();
+    }
+    async getDefaultOllamaModels() {
+        const { LocalizationManager } = await Promise.resolve().then(() => __importStar(require("./utils/localizationManager")));
+        const localization = LocalizationManager.getInstance();
+        const isEnglish = localization.getCurrentLanguage() === "en";
+        return [
+            {
+                id: "llama3",
+                name: "Llama 3",
+                description: isEnglish ? "Meta's latest powerful model" : "Meta'nın en yeni güçlü modeli",
+                speed: "fast",
+                quality: "high",
+                recommended: true,
+                available: true
+            },
+            {
+                id: "mistral",
+                name: "Mistral",
+                description: isEnglish ? "Small and efficient" : "Küçük ve verimli",
+                speed: "fast",
+                quality: "medium",
+                available: true
+            },
+            {
+                id: "phi3",
+                name: "Phi-3",
+                description: isEnglish ? "Microsoft's lightweight model" : "Microsoft'un hafif modeli",
+                speed: "fast",
+                quality: "medium",
+                available: true
+            }
+        ];
     }
 }
 exports.WizardManager = WizardManager;

@@ -45,6 +45,10 @@ export interface AccessiMindSettings {
 					includeTestingSteps?: boolean;
 				};
 			};
+			ollamaUrl: {
+				completed: boolean;
+				value?: string;
+			};
 		};
 	};
 	settings: {
@@ -114,8 +118,8 @@ export class AccessiMindJsonManager {
 	private constructor(context: vscode.ExtensionContext) {
 		this.context = context;
 		// JSON dosyasını workspace root'a yerleştir
-		const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || 
-							  path.dirname(context.extensionPath);
+		const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ||
+			path.dirname(context.extensionPath);
 		this.jsonFilePath = path.join(workspaceRoot, "accessimind.json");
 	}
 
@@ -137,13 +141,13 @@ export class AccessiMindJsonManager {
 		try {
 			// JSON dosyasının varlığını kontrol et
 			await this.checkJsonFileExists();
-			
+
 			// Settings'i yükle
 			await this.loadSettings();
-			
+
 			// File watcher kurma
 			this.setupFileWatcher();
-			
+
 			this.isInitialized = true;
 			logger.info(`🔧 AccessiMindJsonManager başarıyla başlatıldı: ${this.jsonFilePath}`);
 		} catch (error) {
@@ -188,7 +192,8 @@ export class AccessiMindJsonManager {
 					apiKey: { completed: false, hasValue: false },
 					wcagLevel: { completed: false },
 					language: { completed: false },
-					jiraConfig: { completed: false }
+					jiraConfig: { completed: false },
+					ollamaUrl: { completed: false }
 				}
 			},
 			settings: {
@@ -238,17 +243,17 @@ export class AccessiMindJsonManager {
 		try {
 			const fileContent = await fs.promises.readFile(this.jsonFilePath, 'utf8');
 			const parsedSettings = JSON.parse(fileContent) as AccessiMindSettings;
-			
+
 			// Version kontrolü ve migration
 			await this.migrateSettingsIfNeeded(parsedSettings);
-			
+
 			this.settings = parsedSettings;
 			logger.info("📥 AccessiMind ayarları JSON dosyasından başarıyla yüklendi");
-			
+
 			return this.settings;
 		} catch (error) {
 			logger.error("❌ JSON dosyasından ayar yükleme hatası:", error);
-			
+
 			// Hatalı dosya varsa backup al ve yeniden oluştur
 			try {
 				await this.handleCorruptedFile();
@@ -437,7 +442,7 @@ export class AccessiMindJsonManager {
 			await Promise.all(updatePromises);
 
 			logger.info("✅ JSON ayarları VS Code configuration'a başarıyla uygulandı");
-			
+
 			// Settings applied mesajını göster
 			vscode.window.showInformationMessage("✅ AccessiMind settings have been applied!");
 
@@ -467,7 +472,7 @@ export class AccessiMindJsonManager {
 		);
 
 		this.fileWatcher = vscode.workspace.createFileSystemWatcher(filePattern);
-		
+
 		this.fileWatcher.onDidChange(async () => {
 			logger.info("🔄 AccessiMind JSON dosyası değişti, yeniden yükleniyor...");
 			await this.loadSettings();
@@ -539,10 +544,10 @@ export class AccessiMindJsonManager {
 			const backupPath = this.jsonFilePath + `.backup.${Date.now()}`;
 			await fs.promises.copyFile(this.jsonFilePath, backupPath);
 			logger.info(`📁 Bozuk JSON dosyası yedeklendi: ${backupPath}`);
-			
+
 			// Yeni dosya oluştur
 			await this.createDefaultJsonFile();
-			
+
 			vscode.window.showWarningMessage(
 				`⚠️ AccessiMind ayar dosyası bozuktu ve yeniden oluşturuldu. Eski dosya şu konuma yedeklendi: ${backupPath}`
 			);
@@ -563,17 +568,17 @@ export class AccessiMindJsonManager {
 		try {
 			// Extension path'inde bir fallback oluştur
 			const fallbackPath = path.join(this.context.globalStorageUri?.fsPath || this.context.extensionPath, "accessimind-fallback.json");
-			
+
 			// Directory oluştur
 			const fallbackDir = path.dirname(fallbackPath);
 			await fs.promises.mkdir(fallbackDir, { recursive: true });
-			
+
 			// Fallback JSON path'ini güncelle
 			this.jsonFilePath = fallbackPath;
-			
+
 			// Default dosyayı oluştur
 			await this.createDefaultJsonFile();
-			
+
 			logger.warn(`⚠️ Workspace'de JSON oluşturulamadı, fallback konumu kullanılıyor: ${fallbackPath}`);
 			vscode.window.showWarningMessage(
 				`⚠️ AccessiMind ayar dosyası workspace'de oluşturulamadı. Geçici konum kullanılıyor: ${fallbackPath}`
@@ -589,7 +594,7 @@ export class AccessiMindJsonManager {
 	 */
 	private async createInMemoryDefaults(): Promise<AccessiMindSettings> {
 		logger.warn("⚠️ JSON dosyası okunamadı, in-memory defaults kullanılıyor");
-		
+
 		const defaults: AccessiMindSettings = {
 			version: "1.0.0",
 			createdAt: new Date().toISOString(),
@@ -602,7 +607,8 @@ export class AccessiMindJsonManager {
 					apiKey: { completed: false, hasValue: false },
 					wcagLevel: { completed: false },
 					language: { completed: false },
-					jiraConfig: { completed: false }
+					jiraConfig: { completed: false },
+					ollamaUrl: { completed: false }
 				}
 			},
 			settings: {
@@ -640,11 +646,11 @@ export class AccessiMindJsonManager {
 		};
 
 		this.settings = defaults;
-		
+
 		vscode.window.showWarningMessage(
 			"⚠️ AccessiMind settings file could not be read. Temporary settings will be used in this session."
 		);
-		
+
 		return defaults;
 	}
 
@@ -660,7 +666,7 @@ export class AccessiMindJsonManager {
 	 */
 	public async validateJsonHealth(): Promise<{ isHealthy: boolean; issues: string[] }> {
 		const issues: string[] = [];
-		
+
 		try {
 			// Dosya varlığını kontrol et
 			await fs.promises.access(this.jsonFilePath, fs.constants.F_OK);
@@ -703,7 +709,7 @@ export class AccessiMindJsonManager {
 	public async repairJsonFile(): Promise<void> {
 		try {
 			const health = await this.validateJsonHealth();
-			
+
 			if (health.isHealthy) {
 				logger.info("✅ JSON dosyası sağlıklı, onarım gerekmiyor");
 				return;
@@ -722,9 +728,9 @@ export class AccessiMindJsonManager {
 
 			// Yeni dosya oluştur
 			await this.createDefaultJsonFile();
-			
+
 			vscode.window.showInformationMessage("🔧 AccessiMind JSON dosyası onarıldı!");
-			
+
 		} catch (error) {
 			logger.error("❌ JSON dosyası onarılamadı:", error);
 			throw error;

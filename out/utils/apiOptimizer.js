@@ -106,7 +106,7 @@ class OptimizedHttpAgent {
     /**
      * Retry with exponential backoff
      */
-    async retryWithBackoff(requestFn, maxRetries = 3, baseDelayMs = 1000) {
+    async retryWithBackoff(requestFn, maxRetries = 3, baseDelayMs = 1000, shouldCancel) {
         let lastError;
         for (let attempt = 0; attempt <= maxRetries; attempt++) {
             try {
@@ -122,7 +122,11 @@ class OptimizedHttpAgent {
                     throw lastError;
                 }
                 if (attempt < maxRetries) {
-                    const delay = baseDelayMs * Math.pow(2, attempt);
+                    if (shouldCancel && shouldCancel()) {
+                        throw new Error('Operation cancelled');
+                    }
+                    const jitter = Math.floor(Math.random() * 100);
+                    const delay = baseDelayMs * Math.pow(2, attempt) + jitter;
                     await new Promise(resolve => setTimeout(resolve, delay));
                 }
             }

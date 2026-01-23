@@ -1,0 +1,40 @@
+﻿
+> accessimind@1.1.1 package
+> npm run build && vsce package
+
+
+> accessimind@1.1.1 build
+> npm run webpack-prod
+
+
+> accessimind@1.1.1 webpack-prod
+> cross-env NODE_ENV=production webpack --mode production
+
+node.exe :     
+[webpack-cli] Compiler 
+starting... 
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo 
+...
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: (    [webpack-   
+ cli] Compiler star    
+ting... :String) [    
+], RemoteException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+    [webpack-cli] 
+Compiler is using 
+config: 'C:\Users\sarpe
+\workspace\accessi-mind
+\webpack.config.js'

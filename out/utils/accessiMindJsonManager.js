@@ -117,7 +117,8 @@ class AccessiMindJsonManager {
                     apiKey: { completed: false, hasValue: false },
                     wcagLevel: { completed: false },
                     language: { completed: false },
-                    jiraConfig: { completed: false }
+                    jiraConfig: { completed: false },
+                    ollamaUrl: { completed: false }
                 }
             },
             settings: {
@@ -475,7 +476,8 @@ class AccessiMindJsonManager {
                     apiKey: { completed: false, hasValue: false },
                     wcagLevel: { completed: false },
                     language: { completed: false },
-                    jiraConfig: { completed: false }
+                    jiraConfig: { completed: false },
+                    ollamaUrl: { completed: false }
                 }
             },
             settings: {

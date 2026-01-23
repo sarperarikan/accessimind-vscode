@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.validateUserInput = validateUserInput;
 exports.validateHtmlCode = validateHtmlCode;
-exports.validateWcagCompliance = validateWcagCompliance;
+exports.validateWcagConformance = validateWcagConformance;
 function validateUserInput(input) {
     if (!input || input.trim().length === 0) {
         return "Talimat boş olamaz.";
@@ -59,7 +59,7 @@ function validateHtmlCode(code) {
         errors
     };
 }
-function validateWcagCompliance(code) {
+function validateWcagConformance(code) {
     const issues = [];
     // WCAG 2.2 kontrolleri
     const checks = [
@@ -104,7 +104,7 @@ function validateWcagCompliance(code) {
         issues.push("Butonlar için klavye navigasyonu eksik");
     }
     return {
-        compliant: issues.length === 0,
+        conformant: issues.length === 0,
         issues
     };
 }

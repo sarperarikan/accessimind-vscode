@@ -2,15 +2,15 @@ export function validateUserInput(input: string): string | undefined {
 	if (!input || input.trim().length === 0) {
 		return "Talimat boş olamaz.";
 	}
-	
+
 	if (input.trim().length < 5) {
 		return "Talimat en az 5 karakter olmalıdır.";
 	}
-	
+
 	if (input.trim().length > 500) {
 		return "Talimat en fazla 500 karakter olabilir.";
 	}
-	
+
 	// Zararlı karakterleri kontrol et
 	const dangerousPatterns = [
 		/<script/i,
@@ -19,32 +19,32 @@ export function validateUserInput(input: string): string | undefined {
 		/eval\s*\(/i,
 		/alert\s*\(/i
 	];
-	
+
 	for (const pattern of dangerousPatterns) {
 		if (pattern.test(input)) {
 			return "Talimat güvenlik nedeniyle reddedildi.";
 		}
 	}
-	
+
 	return undefined; // Geçerli
 }
 
 export function validateHtmlCode(code: string): { isValid: boolean; errors: string[] } {
 	const errors: string[] = [];
-	
+
 	// Temel HTML yapısı kontrolü
 	if (!code.includes("<") || !code.includes(">")) {
 		errors.push("Geçerli HTML kodu değil.");
 	}
-	
+
 	// Açık/kapalı tag kontrolü
 	const openTags = (code.match(/<[^/][^>]*>/g) || []).length;
 	const closeTags = (code.match(/<\/[^>]*>/g) || []).length;
-	
+
 	if (Math.abs(openTags - closeTags) > 2) {
 		errors.push("HTML tag'leri dengesiz görünüyor.");
 	}
-	
+
 	// Zararlı içerik kontrolü
 	const dangerousContent = [
 		"<script",
@@ -54,22 +54,22 @@ export function validateHtmlCode(code: string): { isValid: boolean; errors: stri
 		"eval(",
 		"alert("
 	];
-	
+
 	for (const dangerous of dangerousContent) {
 		if (code.toLowerCase().includes(dangerous)) {
 			errors.push(`Güvenlik riski: ${dangerous}`);
 		}
 	}
-	
+
 	return {
 		isValid: errors.length === 0,
 		errors
 	};
 }
 
-export function validateWcagCompliance(code: string): { compliant: boolean; issues: string[] } {
+export function validateWcagConformance(code: string): { conformant: boolean; issues: string[] } {
 	const issues: string[] = [];
-	
+
 	// WCAG 2.2 kontrolleri
 	const checks = [
 		{
@@ -97,28 +97,28 @@ export function validateWcagCompliance(code: string): { compliant: boolean; issu
 			message: "Tablolar için başlık hücreleri eksik"
 		}
 	];
-	
+
 	for (const check of checks) {
 		const elements = code.match(check.pattern) || [];
 		const requiredElements = code.match(check.required) || [];
-		
+
 		if (elements.length > 0 && requiredElements.length < elements.length) {
 			issues.push(check.message);
 		}
 	}
-	
+
 	// Kontrast kontrolü (basit)
 	if (code.includes("color:") && !code.includes("background-color:")) {
 		issues.push("Renk kontrastı için background-color tanımlanmamış");
 	}
-	
+
 	// Klavye navigasyonu kontrolü
 	if (code.includes("<button") && !code.includes("tabindex")) {
 		issues.push("Butonlar için klavye navigasyonu eksik");
 	}
-	
+
 	return {
-		compliant: issues.length === 0,
+		conformant: issues.length === 0,
 		issues
 	};
 } 

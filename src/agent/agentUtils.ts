@@ -4,7 +4,7 @@ import { AIProviderManager } from "../utils/aiProvider";
 export interface CodeGenerationResult {
 	code: string
 	explanation: string
-	wcagCompliance: string[]
+	wcagConformance: string[]
 }
 
 export async function generateAccessibleCode(
@@ -24,7 +24,7 @@ export async function generateAccessibleCode(
 
 **Talimat:** ${prompt}${codeContext}
 
-Lütfen WCAG 2.2 standartlarına uygun, erişilebilir kod üret. Kod şu özelliklere sahip olmalı:
+Lütfen WCAG 2.2 standartlarına uyumlu, erişilebilir kod üret. Kod şu özelliklere sahip olmalı:
 - Uygun ARIA etiketleri
 - Semantik HTML yapısı
 - Klavye navigasyonu desteği
@@ -235,7 +235,7 @@ async function generateCodeFromTemplate(
 		code = adaptExistingCode(existingCode, template.template);
 	}
 
-	// WCAG 2.2 uyumluluğu için ek özellikler ekle
+	// WCAG 2.2 uyumu için ek özellikler ekle
 	code = addWcagEnhancements(code, analysis);
 
 	return code;

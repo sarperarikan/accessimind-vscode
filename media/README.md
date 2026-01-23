@@ -5,8 +5,8 @@ AI-powered accessibility enhancement tool for Visual Studio Code that helps deve
 ## Features
 
 - **AI-Powered Analysis**: Intelligent analysis of your code for accessibility improvements
-- **WCAG Compliance**: Supports WCAG 2.1 Level A, AA, and AAA guidelines
-- **Interactive Chat**: Chat interface for asking accessibility questions
+- **Multi-AI Provider Support**: Google Gemini, GitHub Copilot (GPT-5.2), and Ollama (Local AI) available out of the box.
+- **WCAG Conformance**: Supports WCAG 2.2 Level A, AA, and AAA guidelines
 - **Setup Wizard**: Easy configuration with persistent settings
 - **Real-time Enhancement**: Improve entire files or selected code portions
 - **Statistics Tracking**: Monitor your accessibility improvements over time
@@ -26,7 +26,7 @@ AI-powered accessibility enhancement tool for Visual Studio Code that helps deve
 2. Type `AccessiMind: Run Setup Wizard`
 3. Follow the setup steps:
    - Choose your language preference
-   - Select WCAG compliance level (A, AA, AAA)
+   - Select WCAG conformance level (A, AA, AAA)
    - Pick enhancement mode (Conservative, Standard, Aggressive)
    - Configure auto-save preferences
 
@@ -59,7 +59,7 @@ The extension provides the following configuration options:
 
 - `wcagEnhancer.apiKey`: API key for AI enhancement service
 - `wcagEnhancer.language`: Default language (en/tr)
-- `wcagEnhancer.accessibilityLevel`: WCAG compliance level (A/AA/AAA)
+- `wcagEnhancer.accessibilityLevel`: WCAG conformance level (A/AA/AAA)
 - `wcagEnhancer.enhancementMode`: Enhancement aggressiveness (conservative/standard/aggressive)
 - `wcagEnhancer.autoSave`: Automatically save improvements
 
@@ -127,9 +127,9 @@ The extension provides the following configuration options:
 
 ## Support
 
-- [GitHub Issues](https://github.com/wcag-enhancer/vscode-extension/issues)
-- [Documentation](https://github.com/wcag-enhancer/vscode-extension/wiki)
-- [Feature Requests](https://github.com/wcag-enhancer/vscode-extension/discussions)
+- [GitHub Issues](https://github.com/sarperarikan/accessimind-vscode/issues)
+- [Documentation](https://github.com/sarperarikan/accessimind-vscode/wiki)
+- [Feature Requests](https://github.com/sarperarikan/accessimind-vscode/discussions)
 
 ## Contributing
 
@@ -148,7 +148,7 @@ This extension is licensed under the [MIT License](LICENSE).
 - Interactive chat interface
 - Statistics tracking
 - Multi-language support (English, Turkish)
-- WCAG Level A, AA, AAA compliance
+- WCAG Level A, AA, AAA conformance
 
 ---
 

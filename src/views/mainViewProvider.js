@@ -1,35 +1,35 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function (o, m, k, k2) {
+	if (k2 === undefined) k2 = k;
+	var desc = Object.getOwnPropertyDescriptor(m, k);
+	if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+		desc = { enumerable: true, get: function () { return m[k]; } };
+	}
+	Object.defineProperty(o, k2, desc);
+}) : (function (o, m, k, k2) {
+	if (k2 === undefined) k2 = k;
+	o[k2] = m[k];
 }));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function (o, v) {
+	Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function (o, v) {
+	o["default"] = v;
 });
 var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
+	if (mod && mod.__esModule) return mod;
+	var result = {};
+	if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+	__setModuleDefault(result, mod);
+	return result;
 };
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
+	function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+	return new (P || (P = Promise))(function (resolve, reject) {
+		function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+		function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+		function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+		step((generator = generator.apply(thisArg, _arguments || [])).next());
+	});
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MainViewProvider = void 0;
@@ -38,288 +38,288 @@ const geminiApi_1 = require("../utils/geminiApi");
 const statisticsManager_1 = require("../utils/statisticsManager");
 const localizationManager_1 = require("../utils/localizationManager");
 class MainViewProvider {
-    constructor(_extensionUri) {
-        this._extensionUri = _extensionUri;
-    }
-    resolveWebviewView(webviewView, context, _token) {
-        this._view = webviewView;
-        webviewView.webview.options = {
-            enableScripts: true,
-            enableCommandUris: false,
-            enableForms: false,
-            localResourceRoots: [this._extensionUri],
-            portMapping: []
-        };
-        webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
-        // Handle messages from webview
-        webviewView.webview.onDidReceiveMessage((data) => __awaiter(this, void 0, void 0, function* () {
-            switch (data.type) {
-                case "chat":
-                    yield this._handleChatMessage(data.message);
-                    break;
-                case "improveFile":
-                    yield this._handleImproveFile();
-                    break;
-                case "improveSelection":
-                    yield this._handleImproveSelection();
-                    break;
-                case "getStats":
-                    yield this._handleGetStats();
-                    break;
-                case "resetStats":
-                    yield this._handleResetStats();
-                    break;
-                case "setApiKey":
-                    yield this._handleSetApiKey();
-                    break;
-                case "testApiKey":
-                    yield this._handleTestApiKey();
-                    break;
-            }
-        }));
-    }
-    _handleChatMessage(message) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (!this._view)
-                return;
-            const startTime = Date.now();
-            let apiResponseTime = 0;
-            try {
-                // Show typing indicator
-                this._view.webview.postMessage({
-                    type: "setTyping",
-                    isTyping: true
-                });
-                const geminiApi = geminiApi_1.GeminiAPI.getInstance();
-                const isConnected = yield geminiApi.testConnection();
-                if (!isConnected) {
-                    this._view.webview.postMessage({
-                        type: "addChatMessage",
-                        message: localizationManager_1.localization.getString("error.api.key.missing"),
-                        isUser: false,
-                        isError: true
-                    });
-                    return;
-                }
-                const response = yield geminiApi.improveCode({
-                    code: "",
-                    fileType: "chat",
-                    language: "text",
-                    mode: "ask"
-                });
-                apiResponseTime = Date.now() - startTime;
-                // Record statistics with WCAG criteria
-                statisticsManager_1.statisticsManager.getInstance().recordApiResponse("chat", true, "chat", apiResponseTime, ["2.4.1", "2.4.2", "2.4.3"], // Common WCAG criteria for chat
-                {
-                    codeStructuresEnhanced: 1,
-                    htmlElementsImproved: { "div": 1 },
-                    accessibilityFeaturesAdded: { "chat_interface": 1 }
-                });
-                // Hide typing indicator and show response
-                this._view.webview.postMessage({
-                    type: "setTyping",
-                    isTyping: false
-                });
-                this._view.webview.postMessage({
-                    type: "addChatMessage",
-                    message: response.content || "Yanıt alınamadı",
-                    isUser: false,
-                    isError: false
-                });
-            }
-            catch (error) {
-                console.error("Chat error:", error);
-                apiResponseTime = Date.now() - startTime;
-                statisticsManager_1.statisticsManager.getInstance().recordApiResponse("chat", false, "chat", apiResponseTime, [], {}, error instanceof Error ? error.message : "Unknown error");
-                this._view.webview.postMessage({
-                    type: "setTyping",
-                    isTyping: false
-                });
-                this._view.webview.postMessage({
-                    type: "addChatMessage",
-                    message: `Hata oluştu: ${error instanceof Error ? error.message : "Bilinmeyen hata"}`,
-                    isUser: false,
-                    isError: true
-                });
-            }
-        });
-    }
-    _handleImproveFile() {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                // Use the registered WCAG command instead of custom implementation
-                yield vscode.commands.executeCommand('wcagEnhancer.improveFile');
-            }
-            catch (error) {
-                console.error("Improve file error:", error);
-                vscode.window.showErrorMessage(`Dosya iyileştirme hatası: ${error instanceof Error ? error.message : "Bilinmeyen hata"}`);
-            }
-        });
-    }
-    analyzeCodeImprovements(originalCode, improvedCode, language) {
-        const improvements = {
-            wcagCriteria: [],
-            totalElements: 0,
-            htmlElements: {},
-            cssProperties: {},
-            ariaAttributes: {},
-            semanticElements: {},
-            accessibilityFeatures: {}
-        };
-        // Analyze HTML improvements
-        if (language === "html" || language === "htm") {
-            // Count ARIA attributes added
-            const ariaMatches = improvedCode.match(/aria-[a-zA-Z-]+/g) || [];
-            ariaMatches.forEach(attr => {
-                improvements.ariaAttributes[attr] = (improvements.ariaAttributes[attr] || 0) + 1;
-            });
-            // Count semantic elements
-            const semanticElements = ["nav", "main", "article", "section", "aside", "header", "footer", "figure", "figcaption"];
-            semanticElements.forEach(element => {
-                const matches = (improvedCode.match(new RegExp(`<${element}[^>]*>`, "gi")) || []).length;
-                if (matches > 0) {
-                    improvements.semanticElements[element] = matches;
-                }
-            });
-            // Count accessibility features
-            const accessibilityFeatures = ["role", "tabindex", "alt", "title", "label"];
-            accessibilityFeatures.forEach(feature => {
-                const matches = (improvedCode.match(new RegExp(`${feature}=`, "gi")) || []).length;
-                if (matches > 0) {
-                    improvements.accessibilityFeatures[feature] = matches;
-                }
-            });
-        }
-        // Analyze CSS improvements
-        if (language === "css") {
-            const cssProperties = ["color", "background-color", "font-size", "line-height", "margin", "padding"];
-            cssProperties.forEach(property => {
-                const matches = (improvedCode.match(new RegExp(`${property}:`, "gi")) || []).length;
-                if (matches > 0) {
-                    improvements.cssProperties[property] = matches;
-                }
-            });
-        }
-        // Determine WCAG criteria based on improvements
-        if (Object.keys(improvements.ariaAttributes).length > 0) {
-            improvements.wcagCriteria.push("4.1.2"); // Name, Role, Value
-        }
-        if (Object.keys(improvements.semanticElements).length > 0) {
-            improvements.wcagCriteria.push("1.3.1"); // Info and Relationships
-        }
-        if (improvements.accessibilityFeatures["alt"]) {
-            improvements.wcagCriteria.push("1.1.1"); // Non-text Content
-        }
-        if (improvements.accessibilityFeatures["tabindex"]) {
-            improvements.wcagCriteria.push("2.1.1"); // Keyboard
-        }
-        // Calculate total elements improved
-        improvements.totalElements = Object.values(improvements.htmlElements).reduce((a, b) => a + b, 0) +
-            Object.values(improvements.cssProperties).reduce((a, b) => a + b, 0) +
-            Object.values(improvements.ariaAttributes).reduce((a, b) => a + b, 0) +
-            Object.values(improvements.semanticElements).reduce((a, b) => a + b, 0) +
-            Object.values(improvements.accessibilityFeatures).reduce((a, b) => a + b, 0);
-        return improvements;
-    }
-    _handleImproveSelection() {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                // Use the registered WCAG command instead of custom implementation
-                yield vscode.commands.executeCommand('wcagEnhancer.improveSelection');
-            }
-            catch (error) {
-                console.error("Improve selection error:", error);
-                const errorMessage = error instanceof Error ? error.message : localizationManager_1.localization.getString("error.unknown");
-                vscode.window.showErrorMessage(`Seçim iyileştirme hatası: ${errorMessage}`);
-            }
-        });
-    }
-    _handleGetStats() {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (!this._view)
-                return;
-            try {
-                const stats = statisticsManager_1.statisticsManager.getInstance().getStatistics();
-                this._view.webview.postMessage({
-                    type: "updateStats",
-                    stats: stats
-                });
-            }
-            catch (error) {
-                console.error("Get stats error:", error);
-            }
-        });
-    }
-    _handleResetStats() {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                statisticsManager_1.statisticsManager.getInstance().resetStatistics();
-                vscode.window.showInformationMessage(localizationManager_1.localization.getString("success.stats.reset"));
-                if (this._view) {
-                    this._handleGetStats();
-                }
-            }
-            catch (error) {
-                console.error("Reset stats error:", error);
-                vscode.window.showErrorMessage("İstatistikler sıfırlanırken hata oluştu");
-            }
-        });
-    }
-    _handleSetApiKey() {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const apiKey = yield vscode.window.showInputBox({
-                    prompt: localizationManager_1.localization.getString("prompt.enter.api.key"),
-                    password: true,
-                    placeHolder: "Gemini API anahtarınızı girin..."
-                });
-                if (apiKey) {
-                    const config = vscode.workspace.getConfiguration("wcagEnhancer");
-                    yield config.update("apiKey", apiKey, vscode.ConfigurationTarget.Global);
-                    vscode.window.showInformationMessage(localizationManager_1.localization.getString("success.api.key.saved"));
-                }
-            }
-            catch (error) {
-                console.error("Set API key error:", error);
-                vscode.window.showErrorMessage("API anahtarı kaydedilirken hata oluştu");
-            }
-        });
-    }
-    _handleTestApiKey() {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const geminiApi = geminiApi_1.GeminiAPI.getInstance();
-                const isConnected = yield geminiApi.testConnection();
-                if (!isConnected) {
-                    vscode.window.showErrorMessage(localizationManager_1.localization.getString("error.api.key.missing"));
-                    return;
-                }
-                const testPrompt = "Merhaba! Bu bir testtir. Sadece \"Başarılı\" yaz.";
-                const result = yield geminiApi.improveCode({
-                    code: testPrompt,
-                    fileType: "chat",
-                    language: "text",
-                    mode: "ask"
-                });
-                if (result.content && (result.content.toLowerCase().includes("başarılı") || result.content.length > 0)) {
-                    vscode.window.showInformationMessage(localizationManager_1.localization.getString("success.api.key.working"));
-                }
-                else {
-                    vscode.window.showWarningMessage("API anahtarı ile bağlantı kuruldu ancak beklenen yanıt alınamadı.");
-                }
-            }
-            catch (error) {
-                console.error("Test API key error:", error);
-                const errorMessage = error instanceof Error ? error.message : "Bilinmeyen hata";
-                vscode.window.showErrorMessage(`API anahtarı testi başarısız: ${errorMessage}`);
-            }
-        });
-    }
-    _getHtmlForWebview(webview) {
-        const styleResetUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "reset.css"));
-        const styleVSCodeUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "vscode.css"));
-        const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "main.js"));
-        return `<!DOCTYPE html>
+	constructor(_extensionUri) {
+		this._extensionUri = _extensionUri;
+	}
+	resolveWebviewView(webviewView, context, _token) {
+		this._view = webviewView;
+		webviewView.webview.options = {
+			enableScripts: true,
+			enableCommandUris: false,
+			enableForms: false,
+			localResourceRoots: [this._extensionUri],
+			portMapping: []
+		};
+		webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
+		// Handle messages from webview
+		webviewView.webview.onDidReceiveMessage((data) => __awaiter(this, void 0, void 0, function* () {
+			switch (data.type) {
+				case "chat":
+					yield this._handleChatMessage(data.message);
+					break;
+				case "improveFile":
+					yield this._handleImproveFile();
+					break;
+				case "improveSelection":
+					yield this._handleImproveSelection();
+					break;
+				case "getStats":
+					yield this._handleGetStats();
+					break;
+				case "resetStats":
+					yield this._handleResetStats();
+					break;
+				case "setApiKey":
+					yield this._handleSetApiKey();
+					break;
+				case "testApiKey":
+					yield this._handleTestApiKey();
+					break;
+			}
+		}));
+	}
+	_handleChatMessage(message) {
+		return __awaiter(this, void 0, void 0, function* () {
+			if (!this._view)
+				return;
+			const startTime = Date.now();
+			let apiResponseTime = 0;
+			try {
+				// Show typing indicator
+				this._view.webview.postMessage({
+					type: "setTyping",
+					isTyping: true
+				});
+				const geminiApi = geminiApi_1.GeminiAPI.getInstance();
+				const isConnected = yield geminiApi.testConnection();
+				if (!isConnected) {
+					this._view.webview.postMessage({
+						type: "addChatMessage",
+						message: localizationManager_1.localization.getString("error.api.key.missing"),
+						isUser: false,
+						isError: true
+					});
+					return;
+				}
+				const response = yield geminiApi.improveCode({
+					code: "",
+					fileType: "chat",
+					language: "text",
+					mode: "ask"
+				});
+				apiResponseTime = Date.now() - startTime;
+				// Record statistics with WCAG criteria
+				statisticsManager_1.statisticsManager.getInstance().recordApiResponse("chat", true, "chat", apiResponseTime, ["2.4.1", "2.4.2", "2.4.3"], // Common WCAG criteria for chat
+					{
+						codeStructuresEnhanced: 1,
+						htmlElementsImproved: { "div": 1 },
+						accessibilityFeaturesAdded: { "chat_interface": 1 }
+					});
+				// Hide typing indicator and show response
+				this._view.webview.postMessage({
+					type: "setTyping",
+					isTyping: false
+				});
+				this._view.webview.postMessage({
+					type: "addChatMessage",
+					message: response.content || "Yanıt alınamadı",
+					isUser: false,
+					isError: false
+				});
+			}
+			catch (error) {
+				console.error("Chat error:", error);
+				apiResponseTime = Date.now() - startTime;
+				statisticsManager_1.statisticsManager.getInstance().recordApiResponse("chat", false, "chat", apiResponseTime, [], {}, error instanceof Error ? error.message : "Unknown error");
+				this._view.webview.postMessage({
+					type: "setTyping",
+					isTyping: false
+				});
+				this._view.webview.postMessage({
+					type: "addChatMessage",
+					message: `Hata oluştu: ${error instanceof Error ? error.message : "Bilinmeyen hata"}`,
+					isUser: false,
+					isError: true
+				});
+			}
+		});
+	}
+	_handleImproveFile() {
+		return __awaiter(this, void 0, void 0, function* () {
+			try {
+				// Use the registered WCAG command instead of custom implementation
+				yield vscode.commands.executeCommand('wcagEnhancer.improveFile');
+			}
+			catch (error) {
+				console.error("Improve file error:", error);
+				vscode.window.showErrorMessage(`Dosya iyileştirme hatası: ${error instanceof Error ? error.message : "Bilinmeyen hata"}`);
+			}
+		});
+	}
+	analyzeCodeImprovements(originalCode, improvedCode, language) {
+		const improvements = {
+			wcagCriteria: [],
+			totalElements: 0,
+			htmlElements: {},
+			cssProperties: {},
+			ariaAttributes: {},
+			semanticElements: {},
+			accessibilityFeatures: {}
+		};
+		// Analyze HTML improvements
+		if (language === "html" || language === "htm") {
+			// Count ARIA attributes added
+			const ariaMatches = improvedCode.match(/aria-[a-zA-Z-]+/g) || [];
+			ariaMatches.forEach(attr => {
+				improvements.ariaAttributes[attr] = (improvements.ariaAttributes[attr] || 0) + 1;
+			});
+			// Count semantic elements
+			const semanticElements = ["nav", "main", "article", "section", "aside", "header", "footer", "figure", "figcaption"];
+			semanticElements.forEach(element => {
+				const matches = (improvedCode.match(new RegExp(`<${element}[^>]*>`, "gi")) || []).length;
+				if (matches > 0) {
+					improvements.semanticElements[element] = matches;
+				}
+			});
+			// Count accessibility features
+			const accessibilityFeatures = ["role", "tabindex", "alt", "title", "label"];
+			accessibilityFeatures.forEach(feature => {
+				const matches = (improvedCode.match(new RegExp(`${feature}=`, "gi")) || []).length;
+				if (matches > 0) {
+					improvements.accessibilityFeatures[feature] = matches;
+				}
+			});
+		}
+		// Analyze CSS improvements
+		if (language === "css") {
+			const cssProperties = ["color", "background-color", "font-size", "line-height", "margin", "padding"];
+			cssProperties.forEach(property => {
+				const matches = (improvedCode.match(new RegExp(`${property}:`, "gi")) || []).length;
+				if (matches > 0) {
+					improvements.cssProperties[property] = matches;
+				}
+			});
+		}
+		// Determine WCAG criteria based on improvements
+		if (Object.keys(improvements.ariaAttributes).length > 0) {
+			improvements.wcagCriteria.push("4.1.2"); // Name, Role, Value
+		}
+		if (Object.keys(improvements.semanticElements).length > 0) {
+			improvements.wcagCriteria.push("1.3.1"); // Info and Relationships
+		}
+		if (improvements.accessibilityFeatures["alt"]) {
+			improvements.wcagCriteria.push("1.1.1"); // Non-text Content
+		}
+		if (improvements.accessibilityFeatures["tabindex"]) {
+			improvements.wcagCriteria.push("2.1.1"); // Keyboard
+		}
+		// Calculate total elements improved
+		improvements.totalElements = Object.values(improvements.htmlElements).reduce((a, b) => a + b, 0) +
+			Object.values(improvements.cssProperties).reduce((a, b) => a + b, 0) +
+			Object.values(improvements.ariaAttributes).reduce((a, b) => a + b, 0) +
+			Object.values(improvements.semanticElements).reduce((a, b) => a + b, 0) +
+			Object.values(improvements.accessibilityFeatures).reduce((a, b) => a + b, 0);
+		return improvements;
+	}
+	_handleImproveSelection() {
+		return __awaiter(this, void 0, void 0, function* () {
+			try {
+				// Use the registered WCAG command instead of custom implementation
+				yield vscode.commands.executeCommand('wcagEnhancer.improveSelection');
+			}
+			catch (error) {
+				console.error("Improve selection error:", error);
+				const errorMessage = error instanceof Error ? error.message : localizationManager_1.localization.getString("error.unknown");
+				vscode.window.showErrorMessage(`Seçim iyileştirme hatası: ${errorMessage}`);
+			}
+		});
+	}
+	_handleGetStats() {
+		return __awaiter(this, void 0, void 0, function* () {
+			if (!this._view)
+				return;
+			try {
+				const stats = statisticsManager_1.statisticsManager.getInstance().getStatistics();
+				this._view.webview.postMessage({
+					type: "updateStats",
+					stats: stats
+				});
+			}
+			catch (error) {
+				console.error("Get stats error:", error);
+			}
+		});
+	}
+	_handleResetStats() {
+		return __awaiter(this, void 0, void 0, function* () {
+			try {
+				statisticsManager_1.statisticsManager.getInstance().resetStatistics();
+				vscode.window.showInformationMessage(localizationManager_1.localization.getString("success.stats.reset"));
+				if (this._view) {
+					this._handleGetStats();
+				}
+			}
+			catch (error) {
+				console.error("Reset stats error:", error);
+				vscode.window.showErrorMessage("İstatistikler sıfırlanırken hata oluştu");
+			}
+		});
+	}
+	_handleSetApiKey() {
+		return __awaiter(this, void 0, void 0, function* () {
+			try {
+				const apiKey = yield vscode.window.showInputBox({
+					prompt: localizationManager_1.localization.getString("prompt.enter.api.key"),
+					password: true,
+					placeHolder: "Gemini API anahtarınızı girin..."
+				});
+				if (apiKey) {
+					const config = vscode.workspace.getConfiguration("wcagEnhancer");
+					yield config.update("apiKey", apiKey, vscode.ConfigurationTarget.Global);
+					vscode.window.showInformationMessage(localizationManager_1.localization.getString("success.api.key.saved"));
+				}
+			}
+			catch (error) {
+				console.error("Set API key error:", error);
+				vscode.window.showErrorMessage("API anahtarı kaydedilirken hata oluştu");
+			}
+		});
+	}
+	_handleTestApiKey() {
+		return __awaiter(this, void 0, void 0, function* () {
+			try {
+				const geminiApi = geminiApi_1.GeminiAPI.getInstance();
+				const isConnected = yield geminiApi.testConnection();
+				if (!isConnected) {
+					vscode.window.showErrorMessage(localizationManager_1.localization.getString("error.api.key.missing"));
+					return;
+				}
+				const testPrompt = "Merhaba! Bu bir testtir. Sadece \"Başarılı\" yaz.";
+				const result = yield geminiApi.improveCode({
+					code: testPrompt,
+					fileType: "chat",
+					language: "text",
+					mode: "ask"
+				});
+				if (result.content && (result.content.toLowerCase().includes("başarılı") || result.content.length > 0)) {
+					vscode.window.showInformationMessage(localizationManager_1.localization.getString("success.api.key.working"));
+				}
+				else {
+					vscode.window.showWarningMessage("API anahtarı ile bağlantı kuruldu ancak beklenen yanıt alınamadı.");
+				}
+			}
+			catch (error) {
+				console.error("Test API key error:", error);
+				const errorMessage = error instanceof Error ? error.message : "Bilinmeyen hata";
+				vscode.window.showErrorMessage(`API anahtarı testi başarısız: ${errorMessage}`);
+			}
+		});
+	}
+	_getHtmlForWebview(webview) {
+		const styleResetUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "reset.css"));
+		const styleVSCodeUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "vscode.css"));
+		const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "main.js"));
+		return `<!DOCTYPE html>
 <html lang="tr">
 <head>
 	<meta charset="UTF-8">
@@ -953,7 +953,7 @@ class MainViewProvider {
 								<option value="AA" selected>AA (Orta - Önerilen)</option>
 								<option value="AAA">AAA (Yüksek)</option>
 							</select>
-							<div id="wcag-help" class="sr-only">Hedef WCAG uyumluluk seviyesini seçin.</div>
+							<div id="wcag-help" class="sr-only">Hedef WCAG uyum seviyesini seçin.</div>
 						</div>
 
 						<div class="settings-group">
@@ -987,7 +987,7 @@ class MainViewProvider {
 	<script src="${scriptUri}"></script>
 </body>
 </html>`;
-    }
+	}
 }
 exports.MainViewProvider = MainViewProvider;
 MainViewProvider.viewType = "wcagEnhancer.mainView";

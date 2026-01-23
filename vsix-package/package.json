@@ -2,11 +2,11 @@
   "name": "accessimind",
   "displayName": "AccessiMind - AI-Powered WCAG Enhancer",
   "description": "Advanced WCAG 2.2 accessibility improvements with VS Code Copilot & Gemini AI integration",
-  "version": "0.4.0",
+  "version": "1.1.2",
   "publisher": "ai-accessibility-publisher",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/ai-accessibility-enhancer.git"
+    "url": "https://github.com/sarperarikan/accessimind-vscode.git"
   },
   "license": "MIT",
   "engines": {
@@ -175,7 +175,11 @@
       "properties": {
         "accessimind.detailLevel": {
           "type": "string",
-          "enum": ["basic", "detailed", "comprehensive"],
+          "enum": [
+            "basic",
+            "detailed",
+            "comprehensive"
+          ],
           "default": "detailed",
           "description": "Detail level for WCAG analysis and suggestions",
           "enumDescriptions": [
@@ -191,9 +195,13 @@
         },
         "accessimind.wcagLevel": {
           "type": "string",
-          "enum": ["A", "AA", "AAA"],
+          "enum": [
+            "A",
+            "AA",
+            "AAA"
+          ],
           "default": "AA",
-          "description": "WCAG compliance level to target"
+          "description": "WCAG conformance level to target"
         },
         "accessimind.enableCopilotIntegration": {
           "type": "boolean",

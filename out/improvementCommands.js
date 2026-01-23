@@ -71,7 +71,7 @@ async function improveCurrentFile() {
     try {
         await vscode.window.withProgress({
             location: vscode.ProgressLocation.Notification,
-            title: "🔄 WCAG iyileştirmesi yapılıyor...",
+            title: `🔄 WCAG ${aiProviderManager.getCurrentProviderName()} (${aiProviderManager.getCurrentModelName()}) iyileştirmesi yapılıyor...`,
             cancellable: false
         }, async (progress) => {
             const startTime = Date.now();
@@ -127,7 +127,7 @@ async function improveCurrentFile() {
                     const fullRange = new vscode.Range(document.positionAt(0), document.positionAt(code.length));
                     edit.replace(document.uri, fullRange, improvementResult.improvedCode);
                     await vscode.workspace.applyEdit(edit);
-                    vscode.window.showInformationMessage(`✅ ${linesImproved} satır iyileştirildi ve otomatik olarak uygulandı! (${wcagCriteria.length} WCAG kriteri)`);
+                    vscode.window.showInformationMessage(`✅ ${linesImproved} satır iyileştirildi ve otomatik olarak uygulandı! (${wcagCriteria.length} WCAG kriteri) - ${aiProviderManager.getCurrentProviderName()} (${aiProviderManager.getCurrentModelName()})`);
                 }
                 else {
                     // Show diff for manual review
@@ -138,7 +138,7 @@ async function improveCurrentFile() {
                         edit.insert(improvedUri, new vscode.Position(0, 0), improvementResult.improvedCode);
                         await vscode.workspace.applyEdit(edit);
                         await vscode.commands.executeCommand("vscode.diff", originalUri, improvedUri, `${fileName} - WCAG İyileştirmesi`);
-                        vscode.window.showInformationMessage(`✅ ${linesImproved} satır iyileştirildi! (${wcagCriteria.length} WCAG kriteri)`, "Değişiklikleri Uygula", "İstatistikleri Görüntüle").then(action => {
+                        vscode.window.showInformationMessage(`✅ ${linesImproved} satır iyileştirildi! (${wcagCriteria.length} WCAG kriteri) - ${aiProviderManager.getCurrentProviderName()} (${aiProviderManager.getCurrentModelName()})`, "Değişiklikleri Uygula", "İstatistikleri Görüntüle").then(action => {
                             if (action === "Değişiklikleri Uygula") {
                                 const edit = new vscode.WorkspaceEdit();
                                 const fullRange = new vscode.Range(document.positionAt(0), document.positionAt(code.length));
@@ -185,7 +185,7 @@ async function improveSelectedCode() {
     try {
         await vscode.window.withProgress({
             location: vscode.ProgressLocation.Notification,
-            title: "🔄 Seçili kod iyileştiriliyor...",
+            title: `🔄 Seçili kod ${aiProviderManager.getCurrentProviderName()} (${aiProviderManager.getCurrentModelName()}) ile iyileştiriliyor...`,
             cancellable: false
         }, async (progress) => {
             const startTime = Date.now();
@@ -241,11 +241,11 @@ async function improveSelectedCode() {
                     const edit = new vscode.WorkspaceEdit();
                     edit.replace(document.uri, selection, improvementResult.improvedCode);
                     await vscode.workspace.applyEdit(edit);
-                    vscode.window.showInformationMessage(`✅ Seçili ${linesImproved} satır iyileştirildi ve otomatik olarak uygulandı! (${wcagCriteria.length} WCAG kriteri)`);
+                    vscode.window.showInformationMessage(`✅ Seçili ${linesImproved} satır iyileştirildi ve otomatik olarak uygulandı! (${wcagCriteria.length} WCAG kriteri) - ${aiProviderManager.getCurrentProviderName()} (${aiProviderManager.getCurrentModelName()})`);
                 }
                 else {
                     // Show improvement result and ask for confirmation
-                    vscode.window.showInformationMessage(`✅ Seçili kod iyileştirildi! ${linesImproved} satır, ${wcagCriteria.length} WCAG kriteri`, "Değişiklikleri Uygula", "Önizleme Göster", "İstatistikleri Görüntüle").then(async (action) => {
+                    vscode.window.showInformationMessage(`✅ Seçili kod iyileştirildi! ${linesImproved} satır, ${wcagCriteria.length} WCAG kriteri - ${aiProviderManager.getCurrentProviderName()} (${aiProviderManager.getCurrentModelName()})`, "Değişiklikleri Uygula", "Önizleme Göster", "İstatistikleri Görüntüle").then(async (action) => {
                         if (action === "Değişiklikleri Uygula") {
                             const edit = new vscode.WorkspaceEdit();
                             edit.replace(document.uri, selection, improvementResult.improvedCode);

@@ -91,7 +91,8 @@ export class OptimizedHttpAgent {
     public async retryWithBackoff<T>(
         requestFn: () => Promise<T>,
         maxRetries: number = 3,
-        baseDelayMs: number = 1000
+        baseDelayMs: number = 1000,
+        shouldCancel?: () => boolean
     ): Promise<T> {
         let lastError: Error | undefined;
 
@@ -112,7 +113,11 @@ export class OptimizedHttpAgent {
                 }
 
                 if (attempt < maxRetries) {
-                    const delay = baseDelayMs * Math.pow(2, attempt);
+                    if (shouldCancel && shouldCancel()) {
+                        throw new Error('Operation cancelled');
+                    }
+                    const jitter = Math.floor(Math.random() * 100);
+                    const delay = baseDelayMs * Math.pow(2, attempt) + jitter;
                     await new Promise(resolve => setTimeout(resolve, delay));
                 }
             }

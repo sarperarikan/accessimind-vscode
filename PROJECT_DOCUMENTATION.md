@@ -3,9 +3,9 @@
 ## 📋 Genel Bakış
 
 **Proje Adı:** AccessiMind (Önceki adı: WCAG Enhancer)  
-**Sürüm:** 1.0.0  
+**Sürüm:** 1.1.2  
 **Geliştirici:** Sarper Arıkan  
-**Amaç:** AI destekli WCAG 2.2 uyumluluğu analizi ve kod iyileştirme  
+**Amaç:** AI destekli WCAG 2.2 uyumu analizi ve kod iyileştirme  
 **Platform:** Visual Studio Code Extension  
 
 ## 🏗️ Proje Mimarisi
@@ -50,7 +50,7 @@ wcag-enhancer-development-files/
 
 ### 🤖 AI Provider Sistemi
 **📄 src/utils/aiProvider.ts** - AI sağlayıcı yönetimi
-- **Multi-provider support**: Gemini ve GitHub Copilot desteği
+- **Multi-provider support**: Gemini, GitHub Copilot ve Ollama (Yerel AI) desteği
 - **Dynamic model selection**: Model seçimi ve yönetimi
 - **Token tracking**: AI kullanım takibi
 - **Error handling**: Kapsamlı hata yönetimi
@@ -98,7 +98,7 @@ wcag-enhancer-development-files/
 **📄 src/core/wcagAnalyzer.ts** - WCAG analiz motoru
 - **Rule engine**: WCAG kuralları motoru
 - **Code parsing**: Kod analizi
-- **Compliance checking**: Uyumluluk kontrolü
+- **Conformance checking**: Uyum kontrolü
 
 **📄 src/core/wcagImprover.ts** - Kod iyileştirme sistemi
 - **Automated fixes**: Otomatik düzeltmeler
@@ -219,8 +219,9 @@ wcag-enhancer-development-files/
 ### 🔌 API Entegrasyonları
 | Servis | Durum | Özellikler |
 |--------|-------|------------|
-| Google Gemini | ✅ | 2.0 Flash, API key yönetimi |
-| GitHub Copilot | ✅ | Multi-model, dinamik seçim |
+| Google Gemini | ✅ | 2.5 Pro/Flash, API key yönetimi |
+| GitHub Copilot | ✅ | GPT-5.2, Multi-model, dinamik seçim |
+| Ollama (Local) | ✅ | Llama 3, Mistral, 100% Gizlilik |
 | Jira API | ✅ | Görev oluşturma, takip |
 | VS Code API | ✅ | WebView, TreeView, Commands |
 
@@ -283,7 +284,7 @@ wcag-enhancer-development-files/
 - **Local Storage**: Tüm veriler yerel
 - **No Telemetry**: Kullanıcı verisi toplama yok
 - **Opt-in Analytics**: İsteğe bağlı analitik
-- **GDPR Compliance**: GDPR uyumluluğu
+- **GDPR Conformance**: GDPR uyumu
 
 ## 📖 Kullanım Senaryoları
 
@@ -312,13 +313,14 @@ wcag-enhancer-development-files/
 
 ### 📚 WCAG 2.2 Kriterleri
 - **Level A**: Temel erişilebilirlik
-- **Level AA**: Standart uyumluluk
+- **Level AA**: Standart uyum
 - **Level AAA**: Gelişmiş erişilebilirlik
 
 ### 🤖 AI Provider Dokümantasyonu
-- **Gemini API**: Model seçimi ve optimizasyon
-- **Copilot Integration**: VS Code entegrasyonu
-- **Token Management**: Maliyet optimizasyonu
+- **Gemini API**: Google Bulut AI entegrasyonu
+- **Copilot Integration**: VS Code Language Model entegrasyonu
+- **Ollama Support**: Yerel AI (Local AI) ile 100% gizlilik
+- **Token Management**: Kullanım ve maliyet optimizasyonu
 
 ### 🛠️ Geliştirici Kaynakları
 - **VS Code API**: Extension geliştirme
