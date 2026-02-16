@@ -1,0 +1,33 @@
+/* VS Code Theme Compatibility */
+:root {
+	--vscode-font-family: var(--vscode-font-family);
+	--vscode-font-size: var(--vscode-font-size);
+	--vscode-foreground: var(--vscode-foreground);
+	--vscode-background: var(--vscode-background);
+	--vscode-editor-background: var(--vscode-editor-background);
+	--vscode-panel-border: var(--vscode-panel-border);
+	--vscode-button-background: var(--vscode-button-background);
+	--vscode-button-foreground: var(--vscode-button-foreground);
+	--vscode-button-hoverBackground: var(--vscode-button-hoverBackground);
+	--vscode-button-secondaryBackground: var(--vscode-button-secondaryBackground);
+	--vscode-button-secondaryForeground: var(--vscode-button-secondaryForeground);
+	--vscode-button-secondaryHoverBackground: var(--vscode-button-secondaryHoverBackground);
+	--vscode-button-border: var(--vscode-button-border);
+	--vscode-input-background: var(--vscode-input-background);
+	--vscode-input-foreground: var(--vscode-input-foreground);
+	--vscode-input-border: var(--vscode-input-border);
+	--vscode-textLink-foreground: var(--vscode-textLink-foreground);
+	--vscode-textLink-activeForeground: var(--vscode-textLink-activeForeground);
+	--vscode-focusBorder: var(--vscode-focusBorder);
+	--vscode-errorForeground: var(--vscode-errorForeground);
+	--vscode-successForeground: var(--vscode-successForeground);
+	--vscode-warningForeground: var(--vscode-warningForeground);
+	--vscode-descriptionForeground: var(--vscode-descriptionForeground);
+	--vscode-tab-activeBackground: var(--vscode-tab-activeBackground);
+	--vscode-tab-activeForeground: var(--vscode-tab-activeForeground);
+	--vscode-list-hoverBackground: var(--vscode-list-hoverBackground);
+	--vscode-progressBar-background: var(--vscode-progressBar-background);
+	--vscode-progressBar-foreground: var(--vscode-progressBar-foreground);
+	--vscode-inputValidation-errorBackground: var(--vscode-inputValidation-errorBackground);
+	--vscode-inputValidation-errorBorder: var(--vscode-inputValidation-errorBorder);
+} 
