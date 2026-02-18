@@ -83,9 +83,7 @@ export class WizardManager {
 			providerId = "ollama";
 		}
 
-		await this.setupProvider(providerId);
-
-		// Step 1.5: API Key for Gemini or URL for Ollama
+		// Step 1.5: API Key for Gemini or URL for Ollama — BEFORE setupProvider to ensure correct URL is used
 		if (providerId === "gemini") {
 			const apiKey = await vscode.window.showInputBox({
 				title: localization.getString("wizard.apikey.title"),
@@ -105,24 +103,46 @@ export class WizardManager {
 				return; // User cancelled
 			}
 
+			await this.setupProvider(providerId);
+
 			const apiKeySuccess = await this.setupApiKey(apiKey);
 			if (!apiKeySuccess) {
 				vscode.window.showErrorMessage(localization.getString("wizard.apiKey.invalid"));
 				return;
 			}
 		} else if (providerId === "ollama") {
+			// Ask for URL FIRST so setupProvider uses the correct URL for availability check
 			const ollamaUrl = await vscode.window.showInputBox({
-				title: localization.getStringWithParams("wizard.setup.step.title", { step: 1, title: "Ollama URL" }),
+				title: localization.getStringWithParams("wizard.setup.step.title", { step: 2, title: "Ollama URL" }),
 				prompt: localization.getString("wizard.ollama.url.prompt"),
 				value: "http://localhost:11434",
 				placeHolder: "http://localhost:11434",
-				ignoreFocusOut: false
+				ignoreFocusOut: false,
+				validateInput: (value) => {
+					if (!value || value.trim().length === 0) {
+						return isEnglish ? "Please enter a valid URL" : "Lütfen geçerli bir URL girin";
+					}
+					try {
+						new URL(value);
+						return null;
+					} catch {
+						return isEnglish ? "Please enter a valid URL (e.g. http://localhost:11434)" : "Lütfen geçerli bir URL girin (örn. http://localhost:11434)";
+					}
+				}
 			});
 
-			if (ollamaUrl) {
-				await this.setupOllamaUrl(ollamaUrl);
+			if (!ollamaUrl) {
+				return; // User cancelled
 			}
+
+			// Save URL to config BEFORE calling setupProvider so isAvailable() uses the correct URL
+			await this.setupOllamaUrl(ollamaUrl);
+			await this.setupProvider(providerId);
+		} else {
+			// Copilot or other providers
+			await this.setupProvider(providerId);
 		}
+
 
 		// Step 2: Select Model
 		const availableModels = await this.getAvailableModelsForWizard();

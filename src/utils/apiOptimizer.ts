@@ -193,7 +193,7 @@ export class PromptOptimizer {
     /**
      * Truncate code if it's too long
      */
-    public static truncateCode(code: string, maxChars: number = 8000): string {
+    public static truncateCode(code: string, maxChars: number = 200000): string {
         if (code.length <= maxChars) {
             return code;
         }
