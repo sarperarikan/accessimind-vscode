@@ -60,6 +60,14 @@ export class WizardManager {
 				description: localization.getString("wizard.provider.ollama.description"),
 				detail: localization.getString("wizard.provider.ollama.detail"),
 				picked: false
+			},
+			{
+				label: "$(terminal) Codex Subscription",
+				description: isEnglish ? "Use Codex CLI with your ChatGPT/Codex subscription" : "ChatGPT/Codex aboneliğinizle Codex CLI kullanın",
+				detail: isEnglish
+					? "Requires Codex CLI signed in with ChatGPT. No OpenAI API key is used."
+					: "ChatGPT ile oturum açmış Codex CLI gerekir. OpenAI API anahtarı kullanılmaz.",
+				picked: false
 			}
 		];
 
@@ -79,6 +87,8 @@ export class WizardManager {
 			providerId = "gemini";
 		} else if (selectedProvider.label.includes("Copilot")) {
 			providerId = "vscode-copilot";
+		} else if (selectedProvider.label.includes("Codex")) {
+			providerId = "codex-subscription";
 		} else {
 			providerId = "ollama";
 		}
@@ -148,7 +158,8 @@ export class WizardManager {
 		const availableModels = await this.getAvailableModelsForWizard();
 		const providerModels = providerId === "gemini" ? availableModels.gemini
 			: providerId === "vscode-copilot" ? availableModels.copilot
-				: availableModels.ollama;
+				: providerId === "codex-subscription" ? availableModels.codex
+					: availableModels.ollama;
 
 		if (providerModels && providerModels.length > 0) {
 			const modelItems: vscode.QuickPickItem[] = providerModels.map((m: any) => ({
@@ -286,11 +297,13 @@ export class WizardManager {
 			gemini: Array<{ id: string, name: string, description: string, speed: string, quality: string, recommended?: boolean }>;
 			copilot: Array<{ id: string, name: string, description: string, speed: string, quality: string, recommended?: boolean, available?: boolean }>;
 			ollama: Array<{ id: string, name: string, description: string, speed: string, quality: string, recommended?: boolean, available?: boolean }>;
+			codex: Array<{ id: string, name: string, description: string, speed: string, quality: string, recommended?: boolean, available?: boolean }>;
 			all: Array<{ id: string, name: string, description: string, speed: string, quality: string, recommended?: boolean, available?: boolean }>;
 		} = {
 			gemini: [],
 			copilot: [],
 			ollama: [],
+			codex: [],
 			all: []
 		};
 
@@ -344,15 +357,71 @@ export class WizardManager {
 			models.ollama = await this.getDefaultOllamaModels();
 		}
 
-		models.all = [...models.gemini, ...models.copilot, ...models.ollama];
+		try {
+			const codexModels = await this.aiProviderManager.getAvailableModelsForProvider("codex-subscription");
+			models.codex = codexModels.map((model: any) => ({
+				id: model.id,
+				name: model.name,
+				description: model.description || "Codex subscription model",
+				speed: model.id.includes("mini") || model.id.includes("spark") ? "fast" : "medium",
+				quality: model.id.includes("gpt-5.5") || model.id.includes("gpt-5.4") ? "very-high" : "high",
+				recommended: Boolean(model.recommended),
+				available: true
+			}));
+		} catch (error) {
+			logger.warn("Codex Subscription modelleri yüklenemedi, varsayılan modeller kullanılıyor:", error);
+			models.codex = await this.getDefaultCodexModels();
+		}
+
+		models.all = [...models.gemini, ...models.copilot, ...models.ollama, ...models.codex];
 
 		logger.info("Sihirbaz modelleri yüklendi:", {
 			gemini: models.gemini.length,
 			copilot: models.copilot.length,
+			ollama: models.ollama.length,
+			codex: models.codex.length,
 			total: models.all.length
 		});
 
 		return models;
+	}
+
+	private async getDefaultCodexModels(): Promise<Array<{ id: string, name: string, description: string, speed: string, quality: string, recommended?: boolean, available?: boolean }>> {
+		return [
+			{
+				id: "gpt-5.5",
+				name: "GPT-5.5 via Codex",
+				description: "Recommended frontier Codex model using ChatGPT/Codex subscription auth",
+				speed: "medium",
+				quality: "very-high",
+				recommended: true,
+				available: true
+			},
+			{
+				id: "gpt-5.4",
+				name: "GPT-5.4 via Codex",
+				description: "Frontier coding and reasoning model through Codex CLI",
+				speed: "medium",
+				quality: "very-high",
+				available: true
+			},
+			{
+				id: "gpt-5.4-mini",
+				name: "GPT-5.4 Mini via Codex",
+				description: "Faster Codex model for lighter accessibility analysis tasks",
+				speed: "fast",
+				quality: "high",
+				available: true
+			},
+			{
+				id: "gpt-5.3-codex-spark",
+				name: "GPT-5.3 Codex Spark",
+				description: "Research preview model; availability depends on your ChatGPT plan",
+				speed: "fast",
+				quality: "high",
+				available: true
+			}
+		];
 	}
 
 	private async getAvailableGeminiModels(): Promise<Array<{ id: string, name: string, description: string, speed: string, quality: string, recommended?: boolean }>> {
@@ -398,23 +467,21 @@ export class WizardManager {
 		const localization = LocalizationManager.getInstance();
 
 		return [
-			// Gemini 3 Series (Latest)
 			{
-				id: "gemini-3-flash",
-				name: "Gemini 3 Flash",
-				description: localization.getString("gemini.model.gemini.3.flash.description"),
+				id: "gemini-3.5-flash",
+				name: "Gemini 3.5 Flash",
+				description: "GA frontier model for agentic, coding, and accessibility analysis tasks",
 				speed: "fast",
 				quality: "very-high",
 				recommended: true
 			},
 			{
-				id: "gemini-3-pro",
-				name: "Gemini 3 Pro",
-				description: localization.getString("gemini.model.gemini.3.pro.description"),
-				speed: "medium",
+				id: "gemini-flash-latest",
+				name: "Gemini Flash Latest",
+				description: "Dynamic alias for the latest Gemini Flash release",
+				speed: "fast",
 				quality: "very-high"
 			},
-			// Gemini 2.5 Series
 			{
 				id: "gemini-2.5-flash",
 				name: "Gemini 2.5 Flash",
@@ -429,27 +496,19 @@ export class WizardManager {
 				speed: "medium",
 				quality: "very-high"
 			},
-			// Gemini 2 Series
 			{
-				id: "gemini-2.0-flash",
-				name: "Gemini 2.0 Flash",
-				description: localization.getString("gemini.model.gemini.2.0.flash.description"),
+				id: "gemini-2.5-flash-lite",
+				name: "Gemini 2.5 Flash-Lite",
+				description: "Fast and budget-friendly model in the Gemini 2.5 family",
 				speed: "fast",
 				quality: "high"
 			},
 			{
-				id: "gemini-1.5-flash",
-				name: "Gemini 1.5 Flash",
-				description: localization.getString("gemini.model.gemini.1.5.flash.description"),
+				id: "gemini-3.1-flash-lite",
+				name: "Gemini 3.1 Flash-Lite",
+				description: "Cost-efficient Gemini 3 series model for high-volume tasks",
 				speed: "fast",
 				quality: "high"
-			},
-			{
-				id: "gemini-1.5-pro",
-				name: "Gemini 1.5 Pro",
-				description: localization.getString("gemini.model.gemini.1.5.pro.description"),
-				speed: "medium",
-				quality: "very-high"
 			}
 		];
 	}
@@ -539,11 +598,12 @@ export class WizardManager {
 			// Latest models
 			"gpt-5.2", "gpt-5.2-codex",
 			"gpt-5.1", "gpt-5", "gpt-5-mini",
+			"gemini-3.5-flash", "gemini-flash-latest", "gemini-3.1-flash-lite",
 			"gemini-3-flash", "gemini-3-pro",
 			"claude-4.5", "claude-4.5-sonnet", "claude-4.5-haiku",
 			"o3", "o3-mini", "o4-mini",
 			// Current top models
-			"gemini-2.5-flash", "gemini-2.5-pro",
+			"gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.5-flash-lite",
 			"claude-sonnet-4", "claude-4",
 			"gpt-4.1", "gpt-4o",
 			"claude-3.5-sonnet"
@@ -725,6 +785,8 @@ export class WizardManager {
 			providerName = "GitHub Copilot";
 		} else if (provider === "ollama") {
 			providerName = "Ollama (Local)";
+		} else if (provider === "codex-subscription") {
+			providerName = "Codex Subscription";
 		}
 
 		const message = isEnglish
@@ -1787,6 +1849,13 @@ export class WizardManager {
 					<div class="provider-name">Ollama (Local)</div>
 					<div id="ollama-desc" class="provider-description">${isEnglish ? "Run open-source models locally on your machine" : "Açık kaynaklı modelleri makinenizde yerel olarak çalıştırın"}</div>
 				</button>
+
+				<button type="button" class="provider-card" data-provider="codex-subscription" aria-pressed="false" onclick="selectProvider('codex-subscription', this)">
+					<div class="selection-indicator" aria-hidden="true">✓</div>
+					<div class="provider-icon" aria-hidden="true">⌘</div>
+					<div class="provider-name">Codex Subscription</div>
+					<div id="codex-desc" class="provider-description">${isEnglish ? "Use GPT models through Codex CLI and your ChatGPT/Codex subscription" : "GPT modellerini Codex CLI ve ChatGPT/Codex aboneliğiniz üzerinden kullanın"}</div>
+				</button>
 			</fieldset>
 
 			<!-- Gemini API Key Input (shown when Gemini is selected) -->
@@ -1825,6 +1894,16 @@ export class WizardManager {
 					${isEnglish
 				? "GitHub Copilot uses your existing Copilot subscription. Make sure you have an active subscription and the GitHub Copilot extension installed."
 				: "GitHub Copilot mevcut Copilot aboneliğinizi kullanır. Aktif bir aboneliğiniz ve GitHub Copilot uzantısının yüklü olduğundan emin olun."}
+				</div>
+			</div>
+
+			<!-- Codex Subscription Info (shown when Codex Subscription is selected) -->
+			<div id="codexInfoSection" class="copilot-info-section" style="display: none; margin-top: 20px;">
+				<div class="alert alert-success" role="status">
+					<strong>✅ ${isEnglish ? "Uses ChatGPT/Codex Subscription" : "ChatGPT/Codex Aboneliğini Kullanır"}:</strong>
+					${isEnglish
+				? "AccessiMind will call Codex CLI with codex exec. Sign in first with codex login; no OpenAI API key is used."
+				: "AccessiMind codex exec ile Codex CLI çağırır. Önce codex login ile oturum açın; OpenAI API anahtarı kullanılmaz."}
 				</div>
 			</div>
 
@@ -1929,6 +2008,25 @@ export class WizardManager {
 					${availableModels.ollama.map((model: any) => `
 						<div class="model-option-wrapper">
 							<input type="radio" name="model" id="model-${model.id}" value="${model.id}" data-provider="ollama" class="visually-hidden" ${!model.available ? "disabled" : ""} onchange="selectModel(this.value, 'ollama')">
+							<label for="model-${model.id}" class="model-card ${model.recommended ? "recommended" : ""} ${!model.available ? "unavailable" : ""}">
+								<div class="selection-indicator" aria-hidden="true">✓</div>
+								<div class="model-name">${model.name} ${!model.available ? "(" + (isEnglish ? "Unavailable" : "Kullanılamıyor") + ")" : ""}</div>
+								<div class="model-description">${model.description}</div>
+								<div class="model-badges" aria-hidden="true">
+									<span class="badge speed-${model.speed}">${model.speed}</span>
+									<span class="badge quality-${model.quality}">${model.quality}</span>
+									${!model.available ? '<span class="badge unavailable">' + (isEnglish ? "Unavailable" : "Kullanılamıyor") + "</span>" : ""}
+								</div>
+							</label>
+						</div>
+					`).join("")}
+				</div>
+
+				<!-- Codex Subscription Models -->
+				<div id="codexModels" class="model-grid" role="radiogroup" aria-label="Select Codex Subscription Model" style="display: none;">
+					${availableModels.codex.map((model: any) => `
+						<div class="model-option-wrapper">
+							<input type="radio" name="model" id="model-${model.id}" value="${model.id}" data-provider="codex-subscription" class="visually-hidden" ${!model.available ? "disabled" : ""} onchange="selectModel(this.value, 'codex-subscription')">
 							<label for="model-${model.id}" class="model-card ${model.recommended ? "recommended" : ""} ${!model.available ? "unavailable" : ""}">
 								<div class="selection-indicator" aria-hidden="true">✓</div>
 								<div class="model-name">${model.name} ${!model.available ? "(" + (isEnglish ? "Unavailable" : "Kullanılamıyor") + ")" : ""}</div>
@@ -2286,8 +2384,9 @@ export class WizardManager {
 				const geminiApiSection = document.getElementById('geminiApiKeySection');
 				const copilotInfoSection = document.getElementById('copilotInfoSection');
 				const ollamaUrlSection = document.getElementById('ollamaUrlSection');
+				const codexInfoSection = document.getElementById('codexInfoSection');
 				
-				if (!geminiApiSection || !copilotInfoSection || !ollamaUrlSection) {
+				if (!geminiApiSection || !copilotInfoSection || !ollamaUrlSection || !codexInfoSection) {
 					// Silent fail or log?
 					console.error('Missing sections');
 					return;
@@ -2297,16 +2396,25 @@ export class WizardManager {
 					geminiApiSection.style.display = 'block';
 					copilotInfoSection.style.display = 'none';
 					ollamaUrlSection.style.display = 'none';
+					codexInfoSection.style.display = 'none';
 					announceToScreenReader('${isEnglish ? "Gemini selected. Please enter your API key." : "Gemini seçildi. Lütfen API anahtarınızı girin."}');
 				} else if (provider === 'ollama') {
 					geminiApiSection.style.display = 'none';
 					copilotInfoSection.style.display = 'none';
 					ollamaUrlSection.style.display = 'block';
+					codexInfoSection.style.display = 'none';
 					announceToScreenReader('${isEnglish ? "Ollama selected. Please configure your local URL." : "Ollama seçildi. Lütfen yerel URL'nizi yapılandırın."}');
+				} else if (provider === 'codex-subscription') {
+					geminiApiSection.style.display = 'none';
+					copilotInfoSection.style.display = 'none';
+					ollamaUrlSection.style.display = 'none';
+					codexInfoSection.style.display = 'block';
+					announceToScreenReader('${isEnglish ? "Codex Subscription selected. Make sure Codex CLI is signed in with ChatGPT." : "Codex Subscription seçildi. Codex CLI ile ChatGPT oturumu açıldığından emin olun."}');
 				} else {
 					geminiApiSection.style.display = 'none';
 					copilotInfoSection.style.display = 'block';
 					ollamaUrlSection.style.display = 'none';
+					codexInfoSection.style.display = 'none';
 					announceToScreenReader('${isEnglish ? "GitHub Copilot selected. No API key required." : "GitHub Copilot seçildi. API anahtarı gerekmez."}');
 				}
 				
@@ -2587,6 +2695,7 @@ export class WizardManager {
 			document.getElementById('geminiModels').style.display = provider === 'gemini' ? 'grid' : 'none';
 			document.getElementById('copilotModels').style.display = provider === 'vscode-copilot' ? 'grid' : 'none';
 			document.getElementById('ollamaModels').style.display = provider === 'ollama' ? 'grid' : 'none';
+			document.getElementById('codexModels').style.display = provider === 'codex-subscription' ? 'grid' : 'none';
 		}
 		
 		function showApiConfigForProvider(provider) {
@@ -2891,6 +3000,26 @@ export class WizardManager {
 				ollamaGrid.innerHTML = models.ollama.map((model, index) => \`
 					<div class="model-option-wrapper">
 						<input type="radio" name="model" id="model-\${model.id}" value="\${model.id}" data-provider="ollama" class="visually-hidden" \${!model.available ? 'disabled' : ''} onchange="selectModel(this.value, 'ollama')">
+						<label for="model-\${model.id}" class="model-card \${model.recommended ? 'recommended' : ''} \${!model.available ? 'unavailable' : ''}">
+							<div class="selection-indicator" aria-hidden="true">✓</div>
+							<div class="model-name">\${model.name} \${!model.available ? '(' + (isEnglish ? "Unavailable" : "Kullanılamıyor") + ')' : ''}</div>
+							<div class="model-description">\${model.description}</div>
+							<div class="model-badges" aria-hidden="true">
+								<span class="badge speed-\${model.speed}">\${model.speed}</span>
+								<span class="badge quality-\${model.quality}">\${model.quality}</span>
+								\${!model.available ? '<span class="badge unavailable">' + (isEnglish ? "Unavailable" : "Kullanılamıyor") + '</span>' : ''}
+							</div>
+						</label>
+					</div>
+				\`).join('');
+			}
+
+			const codexGrid = document.getElementById('codexModels');
+			if (codexGrid && models.codex) {
+				console.log('Updating Codex grid, count:', models.codex.length);
+				codexGrid.innerHTML = models.codex.map((model, index) => \`
+					<div class="model-option-wrapper">
+						<input type="radio" name="model" id="model-\${model.id}" value="\${model.id}" data-provider="codex-subscription" class="visually-hidden" \${!model.available ? 'disabled' : ''} onchange="selectModel(this.value, 'codex-subscription')">
 						<label for="model-\${model.id}" class="model-card \${model.recommended ? 'recommended' : ''} \${!model.available ? 'unavailable' : ''}">
 							<div class="selection-indicator" aria-hidden="true">✓</div>
 							<div class="model-name">\${model.name} \${!model.available ? '(' + (isEnglish ? "Unavailable" : "Kullanılamıyor") + ')' : ''}</div>

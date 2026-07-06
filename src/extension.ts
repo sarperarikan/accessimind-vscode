@@ -6,8 +6,17 @@ import { SettingsViewProvider } from "./views/settingsViewProvider";
 import { TabbedMainViewProvider } from "./views/tabbedMainViewProvider";
 import { ChatViewProvider } from "./views/chatViewProvider";
 import { ModernSettingsPanel } from "./views/modernSettingsPanel";
+import { NativeSettingsUi } from "./views/nativeSettingsUi";
 import { HelpPanel } from "./views/helpPanel";
 import { WcagImprover } from "./core/wcagImprover";
+import { createExtensionActions } from "./extensionActions";
+import { registerExtensionCommands } from "./extensionCommands";
+import {
+	loadSavedSettings as bootstrapLoadSavedSettings,
+	loadSettingsFromJson as bootstrapLoadSettingsFromJson,
+	registerJsonManagerCommands as bootstrapRegisterJsonManagerCommands,
+	setupSettingsChangeListener as bootstrapSetupSettingsChangeListener,
+} from "./extensionBootstrap";
 import { StatisticsManager } from "./utils/statisticsManager";
 import { AIProviderManager } from "./utils/aiProvider";
 import { LocalizationManager } from "./utils/localizationManager";
@@ -19,6 +28,9 @@ import { initializeImprovementCommands, previewImprovement } from "./improvement
 import { initializeProviderCommands } from "./providerCommands";
 import { initializeJiraTaskCommands, createJiraTask } from "./jiraTaskCommands";
 import { WizardManager } from "./wizardManager";
+import { InnovationManager } from "./innovation/innovationManager";
+import { AgentSessionManager } from "./agent/agentSessionManager";
+import { configureChatGptAuth, openChatGptAuthGuide, openChatGptBridge } from "./utils/chatGptBridge";
 
 let wcagImprover: WcagImprover;
 let aiProviderManager: AIProviderManager;
@@ -27,12 +39,16 @@ let statsViewProvider: StatsViewProvider;
 let modernStatsViewProvider: ModernStatsViewProvider;
 let settingsViewProvider: SettingsViewProvider;
 let tabbedMainViewProvider: TabbedMainViewProvider;
+let chatViewProvider: ChatViewProvider;
 let localization: LocalizationManager;
 let persistentSettingsManager: PersistentSettingsManager;
 let jsonManager: AccessiMindJsonManager;
 let settingsManager: SettingsManager;
 let statusBarItem: vscode.StatusBarItem;
 let wizardManager: WizardManager;
+let extensionActions: ReturnType<typeof createExtensionActions>;
+let innovationManager: InnovationManager;
+let agentSessionManager: AgentSessionManager;
 
 export async function activate(context: vscode.ExtensionContext) {
 	try {
@@ -44,6 +60,8 @@ export async function activate(context: vscode.ExtensionContext) {
 		statisticsManager = StatisticsManager.getInstance(context);
 		localization = LocalizationManager.getInstance();
 		wizardManager = WizardManager.getInstance();
+		innovationManager = new InnovationManager(context, localization, aiProviderManager);
+		agentSessionManager = new AgentSessionManager(context, aiProviderManager, localization);
 
 		// Initialize persistent settings manager
 		persistentSettingsManager = PersistentSettingsManager.getInstance(context);
@@ -65,6 +83,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		modernStatsViewProvider = new ModernStatsViewProvider(context.extensionUri);
 		settingsViewProvider = new SettingsViewProvider(context);
 		tabbedMainViewProvider = new TabbedMainViewProvider(context.extensionUri, context);
+		chatViewProvider = new ChatViewProvider(context.extensionUri);
 		// Set up real-time statistics for view providers
 		statsViewProvider.setStatisticsManager(statisticsManager);
 		modernStatsViewProvider.setStatisticsManager(statisticsManager);
@@ -100,15 +119,79 @@ export async function activate(context: vscode.ExtensionContext) {
 			vscode.window.registerWebviewViewProvider('wcagEnhancer.statsView', statsViewProvider),
 			vscode.window.registerWebviewViewProvider('wcagEnhancer.modernStatsView', modernStatsViewProvider),
 			vscode.window.registerWebviewViewProvider('wcagEnhancer.tabbedMainView', tabbedMainViewProvider),
-			vscode.window.registerWebviewViewProvider('wcagEnhancer.chatView', new ChatViewProvider(context.extensionUri)),
+			vscode.window.registerWebviewViewProvider('wcagEnhancer.chatView', chatViewProvider),
 			vscode.window.registerTreeDataProvider('wcagEnhancer.settingsView', settingsViewProvider),
 		);
 
 		// Register commands
-		registerCommands(context);
+		extensionActions = createExtensionActions({
+			context,
+			aiProviderManager,
+			localization,
+			statisticsManager,
+			statsViewProvider,
+			modernStatsViewProvider,
+			updateStatusBar,
+			wizardManager,
+			wcagImprover,
+		});
+
+		registerExtensionCommands({
+			context,
+			settingsViewProvider,
+			persistentSettingsManager,
+			onAnalyzeOpenCode: extensionActions.analyzeOpenCodeStructures,
+			onAnalyzeSelectedCode: extensionActions.analyzeSelectedCodeStructure,
+			onPreviewImprovement: previewImprovement,
+			onCreateJiraTask: createJiraTask,
+			onSetApiKey: extensionActions.setApiKey,
+			onTestAIConnection: extensionActions.testAIConnection,
+			onShowWelcome: extensionActions.showDetailedWelcomeScreen,
+			onShowDetailedStatistics: showDetailedStatistics,
+			onExportStatistics: exportStatistics,
+			onResetStatistics: resetStatistics,
+			onInlineChat: extensionActions.handleInlineChat,
+			onOpenSettings: () => {
+				void NativeSettingsUi.open();
+			},
+			onOpenHelp: () => {
+				HelpPanel.createOrShow();
+			},
+			onShowInBrowser: extensionActions.showInBrowser,
+			onRunUserJourneyScan: () => innovationManager.runUserJourneyScan(),
+			onRunDomDiffRisk: () => innovationManager.runDomDiffRiskAnalysis(),
+			onRunDesignTokenGuard: () => innovationManager.runDesignTokenGuard(),
+			onAnalyzeComponentMemory: () => innovationManager.analyzeComponentMemory(),
+			onApplyLastFixToSimilar: () => innovationManager.applyLastFixToSimilarPlaces(),
+			onGenerateA11yTest: () => innovationManager.generateA11yTestFile(),
+			onGeneratePrSummary: () => innovationManager.generatePrReadySummary(),
+			onRunRegressionShield: () => innovationManager.runRegressionShield(),
+			onStartAgentSession: () => agentSessionManager.startSession(),
+			onSelectProviderModel: () => aiProviderManager.selectModelForCurrentProvider().then((modelId) => {
+				if (modelId) {
+					vscode.window.showInformationMessage(`AccessiMind model selected: ${modelId}`);
+				} else {
+					vscode.window.showWarningMessage("No models were found for the current provider.");
+				}
+			}),
+			onConnectCodexAccount: extensionActions.connectCodexAccount,
+			onTestCodexAccount: extensionActions.testCodexAccount,
+			onOpenChatGptBridge: openChatGptBridge,
+			onConfigureChatGptAuth: configureChatGptAuth,
+			onOpenChatGptAuthGuide: openChatGptAuthGuide,
+		});
 
 		// Register JSON Manager commands
-		registerJsonManagerCommands(context);
+		bootstrapRegisterJsonManagerCommands(
+			context,
+			{
+				get: () => jsonManager,
+				set: (value) => {
+					jsonManager = value;
+				},
+			},
+			wizardManager
+		);
 
 		// Initialize status bar
 		initializeStatusBar(context);
@@ -117,13 +200,32 @@ export async function activate(context: vscode.ExtensionContext) {
 		registerDynamicKeybindings(context);
 
 		// Setup settings change listener for JSON sync
-		setupSettingsChangeListener();
+		bootstrapSetupSettingsChangeListener(context, jsonManager);
+
+		context.subscriptions.push(
+			vscode.workspace.onDidChangeConfiguration((event) => {
+				if (!event.affectsConfiguration("wcagEnhancer")) {
+					return;
+				}
+
+				localization.detectLanguage();
+				settingsViewProvider.refreshView();
+				tabbedMainViewProvider.refreshView();
+				chatViewProvider.refreshView();
+				if (event.affectsConfiguration("wcagEnhancer.language")) {
+					ModernSettingsPanel.refreshVisiblePanel();
+				} else {
+					ModernSettingsPanel.syncVisiblePanel();
+				}
+				updateStatusBar();
+			})
+		);
 
 		// Load and apply saved settings (enhanced with persistent settings)
-		await loadSavedSettings();
+		await bootstrapLoadSavedSettings(aiProviderManager, localization);
 
 		// JSON dosyasından ayarları yükle (eğer wizard tamamlanmışsa)
-		await loadSettingsFromJson();
+		await bootstrapLoadSettingsFromJson(jsonManager);
 
 		// Restore persistent settings if available (JSON'dan sonra, böylece persistent settings öncelik alır)
 		await persistentSettingsManager.restoreSettings();
@@ -140,496 +242,6 @@ export async function activate(context: vscode.ExtensionContext) {
 	}
 }
 
-function registerCommands(context: vscode.ExtensionContext) {
-	// New WCAG analysis commands
-	context.subscriptions.push(
-		vscode.commands.registerCommand('wcagEnhancer.analyzeOpenCode', async () => {
-			await analyzeOpenCodeStructures();
-		}),
-
-		vscode.commands.registerCommand('wcagEnhancer.analyzeSelectedCode', async () => {
-			await analyzeSelectedCodeStructure();
-		}),
-
-		vscode.commands.registerCommand('wcagEnhancer.previewImprovement', async () => {
-			await previewImprovement();
-		}),
-
-		vscode.commands.registerCommand('wcagEnhancer.createJiraTask', async () => {
-			await createJiraTask();
-		}),
-
-		vscode.commands.registerCommand('wcagEnhancer.setApiKey', async () => {
-			await setApiKey();
-		}),
-
-		vscode.commands.registerCommand('wcagEnhancer.testAIConnection', async () => {
-			await testAIConnection();
-		}),
-
-		vscode.commands.registerCommand('wcagEnhancer.showWelcome', async () => {
-			await showDetailedWelcomeScreen();
-		}),
-
-		vscode.commands.registerCommand('wcagEnhancer.showDetailedStatistics', async () => {
-			await showDetailedStatistics();
-		}),
-
-		vscode.commands.registerCommand('wcagEnhancer.exportStatistics', async () => {
-			await exportStatistics();
-		}),
-
-		vscode.commands.registerCommand('wcagEnhancer.resetStatistics', async () => {
-			await resetStatistics();
-		}),
-
-
-		vscode.commands.registerCommand('wcagEnhancer.openChat', async () => {
-			await vscode.commands.executeCommand('wcagEnhancer.chatView.focus');
-		}),
-
-		vscode.commands.registerCommand('wcagEnhancer.inlineChat', async () => {
-			await handleInlineChat();
-		}),
-
-		// Settings TreeView command
-		vscode.commands.registerCommand('wcagEnhancer.settings.itemClicked', async (item) => {
-			await settingsViewProvider.handleSettingClick(item);
-		}),
-
-		// Open Modern Settings Panel
-		vscode.commands.registerCommand('wcagEnhancer.openSettings', async () => {
-			ModernSettingsPanel.createOrShow(context);
-		}),
-
-		// Open Help Panel
-		vscode.commands.registerCommand('wcagEnhancer.openHelp', async () => {
-			HelpPanel.createOrShow();
-		}),
-
-		// Persistent Settings Management Commands
-		vscode.commands.registerCommand('wcagEnhancer.restoreSettings', async () => {
-			await persistentSettingsManager.restoreSettings();
-		}),
-
-		vscode.commands.registerCommand('wcagEnhancer.exportSettings', async () => {
-			await persistentSettingsManager.exportPersistedSettings();
-		}),
-
-		vscode.commands.registerCommand('wcagEnhancer.importSettings', async () => {
-			await persistentSettingsManager.importPersistedSettings();
-		}),
-
-		vscode.commands.registerCommand('wcagEnhancer.clearPersistedSettings', async () => {
-			const action = await vscode.window.showWarningMessage(
-				'⚠️ Are you sure you want to clear all persistent settings? This action cannot be undone.',
-				{ modal: true },
-				'Clear Persistent Settings'
-			);
-
-			if (action === 'Clear Persistent Settings') {
-				await persistentSettingsManager.clearPersistedSettings();
-			}
-		}),
-
-		vscode.commands.registerCommand('wcagEnhancer.showSettingsStatus', async () => {
-			const status = persistentSettingsManager.getSettingsStatus();
-			const message = `📊 AccessiMind Settings Status:
-			
-🌍 Global Settings: ${status.globalSettingsCount} items
-📁 Workspace Settings: ${status.workspaceSettingsCount} items
-💾 Cache Size: ${status.cacheSize} items
-✅ Persistent Settings: ${status.hasPersistedSettings ? 'Available' : 'Not Found'}`;
-
-			vscode.window.showInformationMessage(message);
-		}),
-
-		vscode.commands.registerCommand('wcagEnhancer.showInBrowser', async () => {
-			await showInBrowser();
-		})
-	);
-}
-
-async function analyzeOpenCodeStructures(): Promise<void> {
-	const editor = vscode.window.activeTextEditor;
-	if (!editor) {
-		vscode.window.showErrorMessage(localization.getString("error.no.active.editor"));
-		return;
-	}
-
-	const document = editor.document;
-	const fileName = document.fileName;
-	const language = document.languageId;
-	const code = document.getText();
-
-	if (!code.trim()) {
-		vscode.window.showErrorMessage(localization.getString("error.empty.file"));
-		return;
-	}
-
-	try {
-		await vscode.window.withProgress({
-			location: vscode.ProgressLocation.Notification,
-			title: "🔍 Analyzing open code structures...",
-			cancellable: false
-		}, async (progress) => {
-			const startTime = Date.now();
-
-			progress.report({ increment: 0, message: "Preparing AI provider..." });
-
-			const provider = await aiProviderManager.getCurrentProviderInstance();
-
-			progress.report({ increment: 30, message: "Analyzing code structures..." });
-
-			const config = vscode.workspace.getConfiguration("wcagEnhancer");
-			const wcagLevel = config.get("wcagLevel") as "A" | "AA" | "AAA" || "AA";
-			const includeComments = config.get("includeComments") !== false;
-
-			const currentProviderName = aiProviderManager.getCurrentProviderName();
-			progress.report({ increment: 60, message: `Performing WCAG conformance check with ${currentProviderName}...` });
-
-			// Use the unified WCAG prompt via provider.improveCode
-			const improvementResult = await provider.improveCode({
-				code,
-				fileType: fileName.split(".").pop() || "unknown",
-				language,
-				wcagLevel,
-				includeComments,
-				responseLanguage: localization.getCurrentLanguage() as "en" | "tr"
-			});
-
-			const processingTime = Date.now() - startTime;
-
-			progress.report({ increment: 90, message: "Updating code..." });
-
-			if (improvementResult.success && improvementResult.content) {
-				// Extract the improved code from the AI response
-				const improvedCodeMatch = improvementResult.content.match(/```[\w]*\n([\s\S]*?)\n```/);
-				const finalCode = improvedCodeMatch ? improvedCodeMatch[1] : improvementResult.content;
-
-				// Apply the improved code to the editor
-				await editor.edit(editBuilder => {
-					const fullRange = new vscode.Range(
-						document.positionAt(0),
-						document.positionAt(code.length)
-					);
-					editBuilder.replace(fullRange, finalCode);
-				});
-
-				// Record statistics
-				const linesImproved = finalCode.split('\n').length;
-				statisticsManager.recordImprovement({
-					type: "file",
-					language,
-					fileName,
-					linesImproved,
-					processingTime,
-					provider: aiProviderManager.getCurrentProviderName() as "gemini" | "vscode-copilot" | "ollama",
-					model: "current",
-					wcagCriteria: extractWcagCriteriaFromCode(finalCode),
-					tokensUsed: improvementResult.tokensUsed || 0
-				});
-
-				// Update views
-				const stats = statisticsManager.getDetailedStatistics();
-				statsViewProvider.updateStatistics(stats);
-				modernStatsViewProvider.updateStatistics(stats);
-				updateStatusBar();
-
-				vscode.window.showInformationMessage(
-					localization.getStringWithParams("success.analysis.completed.detail", {
-						provider: currentProviderName,
-						lines: linesImproved,
-						time: processingTime
-					})
-				);
-			} else {
-				const errorMessage = improvementResult.error || localization.getString("error.unknown.occurred");
-				vscode.window.showErrorMessage(localization.getStringWithParams("error.analysis.failed.detail", { error: errorMessage }));
-
-				// API anahtarı eksikse kullanıcıyı ayarlara yönlendir
-				if (errorMessage.includes("API anahtarı") || errorMessage.includes("API key")) {
-					const action = await vscode.window.showErrorMessage(
-						localization.getString("prompt.api.key.required"),
-						localization.getString("button.go.to.settings")
-					);
-					if (action === localization.getString("button.go.to.settings")) {
-						vscode.commands.executeCommand('wcagEnhancer.setApiKey');
-					}
-				}
-			}
-		});
-	} catch (error) {
-		logger.error("WCAG analysis error:", error);
-
-		let errorMessage = localization.getString("error.unknown.occurred");
-		if (error instanceof Error) {
-			errorMessage = error.message;
-		} else if (typeof error === 'string') {
-			errorMessage = error;
-		}
-
-		vscode.window.showErrorMessage(localization.getStringWithParams("error.analysis.exception.detail", { error: errorMessage }));
-
-		// API anahtarı eksikse kullanıcıyı ayarlara yönlendir
-		if (errorMessage.includes("API anahtarı") || errorMessage.includes("API key")) {
-			const action = await vscode.window.showErrorMessage(
-				localization.getString("prompt.api.key.required"),
-				localization.getString("button.go.to.settings")
-			);
-			if (action === localization.getString("button.go.to.settings")) {
-				vscode.commands.executeCommand('wcagEnhancer.setApiKey');
-			}
-		}
-	}
-}
-
-async function analyzeSelectedCodeStructure(): Promise<void> {
-	const editor = vscode.window.activeTextEditor;
-	if (!editor) {
-		vscode.window.showErrorMessage(localization.getString("error.no.active.editor"));
-		return;
-	}
-
-	const selection = editor.selection;
-	if (selection.isEmpty) {
-		vscode.window.showErrorMessage(localization.getString("error.no.code.selected"));
-		return;
-	}
-
-	const document = editor.document;
-	const fileName = document.fileName;
-	const language = document.languageId;
-	const selectedCode = document.getText(selection);
-
-	try {
-		await vscode.window.withProgress({
-			location: vscode.ProgressLocation.Notification,
-			title: "🔍 Analyzing selected code structure...",
-			cancellable: false
-		}, async (progress) => {
-			const startTime = Date.now();
-
-			progress.report({ increment: 0, message: "Preparing AI provider..." });
-
-			const provider = await aiProviderManager.getCurrentProviderInstance();
-
-			progress.report({ increment: 30, message: "Analyzing selected code..." });
-
-			const config = vscode.workspace.getConfiguration("wcagEnhancer");
-			const wcagLevel = config.get("wcagLevel") as "A" | "AA" | "AAA" || "AA";
-			const includeComments = config.get("includeComments") !== false;
-
-			const currentProviderName = aiProviderManager.getCurrentProviderName();
-			progress.report({ increment: 60, message: `Applying WCAG implementation with ${currentProviderName}...` });
-
-			// Use the unified WCAG prompt via provider.improveCode with selectedText
-			const improvementResult = await provider.improveCode({
-				code: document.getText(),
-				fileType: fileName.split(".").pop() || "unknown",
-				language,
-				selectedText: selectedCode,
-				wcagLevel,
-				includeComments,
-				responseLanguage: localization.getCurrentLanguage() as "en" | "tr"
-			});
-
-			const processingTime = Date.now() - startTime;
-
-			progress.report({ increment: 90, message: "Updating code..." });
-
-			if (improvementResult.success && improvementResult.content) {
-				// Extract the improved code from the AI response
-				const improvedCodeMatch = improvementResult.content.match(/```[\w]*\n([\s\S]*?)\n```/);
-				const finalCode = improvedCodeMatch ? improvedCodeMatch[1] : improvementResult.content;
-
-				// Replace the selected code
-				await editor.edit(editBuilder => {
-					editBuilder.replace(selection, finalCode);
-				});
-
-				// Record statistics
-				const linesImproved = finalCode.split('\n').length;
-				statisticsManager.recordImprovement({
-					type: "selection",
-					language,
-					fileName,
-					linesImproved,
-					processingTime,
-					provider: aiProviderManager.getCurrentProviderName() as "gemini" | "vscode-copilot" | "ollama",
-					model: "current",
-					wcagCriteria: extractWcagCriteriaFromCode(finalCode),
-					tokensUsed: improvementResult.tokensUsed || 0
-				});
-
-				// Update views
-				const stats = statisticsManager.getDetailedStatistics();
-				statsViewProvider.updateStatistics(stats);
-				modernStatsViewProvider.updateStatistics(stats);
-				updateStatusBar();
-
-				vscode.window.showInformationMessage(
-					localization.getStringWithParams("success.analysis.completed.detail", {
-						provider: currentProviderName,
-						lines: linesImproved,
-						time: processingTime
-					})
-				);
-			} else {
-				const errorMessage = improvementResult.error || localization.getString("error.unknown.occurred");
-				vscode.window.showErrorMessage(localization.getStringWithParams("error.analysis.failed.detail", { error: errorMessage }));
-
-				// API anahtarı eksikse kullanıcıyı ayarlara yönlendir
-				if (errorMessage.includes("API anahtarı") || errorMessage.includes("API key")) {
-					const action = await vscode.window.showErrorMessage(
-						localization.getString("prompt.api.key.required"),
-						localization.getString("button.go.to.settings")
-					);
-					if (action === localization.getString("button.go.to.settings")) {
-						vscode.commands.executeCommand('wcagEnhancer.setApiKey');
-					}
-				}
-			}
-		});
-	} catch (error) {
-		logger.error("Selected code WCAG analysis error:", error);
-
-		let errorMessage = localization.getString("error.unknown.occurred");
-		if (error instanceof Error) {
-			errorMessage = error.message;
-		} else if (typeof error === 'string') {
-			errorMessage = error;
-		}
-
-		vscode.window.showErrorMessage(localization.getStringWithParams("error.analysis.exception.detail", { error: errorMessage }));
-
-		// API anahtarı eksikse kullanıcıyı ayarlara yönlendir
-		if (errorMessage.includes("API anahtarı") || errorMessage.includes("API key")) {
-			const action = await vscode.window.showErrorMessage(
-				localization.getString("prompt.api.key.required"),
-				localization.getString("button.go.to.settings")
-			);
-			if (action === localization.getString("button.go.to.settings")) {
-				vscode.commands.executeCommand('wcagEnhancer.setApiKey');
-			}
-		}
-	}
-}
-
-
-
-async function handleInlineChat(): Promise<void> {
-	const editor = vscode.window.activeTextEditor;
-	if (!editor) {
-		vscode.window.showErrorMessage(localization.getString("error.no.active.editor"));
-		return;
-	}
-
-	const selection = editor.selection;
-	if (selection.isEmpty) {
-		vscode.window.showErrorMessage("❌ Please select code to modify");
-		return;
-	}
-
-	const instructions = await vscode.window.showInputBox({
-		placeHolder: "Enter instructions (e.g., 'Make this accessible', 'Fix contrast')",
-		prompt: "AccessiMind Inline Chat"
-	});
-
-	if (!instructions) return;
-
-	await vscode.window.withProgress({
-		location: vscode.ProgressLocation.Notification,
-		title: "✨ AccessiMind Inline Chat",
-		cancellable: false
-	}, async (progress) => {
-		try {
-			const document = editor.document;
-			const language = document.languageId;
-			const selectedCode = document.getText(selection);
-
-			const provider = await aiProviderManager.getCurrentProviderInstance();
-
-			progress.report({ message: "Thinking..." });
-
-			// Construct specific prompt for inline chat
-			const prompt = `
-INSTRUCTIONS: ${instructions}
-FILE TYPE: ${language}
-
-CODE TO MODIFY:
-\`\`\`${language}
-${selectedCode}
-\`\`\`
-
-Provide the modified code based on the instructions. 
-If the instruction implies WCAG improvements, apply relevant WCAG 2.2 criteria.
-Return ONLY the modified code without markdown code blocks if possible, or inside a code block.
-`;
-
-			const result = await provider.improveCode({
-				code: prompt,
-				fileType: language,
-				language: language,
-				mode: 'edit',
-				selectedText: instructions,
-				includeComments: true
-			});
-
-			if (result.success && result.content) {
-				// Extract the improved code from the AI response
-				const improvedCodeMatch = result.content.match(/```[\w]*\n([\s\S]*?)\n```/);
-				const finalCode = improvedCodeMatch ? improvedCodeMatch[1] : result.content;
-
-				await editor.edit(editBuilder => {
-					editBuilder.replace(selection, finalCode);
-				});
-
-				statisticsManager.recordImprovement({
-					type: "inline-chat",
-					language,
-					fileName: document.fileName,
-					linesImproved: finalCode.split('\n').length,
-					processingTime: 0,
-					provider: aiProviderManager.getCurrentProviderName() as "gemini" | "vscode-copilot",
-					model: "current",
-					wcagCriteria: [],
-					tokensUsed: result.tokensUsed || 0
-				});
-			} else {
-				vscode.window.showErrorMessage(`Inline Chat Error: ${result.error}`);
-			}
-
-		} catch (error) {
-			vscode.window.showErrorMessage(`Error: ${error}`);
-		}
-	});
-}
-
-function extractWcagCriteriaFromCode(code: string): string[] {
-	const criteria: string[] = [];
-	if (!code) return criteria;
-	const perf = vscode.workspace.getConfiguration("wcagEnhancer").get("performance") as any || {};
-	const MAX_SCAN_SIZE = typeof perf?.maxScanSize === "number" ? perf.maxScanSize : 500000;
-	const MAX_MATCHES = typeof perf?.maxRegexMatches === "number" ? perf.maxRegexMatches : 100;
-	if (code.length > MAX_SCAN_SIZE) return criteria;
-	const wcagPatterns = [
-		/\/\*\s*WCAG:\s*([^*]+)\*\//gi,
-		/\/\/\s*WCAG:\s*(.+)/gi,
-		/<!--\s*WCAG:\s*([^-]+)-->/gi
-	];
-	for (const pattern of wcagPatterns) {
-		let count = 0;
-		for (const match of code.matchAll(pattern)) {
-			if (match[1]) {
-				criteria.push(match[1].trim());
-				count++;
-				if (count >= MAX_MATCHES) break;
-			}
-		}
-	}
-	return criteria;
-}
 
 async function showDetailedStatistics(): Promise<void> {
 	const stats = statisticsManager.getDetailedStatistics();
@@ -774,6 +386,7 @@ function initializeStatusBar(context: vscode.ExtensionContext) {
 	showInBrowserStatusBarItem.tooltip = 'AccessiMind: Show in Browser - Live preview';
 	showInBrowserStatusBarItem.show();
 	context.subscriptions.push(showInBrowserStatusBarItem);
+
 }
 
 function updateStatusBar() {
@@ -813,6 +426,26 @@ async function showStatusBarMenu(): Promise<void> {
 			label: "✨ Inline Chat",
 			description: "Modify value with AI instructions",
 			action: "inlineChat"
+		},
+		{
+			label: "$(hubot) Agent Session",
+			description: "Plan, generate, review, and apply production accessibility changes",
+			action: "startAgent"
+		},
+		{
+			label: "$(sparkle) Select Provider Model",
+			description: "Refresh and choose models from the active provider",
+			action: "selectProviderModel"
+		},
+		{
+			label: "$(link-external) Open in ChatGPT",
+			description: "Create an analysis prompt and open ChatGPT or the configured ChatGPT app",
+			action: "openChatGptBridge"
+		},
+		{
+			label: "$(key) Configure ChatGPT Auth",
+			description: "Set the ChatGPT app and MCP URLs for account-authorized analysis handoff",
+			action: "configureChatGptAuth"
 		},
 		{
 			label: "📊 Show Detailed Statistics",
@@ -884,6 +517,18 @@ async function handleStatusBarMenuAction(action: string): Promise<void> {
 			break;
 		case "inlineChat":
 			await vscode.commands.executeCommand('wcagEnhancer.inlineChat');
+			break;
+		case "startAgent":
+			await vscode.commands.executeCommand('wcagEnhancer.startAgentSession');
+			break;
+		case "selectProviderModel":
+			await vscode.commands.executeCommand('wcagEnhancer.selectProviderModel');
+			break;
+		case "openChatGptBridge":
+			await vscode.commands.executeCommand('wcagEnhancer.openChatGptBridge');
+			break;
+		case "configureChatGptAuth":
+			await vscode.commands.executeCommand('wcagEnhancer.configureChatGptAuth');
 			break;
 		case "showDetailedStats":
 			await showDetailedStatistics();
@@ -1359,6 +1004,41 @@ async function showWcagCommands(): Promise<void> {
 			label: "📋 Create Jira Task",
 			description: "Create a Jira task for WCAG analysis",
 			command: "wcagEnhancer.createJiraTask"
+		},
+		{
+			label: "🧭 User Journey Scan",
+			description: "Simulate accessibility journey checks on active file",
+			command: "wcagEnhancer.userJourneyScan"
+		},
+		{
+			label: "🔄 DOM Diff Risk",
+			description: "Compare active file snapshot and calculate accessibility risk score",
+			command: "wcagEnhancer.domDiffRisk"
+		},
+		{
+			label: "🎨 Design Token Guard",
+			description: "Scan tokens and detect low-contrast foreground/background pairs",
+			command: "wcagEnhancer.designTokenGuard"
+		},
+		{
+			label: "🧱 Component Memory",
+			description: "Find repeated components/classes to scale fixes safely",
+			command: "wcagEnhancer.componentMemory"
+		},
+		{
+			label: "📦 Apply Last Fix To Similar",
+			description: "Reapply last detected accessibility fix pattern across similar nodes",
+			command: "wcagEnhancer.applyLastFixToSimilar"
+		},
+		{
+			label: "🧾 Generate PR Summary",
+			description: "Create PR-ready accessibility summary from latest innovation reports",
+			command: "wcagEnhancer.generatePrSummary"
+		},
+		{
+			label: "🛡️ Regression Shield",
+			description: "Compare current accessibility debt against stored baseline",
+			command: "wcagEnhancer.regressionShield"
 		}
 	];
 
@@ -1480,78 +1160,9 @@ async function showWelcomeMessage(context: vscode.ExtensionContext) {
 			);
 
 			if (action === buttonText) {
-				await showDetailedWelcomeScreen();
+				await extensionActions.showDetailedWelcomeScreen();
 			}
 		}, 2000);
-	}
-}
-
-async function showDetailedWelcomeScreen(): Promise<void> {
-	await wizardManager.showWizard();
-}
-
-async function setApiKey(): Promise<void> {
-	const config = vscode.workspace.getConfiguration('wcagEnhancer');
-	const aiConfig = config.get('ai') as any || {};
-	const currentKey = aiConfig.apiKey || '';
-
-	const apiKey = await vscode.window.showInputBox({
-		title: '🔑 Gemini API Key Configuration',
-		prompt: 'Enter your Google Gemini API key from Google AI Studio',
-		placeHolder: 'AIzaSy... (Your API key)',
-		password: true,
-		value: currentKey,
-		validateInput: (value) => {
-			if (!value || value.trim().length === 0) {
-				return '❌ API key cannot be empty';
-			}
-			if (value.length < 20) {
-				return '⚠️ API key seems too short (minimum 20 characters)';
-			}
-			if (!value.startsWith('AIza')) {
-				return '⚠️ Gemini API keys typically start with "AIza"';
-			}
-			return null;
-		}
-	});
-
-	if (apiKey !== undefined) {
-		aiConfig.apiKey = apiKey;
-		await config.update('ai', aiConfig, vscode.ConfigurationTarget.Global);
-
-		vscode.window.showInformationMessage(
-			'✅ Gemini API key updated successfully!',
-			'Test Connection'
-		).then(action => {
-			if (action === 'Test Connection') {
-				testAIConnection();
-			}
-		});
-	}
-}
-
-async function testAIConnection(): Promise<void> {
-	try {
-		await vscode.window.withProgress({
-			location: vscode.ProgressLocation.Notification,
-			title: "🧪 Testing AI connection...",
-			cancellable: false
-		}, async (progress) => {
-			progress.report({ increment: 0, message: 'Validating configuration...' });
-			await new Promise(resolve => setTimeout(resolve, 500));
-
-			progress.report({ increment: 50, message: 'Testing AI provider...' });
-
-			// Import AITestUtils dynamically to avoid circular dependencies
-			const { AITestUtils } = await import('./utils/aiTestUtils');
-			const aiTestUtils = AITestUtils.getInstance();
-			const result = await aiTestUtils.testAIProvider();
-
-			progress.report({ increment: 100, message: 'Showing results...' });
-			await aiTestUtils.showTestResult(result);
-		});
-	} catch (error) {
-		vscode.window.showErrorMessage(`❌ AI test failed: ${error}`);
 	}
 }
 
@@ -3072,324 +2683,6 @@ function getModernStatusPanelContent(stats: any): string {
 	`;
 }
 
-async function loadSavedSettings(): Promise<void> {
-	try {
-		const config = vscode.workspace.getConfiguration('wcagEnhancer');
-
-		// AI provider ve model ayarlarını yükle
-		const aiConfig = config.get('ai') as any || {};
-		const aiModelConfig = config.get('aiModels') as any || {};
-
-		// Provider ayarını yükle
-		if (aiConfig.provider) {
-			await aiProviderManager.setProvider(aiConfig.provider);
-			logger.info(`🔄 Saved AI provider loaded: ${aiConfig.provider}`);
-		}
-
-		// Model ayarını yükle - hem aiConfig hem de aiModelConfig'den kontrol et
-		const selectedModel = aiModelConfig.selectedModel || aiConfig.selectedModel;
-		if (selectedModel) {
-			await aiProviderManager.setModel(selectedModel);
-			logger.info(`🔄 Saved AI model loaded: ${selectedModel}`);
-		}
-
-		// API key'i yükle (güvenlik için log'lanmaz)
-		if (aiConfig.apiKey) {
-			logger.info('🔄 Saved API key loaded');
-		}
-
-		// Dil ayarını yükle
-		const savedLanguage = config.get('language') as string;
-		if (savedLanguage && savedLanguage !== 'auto' && (savedLanguage === 'en' || savedLanguage === 'tr')) {
-			localization.setLanguage(savedLanguage as 'en' | 'tr');
-			logger.info(`🔄 Saved language loaded: ${savedLanguage}`);
-		}
-
-		// WCAG seviyesini yükle
-		const wcagLevel = config.get('wcagLevel');
-		if (wcagLevel) {
-			logger.info(`🔄 Saved WCAG level loaded: ${wcagLevel}`);
-		}
-
-		// Wizard tamamlanma durumunu kontrol et
-		const wizardCompleted = config.get('wizardCompleted', false);
-		if (wizardCompleted) {
-			logger.info('✅ AccessiMind fully configured from saved settings');
-
-			// Ayarların tutarlılığını kontrol et ve gerekirse düzelt
-			if (aiConfig.selectedModel && !aiModelConfig.selectedModel) {
-				await config.update('aiModels', { ...aiModelConfig, selectedModel: aiConfig.selectedModel }, vscode.ConfigurationTarget.Global);
-				logger.info('🔧 Model setting synchronized to aiModels config');
-			} else if (!aiConfig.selectedModel && aiModelConfig.selectedModel) {
-				await config.update('ai', { ...aiConfig, selectedModel: aiModelConfig.selectedModel }, vscode.ConfigurationTarget.Global);
-				logger.info('🔧 Model setting synchronized to ai config');
-			}
-		} else {
-			logger.info('⚠️ AccessiMind configuration incomplete - wizard needed');
-		}
-
-	} catch (error) {
-		logger.error('❌ Error loading saved settings:', error);
-	}
-}
-
-/**
-	* JSON dosyasından ayarları yükle ve VS Code'a uygula
-	*/
-async function loadSettingsFromJson(): Promise<void> {
-	try {
-		if (!jsonManager) {
-			logger.warn("⚠️ JSON Manager henüz başlatılmamış");
-			return;
-		}
-
-		// JSON dosyasından ayarları al
-		const settings = await jsonManager.getSettings();
-
-		// JSON dosyasında ayar varsa VS Code'a uygula
-		if (settings.wizard.completed) {
-			await jsonManager.applyToVSCodeConfiguration();
-			logger.info("✅ JSON dosyasından ayarlar VS Code'a uygulandı");
-		} else {
-			logger.info("ℹ️ Wizard henüz tamamlanmamış, JSON ayarları uygulanmadı");
-		}
-	} catch (error) {
-		logger.error("❌ JSON dosyasından ayar yükleme hatası:", error);
-		// Hata durumunda kullanıcıyı bilgilendir
-		vscode.window.showWarningMessage(
-			"⚠️ AccessiMind settings file could not be read. New settings will be created."
-		);
-	}
-}
-
-/**
- * Ayar değişikliklerini dinle ve JSON'a otomatik kaydet
- */
-function setupSettingsChangeListener(): void {
-	const configChangeListener = vscode.workspace.onDidChangeConfiguration(async (event) => {
-		if (event.affectsConfiguration("wcagEnhancer") && jsonManager) {
-			try {
-				// Küçük bir delay ile çoklu değişiklikleri batch'le
-				setTimeout(async () => {
-					await jsonManager.syncFromVSCodeConfiguration();
-					logger.info("🔄 VS Code ayarları JSON dosyasına senkronize edildi");
-				}, 500);
-			} catch (error) {
-				logger.error("❌ VS Code ayarlarını JSON'a senkronize etme hatası:", error);
-			}
-		}
-	});
-
-	// Extension context'e listener'ı ekle (dispose için)
-	if (jsonManager) {
-		const context = (jsonManager as any).context;
-		if (context && context.subscriptions) {
-			context.subscriptions.push(configChangeListener);
-		}
-	}
-}
-
-/**
- * JSON Manager komutlarını kaydet
- */
-function registerJsonManagerCommands(context: vscode.ExtensionContext): void {
-	// JSON ayarlarını VS Code'a uygula komutu
-	context.subscriptions.push(
-		vscode.commands.registerCommand('wcagEnhancer.applyJsonSettings', async () => {
-			try {
-				if (!jsonManager) {
-					vscode.window.showErrorMessage("❌ JSON Manager bulunamadı");
-					return;
-				}
-
-				await jsonManager.applyToVSCodeConfiguration();
-				vscode.window.showInformationMessage("✅ JSON settings have been applied to VS Code!");
-			} catch (error) {
-				logger.error("❌ JSON ayarlarını uygulama hatası:", error);
-				vscode.window.showErrorMessage("❌ JSON ayarları uygulanamadı: " + error);
-			}
-		})
-	);
-
-	// VS Code ayarlarını JSON'a senkronize et komutu
-	context.subscriptions.push(
-		vscode.commands.registerCommand('wcagEnhancer.syncToJson', async () => {
-			try {
-				if (!jsonManager) {
-					vscode.window.showErrorMessage("❌ JSON Manager bulunamadı");
-					return;
-				}
-
-				await jsonManager.syncFromVSCodeConfiguration();
-				vscode.window.showInformationMessage("✅ VS Code ayarları JSON dosyasına senkronize edildi!");
-			} catch (error) {
-				logger.error("❌ JSON senkronizasyon hatası:", error);
-				vscode.window.showErrorMessage("❌ Senkronizasyon başarısız: " + error);
-			}
-		})
-	);
-
-	// JSON dosya yolunu göster komutu
-	context.subscriptions.push(
-		vscode.commands.registerCommand('wcagEnhancer.showJsonPath', async () => {
-			if (!jsonManager) {
-				vscode.window.showErrorMessage("❌ JSON Manager bulunamadı");
-				return;
-			}
-
-			const jsonPath = jsonManager.getJsonFilePath();
-			const action = await vscode.window.showInformationMessage(
-				`📁 AccessiMind JSON dosya yolu:\n${jsonPath}`,
-				"Dosyayı Aç", "Klasörü Aç", "Yolu Kopyala"
-			);
-
-			switch (action) {
-				case "Dosyayı Aç":
-					const uri = vscode.Uri.file(jsonPath);
-					await vscode.window.showTextDocument(uri);
-					break;
-				case "Klasörü Aç":
-					const folderUri = vscode.Uri.file(require('path').dirname(jsonPath));
-					await vscode.env.openExternal(folderUri);
-					break;
-				case "Yolu Kopyala":
-					await vscode.env.clipboard.writeText(jsonPath);
-					vscode.window.showInformationMessage("📋 Dosya yolu panoya kopyalandı!");
-					break;
-			}
-		})
-	);
-
-	// JSON dosya durumunu göster komutu
-	context.subscriptions.push(
-		vscode.commands.registerCommand('wcagEnhancer.showJsonStatus', async () => {
-			try {
-				if (!jsonManager) {
-					vscode.window.showErrorMessage("❌ JSON Manager bulunamadı");
-					return;
-				}
-
-				const settings = await jsonManager.getSettings();
-				const jsonPath = jsonManager.getJsonFilePath();
-
-				const message = `📊 AccessiMind JSON Durumu:
-
-📁 Dosya Yolu: ${jsonPath}
-✨ Sürüm: ${settings.version}
-📅 Oluşturulma: ${new Date(settings.createdAt).toLocaleString('tr-TR')}
-🔄 Son Güncelleme: ${new Date(settings.lastModified).toLocaleString('tr-TR')}
-
-🧙‍♂️ Wizard Durumu: ${settings.wizard.completed ? '✅ Tamamlandı' : '⏳ Devam ediyor'}
-${settings.wizard.completedAt ? `📅 Tamamlanma: ${new Date(settings.wizard.completedAt).toLocaleString('tr-TR')}` : ''}
-
-⚙️ AI Sağlayıcı: ${settings.settings.ai?.provider || 'Belirlenmemiş'}
-🤖 Model: ${settings.settings.ai?.selectedModel || 'Belirlenmemiş'}
-🔑 API Key: ${settings.settings.ai?.apiKeyConfigured ? '✅ Yapılandırılmış' : '❌ Eksik'}
-🌍 Dil: ${settings.settings.language || 'auto'}
-♿ WCAG Seviyesi: ${settings.settings.wcagLevel || 'AA'}
-
-📈 İstatistikler: ${settings.statistics.enabled ? '✅ Aktif' : '❌ Devre dışı'}
-📊 Toplam Analiz: ${settings.statistics.totalAnalyses}
-🔧 Toplam İyileştirme: ${settings.statistics.totalImprovements}`;
-
-				vscode.window.showInformationMessage(message);
-			} catch (error) {
-				logger.error("❌ JSON durumu gösterme hatası:", error);
-				vscode.window.showErrorMessage("❌ JSON durumu alınamadı: " + error);
-			}
-		})
-	);
-
-	// JSON dosyasını sıfırla komutu
-	context.subscriptions.push(
-		vscode.commands.registerCommand('wcagEnhancer.resetJsonFile', async () => {
-			const action = await vscode.window.showWarningMessage(
-				'⚠️ AccessiMind JSON dosyasını sıfırlamak istediğinizden emin misiniz?\n\nBu işlem tüm wizard ve ayar geçmişinizi silecektir.',
-				{ modal: true },
-				'JSON Dosyasını Sıfırla'
-			);
-
-			if (action === 'JSON Dosyasını Sıfırla') {
-				try {
-					if (!jsonManager) {
-						vscode.window.showErrorMessage("❌ JSON Manager bulunamadı");
-						return;
-					}
-
-					// JSON manager'ı yeniden başlat (bu default dosya oluşturacak)
-					jsonManager.dispose();
-					const newJsonManager = AccessiMindJsonManager.getInstance((jsonManager as any).context);
-					await newJsonManager.initialize();
-
-					// Global değişkeni güncelle
-					jsonManager = newJsonManager;
-					wizardManager.setJsonManager(jsonManager);
-
-					vscode.window.showInformationMessage("✅ AccessiMind JSON dosyası başarıyla sıfırlandı!");
-				} catch (error) {
-					logger.error("❌ JSON sıfırlama hatası:", error);
-					vscode.window.showErrorMessage("❌ JSON dosyası sıfırlanamadı: " + error);
-				}
-			}
-		})
-	);
-
-	// JSON dosyası sağlık kontrolü komutu
-	context.subscriptions.push(
-		vscode.commands.registerCommand('wcagEnhancer.validateJsonHealth', async () => {
-			try {
-				if (!jsonManager) {
-					vscode.window.showErrorMessage("❌ JSON Manager bulunamadı");
-					return;
-				}
-
-				const health = await jsonManager.validateJsonHealth();
-
-				if (health.isHealthy) {
-					vscode.window.showInformationMessage("✅ AccessiMind JSON dosyası sağlıklı!");
-				} else {
-					const action = await vscode.window.showWarningMessage(
-						`⚠️ JSON dosyasında sorunlar bulundu:\n${health.issues.join('\n')}`,
-						"Dosyayı Onar", "Detayları Göster"
-					);
-
-					if (action === "Dosyayı Onar") {
-						await vscode.commands.executeCommand('wcagEnhancer.repairJsonFile');
-					}
-				}
-			} catch (error) {
-				logger.error("❌ JSON sağlık kontrolü hatası:", error);
-				vscode.window.showErrorMessage("❌ Sağlık kontrolü başarısız: " + error);
-			}
-		})
-	);
-
-	// JSON dosyasını onar komutu
-	context.subscriptions.push(
-		vscode.commands.registerCommand('wcagEnhancer.repairJsonFile', async () => {
-			try {
-				if (!jsonManager) {
-					vscode.window.showErrorMessage("❌ JSON Manager bulunamadı");
-					return;
-				}
-
-				const action = await vscode.window.showWarningMessage(
-					'🔧 JSON dosyasını onarım işlemi:\n\n• Mevcut dosya yedeklenecek\n• Yeni default dosya oluşturulacak\n• Mevcut wizard durumu kaybolabilir\n\nDevam etmek istiyor musunuz?',
-					{ modal: true },
-					'Dosyayı Onar'
-				);
-
-				if (action === 'Dosyayı Onar') {
-					await jsonManager.repairJsonFile();
-				}
-			} catch (error) {
-				logger.error("❌ JSON onarım hatası:", error);
-				vscode.window.showErrorMessage("❌ Dosya onarılamadı: " + error);
-			}
-		})
-	);
-}
-
 export function deactivate() {
 	logger.info('🔄 AccessiMind deactivating...');
 
@@ -3412,163 +2705,11 @@ export function deactivate() {
 }
 
 
-async function showInBrowser(): Promise<void> {
-	const path = require('path');
-	const fs = require('fs');
-	const { LocalizationManager } = await import("./utils/localizationManager");
-	const localization = LocalizationManager.getInstance();
-	const isEnglish = localization.getCurrentLanguage() === "en";
 
-	const editor = vscode.window.activeTextEditor;
-	if (!editor) {
-		vscode.window.showWarningMessage(
-			isEnglish ? "No active file. Open an HTML file to preview." : "Aktif dosya yok. Önizleme için bir HTML dosyası açın."
-		);
-		return;
-	}
 
-	const document = editor.document;
-	const content = document.getText();
-	const fileName = path.basename(document.fileName);
-	const fileExt = path.extname(document.fileName).toLowerCase();
 
-	// Build the preview HTML
-	let previewHtml: string;
 
-	if (['.html', '.htm'].includes(fileExt)) {
-		// HTML file - show directly with live reload script
-		previewHtml = content;
-	} else {
-		// Non-HTML file - wrap in a styled code viewer
-		const escapedContent = content
-			.replace(/&/g, '&amp;')
-			.replace(/</g, '&lt;')
-			.replace(/>/g, '&gt;')
-			.replace(/"/g, '&quot;');
 
-		previewHtml = `<!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>AccessiMind Preview - ${fileName}</title>
-	<style>
-		:root {
-			--bg: #1e1e2e;
-			--surface: #262637;
-			--text: #cdd6f4;
-			--accent: #89b4fa;
-			--border: #45475a;
-			--green: #a6e3a1;
-			--red: #f38ba8;
-			--yellow: #f9e2af;
-		}
-		* { margin: 0; padding: 0; box-sizing: border-box; }
-		body {
-			font-family: 'Segoe UI', system-ui, sans-serif;
-			background: var(--bg);
-			color: var(--text);
-			min-height: 100vh;
-		}
-		.header {
-			background: var(--surface);
-			border-bottom: 1px solid var(--border);
-			padding: 16px 24px;
-			display: flex;
-			align-items: center;
-			gap: 12px;
-		}
-		.header h1 {
-			font-size: 18px;
-			font-weight: 600;
-			color: var(--accent);
-		}
-		.badge {
-			background: var(--accent);
-			color: var(--bg);
-			padding: 2px 8px;
-			border-radius: 12px;
-			font-size: 12px;
-			font-weight: 600;
-		}
-		.content {
-			padding: 24px;
-		}
-		pre {
-			background: var(--surface);
-			border: 1px solid var(--border);
-			border-radius: 8px;
-			padding: 16px;
-			overflow-x: auto;
-			font-family: 'Cascadia Code', 'Fira Code', monospace;
-			font-size: 14px;
-			line-height: 1.6;
-			tab-size: 4;
-			counter-reset: line;
-		}
-		.line-numbers {
-			counter-reset: line;
-		}
-		.line-numbers span {
-			counter-increment: line;
-			display: block;
-		}
-		.line-numbers span::before {
-			content: counter(line);
-			display: inline-block;
-			width: 3em;
-			text-align: right;
-			margin-right: 1em;
-			color: var(--border);
-			border-right: 1px solid var(--border);
-			padding-right: 0.8em;
-		}
-		.footer {
-			position: fixed;
-			bottom: 0;
-			left: 0;
-			right: 0;
-			background: var(--surface);
-			border-top: 1px solid var(--border);
-			padding: 8px 24px;
-			font-size: 12px;
-			color: var(--border);
-			display: flex;
-			justify-content: space-between;
-		}
-	</style>
-</head>
-<body>
-	<header class="header">
-		<h1>♿ AccessiMind Preview</h1>
-		<span class="badge">${fileExt.slice(1).toUpperCase()}</span>
-		<span>${fileName}</span>
-	</header>
-	<main class="content">
-		<pre class="line-numbers"><code>${escapedContent.split('\n').map(line => '<span>' + line + '</span>').join('\n')}</code></pre>
-	</main>
-	<footer class="footer">
-		<span>AccessiMind - Live Preview</span>
-		<span>Lines: ${content.split('\n').length} | Size: ${(content.length / 1024).toFixed(1)}KB</span>
-	</footer>
-</body>
-</html>`;
-	}
 
-	// Write to temp file and open in browser
-	const os = require('os');
-	const tmpDir = path.join(os.tmpdir(), 'accessimind-preview');
-	if (!fs.existsSync(tmpDir)) {
-		fs.mkdirSync(tmpDir, { recursive: true });
-	}
 
-	const previewPath = path.join(tmpDir, 'preview.html');
-	fs.writeFileSync(previewPath, previewHtml, 'utf-8');
 
-	const previewUri = vscode.Uri.file(previewPath);
-	await vscode.env.openExternal(previewUri);
-
-	vscode.window.showInformationMessage(
-		localization.getString("success.preview.opened")
-	);
-}

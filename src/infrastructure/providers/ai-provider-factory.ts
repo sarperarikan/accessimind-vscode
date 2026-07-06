@@ -7,6 +7,7 @@ import { AIProvider } from "./ai-provider.types";
 import { GeminiProvider } from "./gemini-provider";
 import { VSCodeCopilotProvider } from "./copilot-provider";
 import { OllamaProvider } from "./ollama-provider";
+import { CodexSubscriptionProvider } from "./codex-subscription-provider";
 
 // ---------------------------------------------------------------------------
 // Factory interface (ISP: clients depend only on what they use)
@@ -57,5 +58,6 @@ export class AIProviderFactory implements IAIProviderFactory {
         this.registry.set("gemini", GeminiProvider);
         this.registry.set("vscode-copilot", VSCodeCopilotProvider);
         this.registry.set("ollama", OllamaProvider);
+        this.registry.set("codex-subscription", CodexSubscriptionProvider);
     }
 }

@@ -4,6 +4,7 @@ import { StatisticsManager } from "./utils/statisticsManager";
 import { logger } from "./utils/logger";
 import { buildJiraSystemPrompt } from "./prompts/jiraSystemPrompt";
 import { LocalizationManager } from "./utils/localizationManager";
+import { getRuntimeSettings } from "./utils/runtimeSettings";
 
 // WCAG 2.2 Criteria Reference - Title and URL mapping
 const WCAG_CRITERIA_MAP: { [key: string]: { title: string; level: string } } = {
@@ -213,28 +214,38 @@ async function getJiraTaskDetails(customPrompt: string, includeCustomPrompt: boo
 	issueType: string;
 	customPrompt?: string;
 } | null> {
+	const jiraSettings = getRuntimeSettings().jira;
 	// Get issue type first
-	const issueType = await vscode.window.showQuickPick([
+	const issueTypeOptions = [
 		{ label: "🐛 Bug", value: "Bug", description: "Accessibility defect that needs to be fixed" },
 		{ label: "📖 Story", value: "Story", description: "User story for accessibility improvement" },
 		{ label: "📋 Task", value: "Task", description: "Technical task for accessibility enhancement" },
 		{ label: "✨ Improvement", value: "Improvement", description: "Enhancement to existing accessibility" }
+	];
+	const issueType = await vscode.window.showQuickPick([
+		...issueTypeOptions.filter((option) => option.value === jiraSettings.issueType),
+		...issueTypeOptions.filter((option) => option.value !== jiraSettings.issueType)
 	], {
 		title: "Select Issue Type",
-		placeHolder: "Choose the Jira issue type for this WCAG task"
+		placeHolder: `Choose the Jira issue type for this WCAG task${jiraSettings.issueType ? ` (default: ${jiraSettings.issueType})` : ""}`
 	});
 
 	if (!issueType) return null;
 
 	// Get task priority
-	const priority = await vscode.window.showQuickPick([
+	const priorityOptions = [
 		{ label: "🔴 Critical", value: "Critical", description: "Blocks accessibility for many users" },
 		{ label: "🟠 High", value: "High", description: "Significant accessibility barrier" },
 		{ label: "🟡 Medium", value: "Medium", description: "Important accessibility improvement" },
 		{ label: "🟢 Low", value: "Low", description: "Nice-to-have accessibility enhancement" }
+	];
+	const defaultPriority = jiraSettings.priorityMapping === "impact" ? "High" : "Medium";
+	const priority = await vscode.window.showQuickPick([
+		...priorityOptions.filter((option) => option.value === defaultPriority),
+		...priorityOptions.filter((option) => option.value !== defaultPriority)
 	], {
 		title: "Select Task Priority",
-		placeHolder: "Choose the priority level for this WCAG task"
+		placeHolder: `Choose the priority level for this WCAG task (default: ${defaultPriority})`
 	});
 
 	if (!priority) return null;
@@ -365,6 +376,7 @@ async function showJiraTaskContent(content: string, fileName: string, wcagCriter
 	const summary = extractSummary(content);
 	const priority = extractPriority(content);
 	const description = extractDescription(content);
+	const jiraSettings = getRuntimeSettings().jira;
 
 	// Prepare JSON export data with Summary first
 	const jiraJson = {
@@ -372,6 +384,8 @@ async function showJiraTaskContent(content: string, fileName: string, wcagCriter
 		description: description,
 		issueType: issueType || "Task",
 		priority: priority,
+		projectKey: jiraSettings.projectKey || "",
+		baseUrl: jiraSettings.baseUrl || "",
 		labels: ["accessibility", "wcag", ...wcagCriteria?.map(c => `wcag-${c}`) || []],
 		wcagCriteria: wcagCriteria || [],
 		fileName: fileName,

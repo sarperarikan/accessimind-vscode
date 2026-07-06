@@ -1,5 +1,10 @@
 import * as vscode from "vscode";
 import { AITestUtils } from "./aiTestUtils";
+import {
+	getAiConfig,
+	getNormalizedSelectedModel,
+	updateNormalizedSelectedModel,
+} from "./configurationUtils";
 import { logger } from "./logger";
 import { LocalizationManager } from "./localizationManager";
 
@@ -21,27 +26,28 @@ export class SettingsManager {
 	}
 
 	private setupConfigChangeListener(): void {
-		this.configChangeListener = vscode.workspace.onDidChangeConfiguration(event => {
+		this.configChangeListener = vscode.workspace.onDidChangeConfiguration((event) => {
 			if (event.affectsConfiguration("wcagEnhancer.ai")) {
-				this.onAISettingsChanged();
+				void this.onAISettingsChanged();
+			}
+
+			if (event.affectsConfiguration("wcagEnhancer.language")) {
+				LocalizationManager.getInstance().detectLanguage();
 			}
 		});
 	}
 
 	private async onAISettingsChanged(): Promise<void> {
 		const config = vscode.workspace.getConfiguration("wcagEnhancer");
-		const aiConfig = config.get("ai") as any;
+		const aiConfig = getAiConfig(config);
 		const localization = LocalizationManager.getInstance();
 
-		if (aiConfig?.provider === "gemini") {
-			const apiKey = aiConfig?.apiKey;
-			if (apiKey && apiKey.trim() !== "") {
-				vscode.window.showInformationMessage(
-					localization.getString("settings.updated")
-				);
+		if (aiConfig.provider === "gemini") {
+			const apiKey = aiConfig.apiKey;
+			if (typeof apiKey === "string" && apiKey.trim() !== "") {
+				vscode.window.showInformationMessage(localization.getString("settings.updated"));
 
-				// Auto test if enabled
-				if (aiConfig?.autoTestOnChange) {
+				if (aiConfig.autoTestOnChange) {
 					await this.aiTestUtils.testAIProvider();
 				}
 			} else {
@@ -49,13 +55,12 @@ export class SettingsManager {
 					localization.getString("settings.warn.gemini.key.missing")
 				);
 			}
-		} else if (aiConfig?.provider === "vscode-copilot") {
+		} else if (aiConfig.provider === "vscode-copilot") {
 			vscode.window.showInformationMessage(
 				localization.getString("settings.info.copilot.selected")
 			);
 
-			// Auto test if enabled
-			if (aiConfig?.autoTestOnChange) {
+			if (aiConfig.autoTestOnChange) {
 				await this.aiTestUtils.testAIProvider();
 			}
 		}
@@ -63,47 +68,38 @@ export class SettingsManager {
 
 	public async updateAIProvider(provider: string): Promise<void> {
 		const config = vscode.workspace.getConfiguration("wcagEnhancer");
-		const aiConfig = config.get("ai") as any || {};
+		const aiConfig = getAiConfig(config);
 		aiConfig.provider = provider;
 		await config.update("ai", aiConfig, vscode.ConfigurationTarget.Global);
 	}
 
 	public async updateApiKey(apiKey: string): Promise<void> {
 		const config = vscode.workspace.getConfiguration("wcagEnhancer");
-		const aiConfig = config.get("ai") as any || {};
+		const aiConfig = getAiConfig(config);
 		aiConfig.apiKey = apiKey;
 		await config.update("ai", aiConfig, vscode.ConfigurationTarget.Global);
 	}
 
 	public async updateSelectedModel(model: string): Promise<void> {
 		const config = vscode.workspace.getConfiguration("wcagEnhancer");
-
-		// Model ayarını hem ai config'e hem de aiModels config'e kaydet (tutarlılık için)
-		const aiConfig = config.get("ai") as any || {};
-		aiConfig.selectedModel = model;
-		await config.update("ai", aiConfig, vscode.ConfigurationTarget.Global);
-
-		const aiModelConfig = config.get("aiModels") as any || {};
-		aiModelConfig.selectedModel = model;
-		await config.update("aiModels", aiModelConfig, vscode.ConfigurationTarget.Global);
+		await updateNormalizedSelectedModel(config, model);
 	}
 
-	public async updateAISetting(key: string, value: any): Promise<void> {
+	public async updateAISetting(key: string, value: unknown): Promise<void> {
 		const config = vscode.workspace.getConfiguration("wcagEnhancer");
-		const aiConfig = config.get("ai") as any || {};
+		const aiConfig = getAiConfig(config);
 		aiConfig[key] = value;
 		await config.update("ai", aiConfig, vscode.ConfigurationTarget.Global);
 	}
 
 	public async validateSettings(): Promise<{ isValid: boolean; message: string }> {
-		const config = vscode.workspace.getConfiguration("wcagEnhancer");
-		const aiConfig = config.get("ai") as any;
+		const aiConfig = this.getAIConfig();
 		const localization = LocalizationManager.getInstance();
 
-		if (!aiConfig) {
+		if (!aiConfig || Object.keys(aiConfig).length === 0) {
 			return {
 				isValid: false,
-				message: localization.getString("settings.error.config.missing")
+				message: localization.getString("settings.error.config.missing"),
 			};
 		}
 
@@ -111,30 +107,30 @@ export class SettingsManager {
 		if (!provider) {
 			return {
 				isValid: false,
-				message: localization.getString("settings.error.provider.missing")
+				message: localization.getString("settings.error.provider.missing"),
 			};
 		}
 
 		if (provider === "gemini") {
 			const apiKey = aiConfig.apiKey;
-			if (!apiKey || apiKey.trim() === "") {
+			if (typeof apiKey !== "string" || apiKey.trim() === "") {
 				return {
 					isValid: false,
-					message: localization.getString("settings.error.apikey.missing")
+					message: localization.getString("settings.error.apikey.missing"),
 				};
 			}
 
 			if (!apiKey.startsWith("AIza")) {
 				return {
 					isValid: false,
-					message: localization.getString("error.api.key.format")
+					message: localization.getString("error.api.key.format"),
 				};
 			}
 		}
 
 		return {
 			isValid: true,
-			message: localization.getString("settings.valid")
+			message: localization.getString("settings.valid"),
 		};
 	}
 
@@ -145,16 +141,13 @@ export class SettingsManager {
 		} catch (error) {
 			logger.error("AI connection test error:", error);
 			const localization = LocalizationManager.getInstance();
-
-			vscode.window.showErrorMessage(
-				localization.getString("settings.test.failed")
-			);
+			vscode.window.showErrorMessage(localization.getString("settings.test.failed"));
 		}
 	}
 
-	public getAIConfig(): any {
+	public getAIConfig(): ReturnType<typeof getAiConfig> {
 		const config = vscode.workspace.getConfiguration("wcagEnhancer");
-		return config.get("ai") as any || {};
+		return getAiConfig(config);
 	}
 
 	public getCurrentProvider(): string {
@@ -164,21 +157,15 @@ export class SettingsManager {
 
 	public getApiKey(): string {
 		const aiConfig = this.getAIConfig();
-		return aiConfig.apiKey || "";
+		return typeof aiConfig.apiKey === "string" ? aiConfig.apiKey : "";
 	}
 
 	public getSelectedModel(): string {
 		const config = vscode.workspace.getConfiguration("wcagEnhancer");
-		const aiConfig = config.get("ai") as any || {};
-		const aiModelConfig = config.get("aiModels") as any || {};
-
-		// Önce aiModels'dan, sonra ai config'den model almaya çalış
-		return aiModelConfig.selectedModel || aiConfig.selectedModel || "gemini-2.5-flash";
+		return getNormalizedSelectedModel(config);
 	}
 
 	public dispose(): void {
-		if (this.configChangeListener) {
-			this.configChangeListener.dispose();
-		}
+		this.configChangeListener?.dispose();
 	}
-} 
+}

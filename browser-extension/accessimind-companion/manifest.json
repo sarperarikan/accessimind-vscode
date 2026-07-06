@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "AccessiMind Companion",
+  "version": "0.1.0",
+  "description": "Sends the right-clicked page element to AccessiMind in VS Code.",
+  "permissions": [
+    "contextMenus",
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": [
+    "<all_urls>",
+    "http://127.0.0.1/*"
+  ],
+  "background": {
+    "service_worker": "service-worker.js"
+  },
+  "action": {
+    "default_title": "AccessiMind Companion",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content-script.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}

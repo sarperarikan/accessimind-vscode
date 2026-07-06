@@ -4,7 +4,11 @@ import { StatisticsManager } from "./utils/statisticsManager";
 import { LocalizationManager } from "./utils/localizationManager";
 import { StatsViewProvider } from "./views/statsViewProvider";
 import { ModernStatsViewProvider } from "./views/modernStatsViewProvider";
+import { normalizeGeneratedCode } from "./utils/codeGenerationUtils";
+import { getDisabilityFocusInstruction } from "./utils/disabilityFocus";
 import { logger } from "./utils/logger";
+import { getRuntimeSettings } from "./utils/runtimeSettings";
+import { evaluateFixConfidence } from "./innovation/fixConfidence";
 
 // Shared dependencies
 let aiProviderManager: AIProviderManager;
@@ -84,11 +88,19 @@ async function processImprovement(
 			const config = vscode.workspace.getConfiguration("wcagEnhancer");
 			const wcagLevel = config.get("wcagLevel") as "A" | "AA" | "AAA" || "AA";
 			const includeComments = config.get("includeComments") !== false;
+			const runtimeSettings = getRuntimeSettings();
+			const fullCodeForPrompt = [
+				getDisabilityFocusInstruction(
+					runtimeSettings.disabilityFocusGroups as Array<"screenReader" | "lowVision" | "hearing" | "motor" | "cognitive">,
+					currentLanguage
+				),
+				fullCode,
+			].join("\n\n");
 
 			progress.report({ increment: 40, message: localizationManager.getString("progress.applying.rules") });
 
 			const improvementResult = await provider.improveCode({
-				code: fullCode,
+				code: fullCodeForPrompt,
 				fileType: fileName.split(".").pop() || "unknown",
 				language,
 				selectedText: isSelection ? selectedCode : undefined,
@@ -102,6 +114,21 @@ async function processImprovement(
 			progress.report({ increment: 80, message: localizationManager.getString("progress.preparing.results") });
 
 			if (improvementResult.success && improvementResult.improvedCode) {
+				const normalized = normalizeGeneratedCode({
+					originalCode: isSelection ? selectedCode : fullCode,
+					generatedContent: improvementResult.improvedCode,
+					language,
+					mode: isSelection ? "selection" : "file"
+				});
+				improvementResult.improvedCode = normalized.code;
+				const confidence = evaluateFixConfidence(isSelection ? selectedCode : fullCode, improvementResult.improvedCode);
+				if (confidence.pattern && vscode.workspace.workspaceFolders?.length) {
+					await vscode.commands.executeCommand("setContext", "wcagEnhancer.hasLastFixPattern", true);
+				}
+				if (normalized.warnings.length > 0) {
+					void vscode.window.showWarningMessage(normalized.warnings.join(" "));
+				}
+
 				// Count improved lines
 				const originalLines = selectedCode.split("\n");
 				const improvedLines = improvementResult.improvedCode.split("\n");

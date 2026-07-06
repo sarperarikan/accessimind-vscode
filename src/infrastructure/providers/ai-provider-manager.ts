@@ -4,8 +4,14 @@
  * Uses AIProviderFactory (DIP: depends on abstraction, not concretions).
  */
 import * as vscode from "vscode";
+import {
+    getAiConfig,
+    getNormalizedProvider,
+    getNormalizedSelectedModel,
+    updateNormalizedSelectedModel,
+} from "../../utils/configurationUtils";
 import { logger } from "../../utils/logger";
-import { AIProvider, AIResponse, WCAGRequest } from "./ai-provider.types";
+import { AIModelDescriptor, AIProvider, AIResponse, WCAGRequest } from "./ai-provider.types";
 import { AIProviderFactory } from "./ai-provider-factory";
 import { VSCodeCopilotProvider } from "./copilot-provider";
 import { OllamaProvider } from "./ollama-provider";
@@ -94,7 +100,7 @@ export class AIProviderManager {
         this.currentProvider = providerName;
 
         const config = vscode.workspace.getConfiguration("wcagEnhancer");
-        const aiConfig = (config.get("ai") as Record<string, unknown>) || {};
+        const aiConfig = getAiConfig(config);
         aiConfig.provider = providerName;
         await config.update("ai", aiConfig, vscode.ConfigurationTarget.Global);
 
@@ -117,14 +123,7 @@ export class AIProviderManager {
     async setModel(modelId: string): Promise<boolean> {
         try {
             const config = vscode.workspace.getConfiguration("wcagEnhancer");
-            const aiModelConfig =
-                (config.get("aiModels") as Record<string, unknown>) || {};
-            aiModelConfig.selectedModel = modelId;
-            await config.update(
-                "aiModels",
-                aiModelConfig,
-                vscode.ConfigurationTarget.Global
-            );
+            await updateNormalizedSelectedModel(config, modelId);
 
             if (this.currentProvider === "vscode-copilot") {
                 const copilot = this.providers.get(
@@ -141,11 +140,68 @@ export class AIProviderManager {
         }
     }
 
+    async getAvailableModelsForProvider(providerName = this.currentProvider): Promise<AIModelDescriptor[]> {
+        const provider = this.providers.get(providerName);
+        if (!provider) {
+            return [];
+        }
+
+        try {
+            if (providerName === "vscode-copilot") {
+                const copilot = provider as VSCodeCopilotProvider;
+                await copilot.refreshModels();
+            }
+            return await provider.getAvailableModels();
+        } catch (error) {
+            logger.error(`Model discovery failed for provider ${providerName}:`, error);
+            return [];
+        }
+    }
+
+    async refreshCurrentProviderModels(): Promise<AIModelDescriptor[]> {
+        await this.loadCurrentProvider();
+        return this.getAvailableModelsForProvider(this.currentProvider);
+    }
+
+    async selectModelForCurrentProvider(): Promise<string | undefined> {
+        const models = await this.refreshCurrentProviderModels();
+        if (models.length === 0) {
+            return undefined;
+        }
+
+        const selected = await vscode.window.showQuickPick(
+            models.map((model) => ({
+                label: model.recommended ? `$(star-full) ${model.name}` : model.name,
+                description: model.id,
+                detail: [
+                    model.vendor,
+                    model.family,
+                    model.description,
+                    model.inputTokenLimit ? `Input: ${model.inputTokenLimit}` : "",
+                    model.outputTokenLimit ? `Output: ${model.outputTokenLimit}` : "",
+                ].filter(Boolean).join(" | "),
+                model,
+            })),
+            {
+                title: "AccessiMind: Select AI Model",
+                placeHolder: `Current provider: ${this.currentProvider}`,
+                matchOnDescription: true,
+                matchOnDetail: true,
+            }
+        );
+
+        if (!selected) {
+            return undefined;
+        }
+
+        await this.setModel(selected.model.id);
+        return selected.model.id;
+    }
+
     getCurrentModelName(): string {
         try {
             const config = vscode.workspace.getConfiguration("wcagEnhancer");
-            const aiModelConfig = config.get("aiModels") as Record<string, unknown>;
-            const modelId = (aiModelConfig?.selectedModel as string) || "unknown";
+            const modelId = getNormalizedSelectedModel(config, "unknown");
             if (modelId === "unknown") return "Default Model";
             return modelId
                 .replace(/-/g, " ")
@@ -209,8 +265,7 @@ export class AIProviderManager {
     async loadCurrentProvider(): Promise<void> {
         try {
             const config = vscode.workspace.getConfiguration("wcagEnhancer");
-            const aiConfig = config.get("ai") as Record<string, unknown>;
-            const newProvider = (aiConfig?.provider as string) || "gemini";
+            const newProvider = getNormalizedProvider(config);
 
             if (this.currentProvider !== newProvider) {
                 this.currentProvider = newProvider;

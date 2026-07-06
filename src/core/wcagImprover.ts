@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { AIProviderManager } from "../utils/aiProvider";
+import { normalizeGeneratedCode } from "../utils/codeGenerationUtils";
 import { logger } from "../utils/logger";
 
 export interface WcagImprovementOptions {
@@ -57,8 +58,15 @@ export class WcagImprover {
 
 			if (response.success && response.content) {
 				// Extract WCAG criteria from the improved code comments
-				const wcagCriteria = this.extractWcagCriteriaFromCode(response.content);
-				const improvementsSummary = this.generateImprovementsSummary(code, response.content, language);
+				const normalized = normalizeGeneratedCode({
+					originalCode: code,
+					generatedContent: response.content,
+					language,
+					mode: isSelection ? "selection" : "file"
+				});
+				const improvedCode = normalized.code;
+				const wcagCriteria = this.extractWcagCriteriaFromCode(improvedCode);
+				const improvementsSummary = this.generateImprovementsSummary(code, improvedCode, language);
 
 				logger.info(`WCAG iyileştirme tamamlandı: ${wcagCriteria.length} kriter uygulandı`);
 
@@ -68,7 +76,7 @@ export class WcagImprover {
 
 				return {
 					success: true,
-					improvedCode: response.content,
+					improvedCode,
 					wcagCriteria,
 					tokensUsed: response.tokensUsed,
 					improvementsSummary,

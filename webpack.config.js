@@ -56,7 +56,7 @@ const config = {
 // Production mode configuration
 if (process.env.NODE_ENV === 'production') {
 	config.mode = 'production'
-	config.devtool = 'hidden-source-map'
+	config.devtool = false
 	config.optimization = {
 		minimize: true,
 		sideEffects: false,

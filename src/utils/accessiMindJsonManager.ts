@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
 import * as path from "path";
+import { getAiConfig, getAiModelsConfig, getNormalizedSelectedModel, normalizeAiSettingsSnapshot, updateNormalizedSelectedModel } from "./configurationUtils";
 import { logger } from "./logger";
 import { LocalizationManager } from "./localizationManager";
 
@@ -65,6 +66,10 @@ export interface AccessiMindSettings {
 		};
 		language?: string;
 		wcagLevel?: string;
+		strictMode?: boolean;
+		customRulesPath?: string;
+		contextAwareAnalysis?: boolean;
+		analysisDisabilityFocus?: string[];
 		autoApply?: boolean;
 		includeComments?: boolean;
 		enableStatistics?: boolean;
@@ -74,6 +79,13 @@ export interface AccessiMindSettings {
 			theme?: string;
 			compactMode?: boolean;
 			showAdvancedOptions?: boolean;
+			showNotifications?: boolean;
+			autoSave?: boolean;
+		};
+		browserIntegration?: {
+			enabled?: boolean;
+			browserPath?: string;
+			launchMode?: string;
 		};
 		jira?: {
 			customPrompt?: string;
@@ -115,6 +127,9 @@ export class AccessiMindJsonManager {
 	private settings: AccessiMindSettings | null = null;
 	private isInitialized: boolean = false;
 	private fileWatcher: vscode.FileSystemWatcher | undefined;
+	private syncDebounceTimer: NodeJS.Timeout | undefined;
+	private suppressWatcherReload = false;
+	private lastSyncedSnapshot = "";
 
 	private constructor(context: vscode.ExtensionContext) {
 		this.context = context;
@@ -204,6 +219,10 @@ export class AccessiMindJsonManager {
 				aiModels: {},
 				language: "auto",
 				wcagLevel: "AA",
+				strictMode: false,
+				customRulesPath: "",
+				contextAwareAnalysis: true,
+				analysisDisabilityFocus: [],
 				autoApply: false,
 				includeComments: true,
 				enableStatistics: true,
@@ -212,6 +231,11 @@ export class AccessiMindJsonManager {
 					theme: "auto",
 					compactMode: false,
 					showAdvancedOptions: false
+				},
+				browserIntegration: {
+					enabled: false,
+					browserPath: "",
+					launchMode: "new-isolated-window"
 				},
 				shortcuts: {
 					analyzeOpenCode: "ctrl+alt+w",
@@ -335,29 +359,34 @@ export class AccessiMindJsonManager {
 	public async syncFromVSCodeConfiguration(): Promise<void> {
 		try {
 			const config = vscode.workspace.getConfiguration("wcagEnhancer");
-			const aiConfig = config.get("ai") as any || {};
-			const aiModelConfig = config.get("aiModels") as any || {};
+			this.suppressWatcherReload = true;
+			const { ai, aiModels, selectedModel } = normalizeAiSettingsSnapshot(config);
 
 			const updatedSettings: Partial<AccessiMindSettings> = {
 				settings: {
 					ai: {
-						provider: aiConfig.provider,
-						selectedModel: aiConfig.selectedModel,
-						apiKeyConfigured: !!(aiConfig.apiKey && aiConfig.apiKey.trim()),
-						autoTestOnChange: aiConfig.autoTestOnChange
+						provider: ai.provider,
+						selectedModel,
+						apiKeyConfigured: !!(typeof ai.apiKey === "string" && ai.apiKey.trim()),
+						autoTestOnChange: !!ai.autoTestOnChange
 					},
 					aiModels: {
-						selectedModel: aiModelConfig.selectedModel || aiConfig.selectedModel,
-						availableModels: aiModelConfig.availableModels
+						selectedModel,
+						availableModels: aiModels.availableModels
 					},
 					language: config.get("language"),
 					wcagLevel: config.get("wcagLevel"),
+					strictMode: config.get("strictMode"),
+					customRulesPath: config.get("customRulesPath"),
+					contextAwareAnalysis: config.get("contextAwareAnalysis"),
+					analysisDisabilityFocus: config.get("analysisDisabilityFocus"),
 					autoApply: config.get("autoApply"),
 					includeComments: config.get("includeComments"),
 					enableStatistics: config.get("enableStatistics"),
 					customPrompt: config.get("customPrompt"),
 					responseDetail: config.get("responseDetail"),
 					interfacePreferences: config.get("interfacePreferences"),
+					browserIntegration: config.get("browserIntegration"),
 					jira: config.get("jira"),
 					shortcuts: {
 						analyzeOpenCode: config.get("shortcuts.analyzeOpenCode"),
@@ -367,16 +396,34 @@ export class AccessiMindJsonManager {
 				}
 			};
 
+			const snapshotKey = JSON.stringify(updatedSettings.settings);
+			if (snapshotKey === this.lastSyncedSnapshot) {
+				return;
+			}
+
 			await this.saveSettings(updatedSettings);
+			this.lastSyncedSnapshot = snapshotKey;
 			logger.info("🔄 VS Code configuration'dan JSON'a senkronizasyon tamamlandı");
 		} catch (error) {
-			logger.error("❌ VS Code configuration senkronizasyon hatası:", error);
+			logger.error("JSON sync from VS Code configuration failed", error);
+		} finally {
+			this.suppressWatcherReload = false;
 		}
 	}
 
 	/**
 	 * JSON'dan VS Code configuration'a ayarları uygula
 	 */
+	public scheduleSyncFromVSCodeConfiguration(delayMs = 300): void {
+		if (this.syncDebounceTimer) {
+			clearTimeout(this.syncDebounceTimer);
+		}
+
+		this.syncDebounceTimer = setTimeout(() => {
+			void this.syncFromVSCodeConfiguration();
+		}, delayMs);
+	}
+
 	public async applyToVSCodeConfiguration(): Promise<void> {
 		try {
 			const settings = await this.getSettings();
@@ -386,18 +433,13 @@ export class AccessiMindJsonManager {
 			const updatePromises: Thenable<void>[] = [];
 
 			if (settings.settings.ai?.provider) {
-				const aiConfig = config.get("ai") as any || {};
+				const aiConfig = getAiConfig(config);
 				aiConfig.provider = settings.settings.ai.provider;
-				if (settings.settings.ai.selectedModel) {
-					aiConfig.selectedModel = settings.settings.ai.selectedModel;
-				}
 				updatePromises.push(config.update("ai", aiConfig, vscode.ConfigurationTarget.Global));
 			}
 
 			if (settings.settings.aiModels?.selectedModel) {
-				const aiModelConfig = config.get("aiModels") as any || {};
-				aiModelConfig.selectedModel = settings.settings.aiModels.selectedModel;
-				updatePromises.push(config.update("aiModels", aiModelConfig, vscode.ConfigurationTarget.Global));
+				await updateNormalizedSelectedModel(config, settings.settings.aiModels.selectedModel);
 			}
 
 			if (settings.settings.language) {
@@ -406,6 +448,22 @@ export class AccessiMindJsonManager {
 
 			if (settings.settings.wcagLevel) {
 				updatePromises.push(config.update("wcagLevel", settings.settings.wcagLevel, vscode.ConfigurationTarget.Global));
+			}
+
+			if (settings.settings.strictMode !== undefined) {
+				updatePromises.push(config.update("strictMode", settings.settings.strictMode, vscode.ConfigurationTarget.Global));
+			}
+
+			if (settings.settings.customRulesPath !== undefined) {
+				updatePromises.push(config.update("customRulesPath", settings.settings.customRulesPath, vscode.ConfigurationTarget.Global));
+			}
+
+			if (settings.settings.contextAwareAnalysis !== undefined) {
+				updatePromises.push(config.update("contextAwareAnalysis", settings.settings.contextAwareAnalysis, vscode.ConfigurationTarget.Global));
+			}
+
+			if (settings.settings.analysisDisabilityFocus !== undefined) {
+				updatePromises.push(config.update("analysisDisabilityFocus", settings.settings.analysisDisabilityFocus, vscode.ConfigurationTarget.Global));
 			}
 
 			if (settings.settings.autoApply !== undefined) {
@@ -432,6 +490,10 @@ export class AccessiMindJsonManager {
 				updatePromises.push(config.update("interfacePreferences", settings.settings.interfacePreferences, vscode.ConfigurationTarget.Global));
 			}
 
+			if (settings.settings.browserIntegration) {
+				updatePromises.push(config.update("browserIntegration", settings.settings.browserIntegration, vscode.ConfigurationTarget.Global));
+			}
+
 			if (settings.settings.jira) {
 				updatePromises.push(config.update("jira", settings.settings.jira, vscode.ConfigurationTarget.Global));
 			}
@@ -454,6 +516,8 @@ export class AccessiMindJsonManager {
 			vscode.window.showErrorMessage(
 				localization.getStringWithParams("json.settings.apply.error", { error: errorMessage })
 			);
+		} finally {
+			this.suppressWatcherReload = false;
 		}
 	}
 
@@ -479,6 +543,11 @@ export class AccessiMindJsonManager {
 		this.fileWatcher = vscode.workspace.createFileSystemWatcher(filePattern);
 
 		this.fileWatcher.onDidChange(async () => {
+			if (this.suppressWatcherReload) {
+				return;
+			}
+
+
 			logger.info("🔄 AccessiMind JSON dosyası değişti, yeniden yükleniyor...");
 			await this.loadSettings();
 		});
@@ -633,6 +702,11 @@ export class AccessiMindJsonManager {
 					compactMode: false,
 					showAdvancedOptions: false
 				},
+				browserIntegration: {
+					enabled: false,
+					browserPath: "",
+					launchMode: "new-isolated-window"
+				},
 				shortcuts: {
 					analyzeOpenCode: "ctrl+alt+w",
 					analyzeSelectedCode: "ctrl+alt+shift+w",
@@ -755,3 +829,6 @@ export class AccessiMindJsonManager {
 		logger.info("🔄 AccessiMindJsonManager temizlendi");
 	}
 }
+
+
+

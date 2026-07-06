@@ -1,5 +1,8 @@
 import * as vscode from 'vscode';
 
+import { AIProviderManager } from '../infrastructure/providers';
+import { normalizeGeneratedCode } from '../utils/codeGenerationUtils';
+import { LocalizationManager } from '../utils/localizationManager';
 import { logger } from '../utils/logger';
 
 export interface CorrectionResult {
@@ -13,10 +16,10 @@ export class SelfCorrectionManager {
     private static instance: SelfCorrectionManager;
     private providerManager: any; // AIProviderManager type
     private readonly MAX_RETRIES = 2;
+    private readonly localization = LocalizationManager.getInstance();
 
     private constructor() {
-        // Dynamic require to avoid circular dependency
-        this.providerManager = require('../utils/aiProvider').AIProviderManager.getInstance();
+        this.providerManager = AIProviderManager.getInstance();
     }
 
     public static getInstance(): SelfCorrectionManager {
@@ -48,7 +51,8 @@ export class SelfCorrectionManager {
                 fileType: 'unknown', // context needed
                 language: language,
                 mode: 'agent',
-                selectedText: instructions // Passing instructions as context
+                selectedText: instructions, // Passing instructions as context
+                responseLanguage: this.localization.getCurrentLanguage() as "en" | "tr"
             });
 
             if (!improvementResult.success || !improvementResult.content) {
@@ -57,7 +61,24 @@ export class SelfCorrectionManager {
                 continue;
             }
 
-            const proposedCode = this.extractCode(improvementResult.content);
+            let proposedCode: string;
+            try {
+                proposedCode = normalizeGeneratedCode({
+                    originalCode: currentCode,
+                    generatedContent: improvementResult.content,
+                    language,
+                    mode: "file"
+                }).code;
+            } catch (error) {
+                lastError = error instanceof Error ? error.message : "Provider returned invalid code";
+                logger.error(`Attempt ${attempt} failed: ${lastError}`);
+                continue;
+            }
+            if (!proposedCode.trim()) {
+                lastError = "Provider returned an empty fix";
+                logger.error(`Attempt ${attempt} failed: ${lastError}`);
+                continue;
+            }
 
             // 2. Verify Fix (Self-Correction)
             onProgress?.(`Attempt ${attempt}: Verifying fix...`);
@@ -89,15 +110,30 @@ export class SelfCorrectionManager {
         // In a real agent, this would run linter, compiler, or a separate AI verification step.
         // For now, we'll ask Gemini to critique its own work.
 
-        const verificationPrompt = `
+        const verificationPrompt = this.localization.getCurrentLanguage() === "tr"
+            ? `
+        Bir kod gözden geçiricisisin. Aşağıdaki kodu şu talimatlara göre değerlendir: "${originalInstructions}".
+
+        Kod:
+        \`\`\`${language}
+        ${code}
+        \`\`\`
+
+        Yalnızca şu JSON nesnesini döndür:
+        {
+            "isValid": boolean,
+            "reason": "string (geçerli değilse neden)"
+        }
+        `
+            : `
         You are a code reviewer. Review the following code against these instructions: "${originalInstructions}".
-        
+
         Code:
         \`\`\`${language}
         ${code}
         \`\`\`
 
-        Return a JSON object:
+        Return only this JSON object:
         {
             "isValid": boolean,
             "reason": "string (if not valid)"
@@ -112,7 +148,7 @@ export class SelfCorrectionManager {
                 response = await provider.chat(verificationPrompt);
             } catch (e) {
                 // Provider might not support chat
-                return { isValid: true, reason: "Verification skipped (provider capabilities)" };
+                return { isValid: false, reason: "Verification could not be completed by the current provider" };
             }
 
             if (response.success && response.content) {
@@ -129,12 +165,6 @@ export class SelfCorrectionManager {
             logger.error("Verification error:", e);
         }
 
-        // Fallback: assume valid if we can't verify (to prevent infinite loops on parse errors)
-        return { isValid: true, reason: "" };
-    }
-
-    private extractCode(content: string): string {
-        const match = content.match(/```[\w]*\n([\s\S]*?)\n```/);
-        return match ? match[1] : content;
+        return { isValid: false, reason: "Verification response could not be parsed" };
     }
 }

@@ -11,6 +11,7 @@ export {
 	GeminiProvider,
 	VSCodeCopilotProvider,
 	OllamaProvider,
+	CodexSubscriptionProvider,
 	AIProviderFactory,
 	AIProviderManager,
 } from "../infrastructure/providers";

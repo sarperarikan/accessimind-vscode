@@ -2,9 +2,9 @@
   "name": "accessimind",
   "displayName": "AccessiMind - AI WCAG Accessibility",
   "description": "AI-powered WCAG 2.2 accessibility analyzer with Gemini & Copilot integration. Real-time code improvement, Jira export, and comprehensive statistics.",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "publisher": "sarperarikan",
-  "icon": "accessi-mind.jpg",
+  "icon": "accessi-mind.png",
   "galleryBanner": {
     "color": "#1e1e1e",
     "theme": "dark"
@@ -64,7 +64,21 @@
     "web accessibility"
   ],
   "activationEvents": [
-    "onStartupFinished"
+    "onStartupFinished",
+    "onCommand:wcagEnhancer.showStatusBarMenu",
+    "onCommand:wcagEnhancer.openChat",
+    "onCommand:wcagEnhancer.inlineChat",
+    "onCommand:wcagEnhancer.openSettings",
+    "onCommand:wcagEnhancer.showInBrowser",
+    "onCommand:wcagEnhancer.analyzeOpenCode",
+    "onCommand:wcagEnhancer.analyzeSelectedCode",
+    "onCommand:wcagEnhancer.startAgentSession",
+    "onCommand:wcagEnhancer.selectProviderModel",
+    "onCommand:wcagEnhancer.connectCodexAccount",
+    "onCommand:wcagEnhancer.testCodexAccount",
+    "onCommand:wcagEnhancer.openChatGptBridge",
+    "onCommand:wcagEnhancer.configureChatGptAuth",
+    "onCommand:wcagEnhancer.openChatGptAuthGuide"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -221,6 +235,81 @@
         "command": "wcagEnhancer.showInBrowser",
         "title": "♿ AccessiMind: Show in Browser",
         "icon": "$(globe)"
+      },
+      {
+        "command": "wcagEnhancer.userJourneyScan",
+        "title": "♿ AccessiMind: User Journey Scan",
+        "icon": "$(compass)"
+      },
+      {
+        "command": "wcagEnhancer.domDiffRisk",
+        "title": "♿ AccessiMind: DOM Diff Risk",
+        "icon": "$(history)"
+      },
+      {
+        "command": "wcagEnhancer.designTokenGuard",
+        "title": "♿ AccessiMind: Design Token Guard",
+        "icon": "$(symbol-color)"
+      },
+      {
+        "command": "wcagEnhancer.componentMemory",
+        "title": "♿ AccessiMind: Component Memory",
+        "icon": "$(symbol-class)"
+      },
+      {
+        "command": "wcagEnhancer.applyLastFixToSimilar",
+        "title": "♿ AccessiMind: Apply Last Fix To Similar",
+        "icon": "$(replace-all)"
+      },
+      {
+        "command": "wcagEnhancer.generatePrSummary",
+        "title": "♿ AccessiMind: Generate PR Summary",
+        "icon": "$(notebook-template)"
+      },
+      {
+        "command": "wcagEnhancer.regressionShield",
+        "title": "♿ AccessiMind: Regression Shield",
+        "icon": "$(shield)"
+      },
+      {
+        "command": "wcagEnhancer.generateA11yTest",
+        "title": "AccessiMind: Generate Accessibility Test",
+        "icon": "$(beaker)"
+      },
+      {
+        "command": "wcagEnhancer.startAgentSession",
+        "title": "AccessiMind: Agent Session",
+        "icon": "$(hubot)"
+      },
+      {
+        "command": "wcagEnhancer.selectProviderModel",
+        "title": "AccessiMind: Select Provider Model",
+        "icon": "$(sparkle)"
+      },
+      {
+        "command": "wcagEnhancer.connectCodexAccount",
+        "title": "AccessiMind: Connect Codex Account",
+        "icon": "$(account)"
+      },
+      {
+        "command": "wcagEnhancer.testCodexAccount",
+        "title": "AccessiMind: Test Codex Account",
+        "icon": "$(plug)"
+      },
+      {
+        "command": "wcagEnhancer.openChatGptBridge",
+        "title": "AccessiMind: Open in ChatGPT",
+        "icon": "$(link-external)"
+      },
+      {
+        "command": "wcagEnhancer.configureChatGptAuth",
+        "title": "AccessiMind: Configure ChatGPT Auth",
+        "icon": "$(key)"
+      },
+      {
+        "command": "wcagEnhancer.openChatGptAuthGuide",
+        "title": "AccessiMind: ChatGPT Auth Guide",
+        "icon": "$(book)"
       }
     ],
     "viewsContainers": {
@@ -273,8 +362,27 @@
     "menus": {
       "editor/context": [
         {
-          "submenu": "wcagEnhancer.submenu",
+          "command": "wcagEnhancer.analyzeSelectedCode",
+          "when": "editorHasSelection",
           "group": "1_modification@1"
+        },
+        {
+          "command": "wcagEnhancer.previewImprovement",
+          "when": "editorHasSelection",
+          "group": "1_modification@2"
+        },
+        {
+          "command": "wcagEnhancer.inlineChat",
+          "when": "editorHasSelection",
+          "group": "1_modification@3"
+        },
+        {
+          "command": "wcagEnhancer.analyzeOpenCode",
+          "group": "1_modification@4"
+        },
+        {
+          "submenu": "wcagEnhancer.submenu",
+          "group": "1_modification@9"
         }
       ],
       "wcagEnhancer.submenu": [
@@ -291,6 +399,42 @@
           "command": "wcagEnhancer.previewImprovement",
           "when": "editorHasSelection",
           "group": "1_analyze"
+        },
+        {
+          "command": "wcagEnhancer.userJourneyScan",
+          "group": "2_innovation"
+        },
+        {
+          "command": "wcagEnhancer.startAgentSession",
+          "group": "2_innovation@2"
+        },
+        {
+          "command": "wcagEnhancer.generateA11yTest",
+          "group": "2_innovation@3"
+        },
+        {
+          "command": "wcagEnhancer.selectProviderModel",
+          "group": "3_provider"
+        },
+        {
+          "command": "wcagEnhancer.connectCodexAccount",
+          "group": "3_provider@2"
+        },
+        {
+          "command": "wcagEnhancer.testCodexAccount",
+          "group": "3_provider@3"
+        },
+        {
+          "command": "wcagEnhancer.openChatGptBridge",
+          "group": "4_external"
+        },
+        {
+          "command": "wcagEnhancer.configureChatGptAuth",
+          "group": "4_external@2"
+        },
+        {
+          "command": "wcagEnhancer.openChatGptAuthGuide",
+          "group": "4_external@3"
         }
       ]
     },
@@ -327,14 +471,16 @@
               "enum": [
                 "gemini",
                 "vscode-copilot",
-                "ollama"
+                "ollama",
+                "codex-subscription"
               ],
               "default": "gemini",
               "description": "AI provider for WCAG improvements - Configure via Settings panel",
               "enumDescriptions": [
                 "Google Gemini API (requires API key)",
                 "VS Code Copilot (uses GitHub Copilot subscription)",
-                "Ollama (Local AI models)"
+                "Ollama (Local AI models)",
+                "Codex CLI using ChatGPT subscription sign-in"
               ]
             },
             "apiKey": {
@@ -362,6 +508,18 @@
               "type": "string",
               "default": "llama3",
               "description": "Selected Ollama model"
+            },
+            "codexPath": {
+              "type": "string",
+              "default": "codex",
+              "description": "Codex CLI executable path for ChatGPT subscription-backed analysis. Use codex by default, or set an absolute path if the app alias is blocked."
+            },
+            "codexTimeoutMs": {
+              "type": "number",
+              "default": 180000,
+              "minimum": 30000,
+              "maximum": 600000,
+              "description": "Timeout in milliseconds for Codex subscription provider runs."
             }
           }
         },
@@ -375,13 +533,20 @@
               "default": "gemini-2.5-flash",
               "description": "Currently selected AI model - Configure via Settings panel",
               "enum": [
+                "gpt-5.5",
+                "gpt-5.4",
+                "gpt-5.4-mini",
+                "gpt-5.3-codex-spark",
                 "gpt-5.2",
                 "gpt-5.2-codex",
+                "gemini-2.5-flash-lite",
+                "gemini-3.1-flash-lite",
+                "gemini-flash-latest",
+                "gemini-3.5-flash",
                 "gemini-3-flash",
                 "gemini-3-pro",
                 "gemini-2.5-flash",
                 "gemini-2.5-pro",
-                "gemini-2.0-flash",
                 "gpt-4o",
                 "gpt-4o-mini",
                 "gpt-4.1",
@@ -401,13 +566,20 @@
                 "claude-3-haiku"
               ],
               "enumDescriptions": [
+                "GPT-5.5 - Recommended Codex frontier model",
+                "GPT-5.4 - Frontier Codex coding and reasoning model",
+                "GPT-5.4 Mini - Faster Codex model for lighter tasks",
+                "GPT-5.3 Codex Spark - Pro research preview for near-instant coding iteration",
                 "GPT-5.2 - Latest general",
                 "GPT-5.2 Codex - Latest code-optimized",
+                "Gemini 2.5 Flash-Lite - Fast and budget-friendly 2.5 family",
+                "Gemini 3.1 Flash-Lite - Cost-efficient Gemini 3 series",
+                "Gemini Flash Latest - Dynamic alias for the latest Flash release",
+                "Gemini 3.5 Flash - GA model for agentic and coding tasks",
                 "Gemini 3 Flash - Next-gen multimodal",
                 "Gemini 3 Pro - Higher quality",
                 "Gemini 2.5 Flash - Fastest response time",
                 "Gemini 2.5 Pro - Highest quality",
-                "Gemini 2.0 Flash - Fast multimodal",
                 "GPT-4o - Latest OpenAI model",
                 "GPT-4o Mini - Fast and efficient",
                 "GPT-4.1 - High quality completions",
@@ -459,7 +631,10 @@
                     "gemini-2.5-flash",
                     "gpt-4o-mini",
                     "claude-3-haiku",
-                    "gpt-3.5-turbo"
+                    "gpt-3.5-turbo",
+                    "gemini-3.5-flash",
+                    "gemini-flash-latest",
+                    "gemini-2.5-flash-lite"
                   ]
                 },
                 "forComplexAnalysis": {
@@ -470,7 +645,8 @@
                     "gemini-2.5-pro",
                     "gpt-4o",
                     "claude-3.5-sonnet",
-                    "claude-3-opus"
+                    "claude-3-opus",
+                    "gemini-3.5-flash"
                   ]
                 }
               }
@@ -594,6 +770,36 @@
           ],
           "description": "Level of detail for AI responses (summary or detailed) - Configure via Settings panel"
         },
+        "wcagEnhancer.strictMode": {
+          "type": "boolean",
+          "default": false,
+          "description": "Apply stricter accessibility analysis checks"
+        },
+        "wcagEnhancer.customRulesPath": {
+          "type": "string",
+          "default": "",
+          "description": "Optional markdown file path for custom WCAG rules"
+        },
+        "wcagEnhancer.contextAwareAnalysis": {
+          "type": "boolean",
+          "default": true,
+          "description": "Consider surrounding code context during analysis"
+        },
+        "wcagEnhancer.analysisDisabilityFocus": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string",
+            "enum": [
+              "screenReader",
+              "lowVision",
+              "hearing",
+              "motor",
+              "cognitive"
+            ]
+          },
+          "description": "Prioritize specific disability groups during analysis and code improvements"
+        },
         "wcagEnhancer.interfacePreferences": {
           "type": "object",
           "title": "Interface Preferences",
@@ -618,6 +824,46 @@
                 "large"
               ],
               "description": "Font size for extension panels"
+            },
+            "showNotifications": {
+              "type": "boolean",
+              "default": true,
+              "description": "Display popup notifications for key actions"
+            },
+            "autoSave": {
+              "type": "boolean",
+              "default": true,
+              "description": "Automatically save applied improvements when supported"
+            }
+          }
+        },
+        "wcagEnhancer.browserIntegration": {
+          "type": "object",
+          "title": "Browser Integration",
+          "description": "Controls for the live Chrome/Edge inspector bridge",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false,
+              "description": "Enable the live browser inspector integration"
+            },
+            "browserPath": {
+              "type": "string",
+              "default": "",
+              "description": "Optional absolute path to Chrome or Edge executable"
+            },
+            "launchMode": {
+              "type": "string",
+              "default": "new-isolated-window",
+              "enum": [
+                "new-isolated-window",
+                "attach-existing-debug-session"
+              ],
+              "enumDescriptions": [
+                "Launch a separate isolated Chrome/Edge debugging window",
+                "Attach to an already running browser that was started with a remote debugging port"
+              ],
+              "description": "How the live browser inspector should connect to Chrome/Edge"
             }
           }
         },
@@ -689,6 +935,36 @@
               "type": "boolean",
               "default": true,
               "description": "Include testing steps in Jira task descriptions - Configure via Settings panel"
+            },
+            "baseUrl": {
+              "type": "string",
+              "default": "",
+              "description": "Default Jira instance URL"
+            },
+            "projectKey": {
+              "type": "string",
+              "default": "",
+              "description": "Default Jira project key"
+            },
+            "issueType": {
+              "type": "string",
+              "default": "Bug",
+              "description": "Default Jira issue type"
+            },
+            "autoCreateIssues": {
+              "type": "boolean",
+              "default": false,
+              "description": "Automatically create Jira issues for findings when enabled"
+            },
+            "priorityMapping": {
+              "type": "string",
+              "default": "severity",
+              "enum": [
+                "severity",
+                "level",
+                "impact"
+              ],
+              "description": "Mapping strategy for Jira priority"
             }
           }
         },
@@ -696,6 +972,33 @@
           "type": "boolean",
           "default": false,
           "description": "Whether the setup wizard has been completed - Configure via Settings panel"
+        },
+        "wcagEnhancer.chatGptIntegration": {
+          "type": "object",
+          "title": "ChatGPT Integration",
+          "description": "Account-connected ChatGPT handoff settings for Apps SDK/MCP OAuth flows.",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false,
+              "description": "Enable ChatGPT app handoff for account-authorized analysis workflows."
+            },
+            "appUrl": {
+              "type": "string",
+              "default": "",
+              "description": "ChatGPT app or connection URL used after publishing/testing the AccessiMind Apps SDK app."
+            },
+            "mcpServerUrl": {
+              "type": "string",
+              "default": "",
+              "description": "Remote MCP server URL that exposes AccessiMind tools to ChatGPT with OAuth authorization."
+            },
+            "authNotes": {
+              "type": "string",
+              "default": "",
+              "description": "Read-only implementation note for the ChatGPT Apps SDK/MCP authorization path."
+            }
+          }
         }
       }
     }
@@ -721,13 +1024,13 @@
     "webpack-cli": "^5.1.4"
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "npm run webpack-prod",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src",
     "test": "vscode-test",
-    "test:unit": "jest",
+    "test:unit": "jest --runInBand",
     "test:coverage": "jest --coverage",
     "webpack": "webpack",
     "webpack-dev": "webpack --mode development --watch",
@@ -738,5 +1041,8 @@
     "clean": "rimraf out dist *.vsix",
     "rebuild": "npm run clean && npm run build",
     "publish": "vsce publish"
+  },
+  "dependencies": {
+    "chrome-remote-interface": "^0.34.0"
   }
 }

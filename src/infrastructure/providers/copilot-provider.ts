@@ -5,6 +5,7 @@
  */
 import * as vscode from "vscode";
 import { RequestCache } from "../../utils/requestCache";
+import { getAiConfig, getNormalizedSelectedModel } from "../../utils/configurationUtils";
 import { logger } from "../../utils/logger";
 import { AIProvider, AIResponse, WCAGRequest } from "./ai-provider.types";
 
@@ -504,8 +505,8 @@ export class VSCodeCopilotProvider extends AIProvider {
     private async selectCurrentModel(): Promise<void> {
         if (this.availableModels.length === 0) return;
         const config = vscode.workspace.getConfiguration("wcagEnhancer");
-        const aiConfig = config.get("ai") as Record<string, unknown>;
-        const selectedModelId = (aiConfig?.selectedModel as string) || "";
+        const aiConfig = getAiConfig(config);
+        const selectedModelId = getNormalizedSelectedModel(config, "");
 
         let selected = this.availableModels.find(
             (m) =>

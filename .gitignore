@@ -13,6 +13,12 @@ dist/
 *.txt
 *.log
 *.json.bak
+lint_json.json
+tmp_edit.py
+fix-wizard.js
+
+# Local generated AccessiMind state
+accessimind.json
 
 # Old packages
 vsix-package/

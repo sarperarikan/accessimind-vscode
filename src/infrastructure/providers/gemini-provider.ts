@@ -31,6 +31,21 @@ interface GeminiModelDescriptor {
     outputTokenLimit?: number;
 }
 
+interface GeminiApiModel {
+    name?: string;
+    displayName?: string;
+    description?: string;
+    supportedGenerationMethods?: string[];
+    supportedActions?: string[];
+    inputTokenLimit?: number;
+    outputTokenLimit?: number;
+}
+
+interface GeminiModelsListResponse {
+    models?: GeminiApiModel[];
+    nextPageToken?: string;
+}
+
 interface GeminiRawCallResult {
     content: string;
     tokensUsed?: number;
@@ -280,126 +295,164 @@ export class GeminiProvider extends AIProvider {
     }
 
     private async fetchModelsFromApi(): Promise<GeminiModelDescriptor[]> {
-        const url = new URL(
-            `https://generativelanguage.googleapis.com/v1beta/models?key=${this.apiKey}`
-        );
-
-        const response = await new Promise<Record<string, unknown>>(
-            (resolve, reject) => {
-                const req = https.request(
-                    {
-                        hostname: url.hostname,
-                        port: 443,
-                        path: url.pathname + url.search,
-                        method: "GET",
-                        headers: { "Content-Type": "application/json" },
-                    },
-                    (res) => {
-                        let data = "";
-                        res.on("data", (chunk) => (data += chunk));
-                        res.on("end", () => {
-                            try {
-                                if (res.statusCode && res.statusCode >= 400) {
-                                    reject(new Error(`API Error ${res.statusCode}`));
-                                    return;
-                                }
-                                resolve(JSON.parse(data));
-                            } catch (e) {
-                                reject(e);
-                            }
-                        });
-                    }
-                );
-                req.on("error", reject);
-                req.end();
-            }
-        );
-
-        const models = response.models as Array<Record<string, unknown>>;
-        if (!Array.isArray(models)) {
+        const models = await this.fetchAllGeminiModels();
+        if (!Array.isArray(models) || models.length === 0) {
             return this.getDefaultModels();
         }
 
         const generative = models
-            .filter(
-                (m) =>
-                    (m.supportedGenerationMethods as string[])?.includes(
-                        "generateContent"
-                    ) && (m.name as string)?.includes("gemini")
-            )
-            .sort((a, b) => {
-                const an = ((a.name as string) || "").toLowerCase();
-                const bn = ((b.name as string) || "").toLowerCase();
-                if (an.includes("2.5") && !bn.includes("2.5")) return -1;
-                if (!an.includes("2.5") && bn.includes("2.5")) return 1;
-                if (an.includes("2.0") && !bn.includes("2.0")) return -1;
-                if (!an.includes("2.0") && bn.includes("2.0")) return 1;
-                if (an.includes("flash") && !bn.includes("flash")) return -1;
-                if (!an.includes("flash") && bn.includes("flash")) return 1;
-                return 0;
-            });
+            .filter((model) => this.isGenerativeGeminiModel(model))
+            .sort((a, b) => this.getModelRank(b) - this.getModelRank(a));
 
         logger.info(`Fetched ${generative.length} Gemini models from API`);
 
         return generative.map((m, idx) => {
-            const modelId = ((m.name as string) || "").replace("models/", "");
+            const modelId = (m.name || "").replace("models/", "");
             const displayName =
-                (m.displayName as string) || this.formatModelName(modelId);
+                m.displayName || this.formatModelName(modelId);
             return {
                 id: modelId,
                 name: displayName,
                 description:
-                    (m.description as string) ||
+                    m.description ||
                     `${displayName} - ${m.inputTokenLimit || "Unknown"} input tokens`,
                 speed: modelId.includes("flash") ? "fast" : "medium",
                 quality:
-                    modelId.includes("pro") || modelId.includes("2.5")
+                    modelId.includes("pro") ||
+                        modelId.includes("3.5") ||
+                        modelId.includes("3.1") ||
+                        modelId.includes("2.5")
                         ? "very-high"
                         : "high",
                 recommended: idx === 0,
-                inputTokenLimit: m.inputTokenLimit as number,
-                outputTokenLimit: m.outputTokenLimit as number,
+                inputTokenLimit: m.inputTokenLimit,
+                outputTokenLimit: m.outputTokenLimit,
             };
         });
+    }
+
+    private async fetchAllGeminiModels(): Promise<GeminiApiModel[]> {
+        const allModels: GeminiApiModel[] = [];
+        let pageToken = "";
+
+        do {
+            const url = new URL("https://generativelanguage.googleapis.com/v1beta/models");
+            url.searchParams.set("key", this.apiKey);
+            url.searchParams.set("pageSize", "1000");
+            if (pageToken) {
+                url.searchParams.set("pageToken", pageToken);
+            }
+
+            const response = await this.fetchGeminiModelsPage(url);
+            allModels.push(...(response.models || []));
+            pageToken = response.nextPageToken || "";
+        } while (pageToken);
+
+        return allModels;
+    }
+
+    private async fetchGeminiModelsPage(url: URL): Promise<GeminiModelsListResponse> {
+        return new Promise<GeminiModelsListResponse>((resolve, reject) => {
+            const req = https.request(
+                {
+                    hostname: url.hostname,
+                    port: 443,
+                    path: url.pathname + url.search,
+                    method: "GET",
+                    headers: { "Content-Type": "application/json" },
+                },
+                (res) => {
+                    let data = "";
+                    res.on("data", (chunk) => (data += chunk));
+                    res.on("end", () => {
+                        try {
+                            if (res.statusCode && res.statusCode >= 400) {
+                                reject(new Error(`API Error ${res.statusCode}`));
+                                return;
+                            }
+                            resolve(JSON.parse(data) as GeminiModelsListResponse);
+                        } catch (e) {
+                            reject(e);
+                        }
+                    });
+                }
+            );
+            req.on("error", reject);
+            req.end();
+        });
+    }
+
+    private isGenerativeGeminiModel(model: GeminiApiModel): boolean {
+        const modelName = (model.name || "").toLowerCase();
+        const supportedActions = [
+            ...(model.supportedGenerationMethods || []),
+            ...(model.supportedActions || []),
+        ];
+        return modelName.includes("gemini") && supportedActions.includes("generateContent");
+    }
+
+    private getModelRank(model: GeminiApiModel): number {
+        const name = (model.name || "").toLowerCase();
+        let rank = 0;
+
+        if (name.includes("latest")) rank += 1000;
+        if (name.includes("3.5")) rank += 900;
+        if (name.includes("3.1")) rank += 800;
+        if (name.includes("3-") || name.includes("3.")) rank += 700;
+        if (name.includes("2.5")) rank += 600;
+        if (name.includes("pro")) rank += 60;
+        if (name.includes("flash")) rank += 50;
+        if (name.includes("lite")) rank += 20;
+        if (name.includes("preview")) rank -= 10;
+        if (name.includes("tts") || name.includes("image") || name.includes("live")) rank -= 100;
+
+        return rank;
     }
 
     private getDefaultModels(): GeminiModelDescriptor[] {
         return [
             {
-                id: "gemini-2.5-flash",
-                name: "Gemini 2.5 Flash",
-                description: "Latest & fastest - Best for quick improvements",
+                id: "gemini-3.5-flash",
+                name: "Gemini 3.5 Flash",
+                description: "GA frontier model for agentic, coding, and accessibility analysis tasks",
                 speed: "fast",
                 quality: "very-high",
                 recommended: true,
             },
             {
+                id: "gemini-flash-latest",
+                name: "Gemini Flash Latest",
+                description: "Dynamic alias for the latest Gemini Flash release",
+                speed: "fast",
+                quality: "very-high",
+            },
+            {
+                id: "gemini-2.5-flash",
+                name: "Gemini 2.5 Flash",
+                description: "Best price-performance model for low-latency reasoning tasks",
+                speed: "fast",
+                quality: "very-high",
+            },
+            {
                 id: "gemini-2.5-pro",
                 name: "Gemini 2.5 Pro",
-                description: "Most capable - Best for complex analysis",
+                description: "Advanced reasoning and coding model for complex analysis",
                 speed: "medium",
                 quality: "very-high",
             },
             {
-                id: "gemini-2.0-flash",
-                name: "Gemini 2.0 Flash",
-                description: "Fast and reliable - Good balance",
+                id: "gemini-2.5-flash-lite",
+                name: "Gemini 2.5 Flash-Lite",
+                description: "Fast and budget-friendly model in the Gemini 2.5 family",
                 speed: "fast",
                 quality: "high",
             },
             {
-                id: "gemini-1.5-flash",
-                name: "Gemini 1.5 Flash",
-                description: "Stable performance",
+                id: "gemini-3.1-flash-lite",
+                name: "Gemini 3.1 Flash-Lite",
+                description: "Cost-efficient Gemini 3 series model for high-volume tasks",
                 speed: "fast",
                 quality: "high",
-            },
-            {
-                id: "gemini-1.5-pro",
-                name: "Gemini 1.5 Pro",
-                description: "High quality for complex tasks",
-                speed: "medium",
-                quality: "very-high",
             },
         ];
     }

@@ -1,422 +1,379 @@
 import * as vscode from "vscode";
-import { logger } from "./logger";
 import { AccessiMindJsonManager } from "./accessiMindJsonManager";
+import {
+	normalizeAiSettingsSnapshot,
+	updateNormalizedSelectedModel,
+} from "./configurationUtils";
+import { logger } from "./logger";
 import { LocalizationManager } from "./localizationManager";
 
-/**
- * VS Code extension ayarlarının kalıcı olarak saklanması için gelişmiş ayar yöneticisi
- * Extension restart edildiğinde bile ayarların korunmasını sağlar
- */
 export class PersistentSettingsManager {
-    private static instance: PersistentSettingsManager;
-    private context: vscode.ExtensionContext;
-    private configChangeListener: vscode.Disposable | undefined;
-    private settingsCache: Map<string, any> = new Map();
-    private isInitialized: boolean = false;
-    private jsonManager: AccessiMindJsonManager | undefined;
+	private static instance: PersistentSettingsManager;
+	private context: vscode.ExtensionContext;
+	private configChangeListener: vscode.Disposable | undefined;
+	private settingsCache: Map<string, unknown> = new Map();
+	private isInitialized = false;
+	private jsonManager: AccessiMindJsonManager | undefined;
+	private persistDebounceTimer: NodeJS.Timeout | undefined;
 
-    private constructor(context: vscode.ExtensionContext) {
-        this.context = context;
-        // JSON yöneticisini başlat
-        this.jsonManager = AccessiMindJsonManager.getInstance(context);
-    }
+	private constructor(context: vscode.ExtensionContext) {
+		this.context = context;
+		this.jsonManager = AccessiMindJsonManager.getInstance(context);
+	}
 
-    public static getInstance(context?: vscode.ExtensionContext): PersistentSettingsManager {
-        if (!PersistentSettingsManager.instance && context) {
-            PersistentSettingsManager.instance = new PersistentSettingsManager(context);
-        }
-        return PersistentSettingsManager.instance;
-    }
+	public static getInstance(context?: vscode.ExtensionContext): PersistentSettingsManager {
+		if (!PersistentSettingsManager.instance && context) {
+			PersistentSettingsManager.instance = new PersistentSettingsManager(context);
+		}
+		return PersistentSettingsManager.instance;
+	}
 
-    /**
-     * Kalıcı ayar yöneticisini başlat
-     */
-    public async initialize(): Promise<void> {
-        if (this.isInitialized) {
-            return;
-        }
+	public async initialize(): Promise<void> {
+		if (this.isInitialized) {
+			return;
+		}
 
-        try {
-            // Kaydedilmiş ayarları yükle
-            await this.loadPersistedSettings();
+		try {
+			await this.loadPersistedSettings();
+			this.setupConfigurationListener();
+			await this.syncWithWorkspaceConfiguration();
+			this.isInitialized = true;
+			logger.info("PersistentSettingsManager initialized");
+		} catch (error) {
+			logger.error("PersistentSettingsManager initialization error:", error);
+		}
+	}
 
-            // Configuration değişikliklerini dinle
-            this.setupConfigurationListener();
+	private setupConfigurationListener(): void {
+		this.configChangeListener = vscode.workspace.onDidChangeConfiguration((event) => {
+			if (!event.affectsConfiguration("wcagEnhancer")) {
+				return;
+			}
 
-            // Workspace state ile VS Code configuration'ı senkronize et
-            await this.syncWithWorkspaceConfiguration();
+			if (this.persistDebounceTimer) {
+				clearTimeout(this.persistDebounceTimer);
+			}
 
-            this.isInitialized = true;
-            logger.info("🔧 PersistentSettingsManager başarıyla başlatıldı");
-        } catch (error) {
-            logger.error("❌ PersistentSettingsManager başlatma hatası:", error);
-        }
-    }
+			this.persistDebounceTimer = setTimeout(() => {
+				void this.persistCurrentConfiguration();
+				this.jsonManager?.scheduleSyncFromVSCodeConfiguration();
+				logger.info("Configuration change scheduled for persistence");
+			}, 250);
+		});
+	}
 
-    /**
-     * Configuration değişikliklerini dinle ve kalıcı storage'a kaydet
-     */
-    private setupConfigurationListener(): void {
-        this.configChangeListener = vscode.workspace.onDidChangeConfiguration(async (event) => {
-            if (event.affectsConfiguration("wcagEnhancer")) {
-                await this.persistCurrentConfiguration();
-                logger.info("🔄 Ayar değişikliği algılandı ve kalıcı storage'a kaydedildi");
-                if (this.jsonManager) {
-                    await this.jsonManager.syncFromVSCodeConfiguration();
-                    logger.info("🔄 Ayar değişikliği JSON dosyasına da senkronize edildi");
-                }
-            }
-        });
-    }
+	public async persistCurrentConfiguration(): Promise<void> {
+		try {
+			const config = vscode.workspace.getConfiguration("wcagEnhancer");
+			const { ai, aiModels } = normalizeAiSettingsSnapshot(config);
+			const settingsToSave = {
+				ai,
+				aiModels,
+				language: config.get("language", "en"),
+				wcagLevel: config.get("wcagLevel", "AA"),
+				strictMode: config.get("strictMode", false),
+				customRulesPath: config.get("customRulesPath", ""),
+				contextAwareAnalysis: config.get("contextAwareAnalysis", true),
+				analysisDisabilityFocus: config.get("analysisDisabilityFocus", []),
+				autoApply: config.get("autoApply", false),
+				includeComments: config.get("includeComments", true),
+				enableStatistics: config.get("enableStatistics", true),
+				customPrompt: config.get("customPrompt", ""),
+				responseDetail: config.get("responseDetail", "summary"),
+				interfacePreferences: config.get("interfacePreferences", {}),
+				browserIntegration: config.get("browserIntegration", {}),
+				jira: config.get("jira", {}),
+				wizardCompleted: config.get("wizardCompleted", false),
+				shortcuts: {
+					analyzeOpenCode: config.get("shortcuts.analyzeOpenCode", "ctrl+alt+w"),
+					analyzeSelectedCode: config.get("shortcuts.analyzeSelectedCode", "ctrl+alt+shift+w"),
+					showInterface: config.get("shortcuts.showInterface", "ctrl+alt+u"),
+				},
+			};
 
-    /**
-     * Mevcut VS Code configuration'ını kalıcı storage'a kaydet
-     */
-    public async persistCurrentConfiguration(): Promise<void> {
-        try {
-            const config = vscode.workspace.getConfiguration("wcagEnhancer");
-            const settingsToSave = {
-                ai: config.get("ai", {}),
-                aiModels: config.get("aiModels", {}),
-                language: config.get("language", "en"),
-                wcagLevel: config.get("wcagLevel", "AA"),
-                autoApply: config.get("autoApply", false),
-                includeComments: config.get("includeComments", true),
-                enableStatistics: config.get("enableStatistics", true),
-                customPrompt: config.get("customPrompt", ""),
-                responseDetail: config.get("responseDetail", "summary"),
-                interfacePreferences: config.get("interfacePreferences", {}),
-                jira: config.get("jira", {}),
-                wizardCompleted: config.get("wizardCompleted", false),
-                shortcuts: {
-                    analyzeOpenCode: config.get("shortcuts.analyzeOpenCode", "ctrl+alt+w"),
-                    analyzeSelectedCode: config.get("shortcuts.analyzeSelectedCode", "ctrl+alt+shift+w"),
-                    showInterface: config.get("shortcuts.showInterface", "ctrl+alt+u")
-                }
-            };
+			await this.context.globalState.update("wcagEnhancer.persistedSettings", settingsToSave);
+			await this.context.workspaceState.update("wcagEnhancer.workspaceSettings", settingsToSave);
+			this.settingsCache.set("persistedSettings", settingsToSave);
+			logger.info("Settings persisted successfully");
+		} catch (error) {
+			logger.error("Settings persistence error:", error);
+		}
+	}
 
-            // Global state'e kaydet
-            await this.context.globalState.update("wcagEnhancer.persistedSettings", settingsToSave);
+	private async loadPersistedSettings(): Promise<void> {
+		try {
+			const globalSettings = this.context.globalState.get("wcagEnhancer.persistedSettings") as Record<string, unknown> | undefined;
+			const workspaceSettings = this.context.workspaceState.get("wcagEnhancer.workspaceSettings") as Record<string, unknown> | undefined;
 
-            // Workspace state'e de kaydet (workspace-specific ayarlar için)
-            await this.context.workspaceState.update("wcagEnhancer.workspaceSettings", settingsToSave);
+			if (globalSettings || workspaceSettings) {
+				this.settingsCache.set("persistedSettings", {
+					...(globalSettings || {}),
+					...(workspaceSettings || {}),
+				});
+				logger.info("Persisted settings loaded");
+			}
+		} catch (error) {
+			logger.error("Persisted settings load error:", error);
+		}
+	}
 
-            // Cache'i güncelle
-            this.settingsCache.set("persistedSettings", settingsToSave);
+	public async restoreSettings(): Promise<void> {
+		try {
+			const persistedSettings =
+				(this.settingsCache.get("persistedSettings") as Record<string, any> | undefined) ||
+				(this.context.globalState.get("wcagEnhancer.persistedSettings") as Record<string, any> | undefined);
 
-            logger.info("💾 Ayarlar kalıcı storage'a başarıyla kaydedildi");
-        } catch (error) {
-            logger.error("❌ Ayarları kalıcı storage'a kaydetme hatası:", error);
-        }
-    }
+			if (!persistedSettings) {
+				logger.info("No persisted settings to restore");
+				return;
+			}
 
-    /**
-     * Kalıcı storage'dan ayarları yükle
-     */
-    private async loadPersistedSettings(): Promise<void> {
-        try {
-            // Global state'den ayarları yükle
-            const globalSettings = this.context.globalState.get("wcagEnhancer.persistedSettings") as any;
+			const config = vscode.workspace.getConfiguration("wcagEnhancer");
+			const restorePromises: Array<Thenable<void> | Promise<void>> = [
+				this.updateConfigSafely(config, "ai", persistedSettings.ai),
+				this.updateConfigSafely(config, "language", persistedSettings.language),
+				this.updateConfigSafely(config, "wcagLevel", persistedSettings.wcagLevel),
+				this.updateConfigSafely(config, "strictMode", persistedSettings.strictMode),
+				this.updateConfigSafely(config, "customRulesPath", persistedSettings.customRulesPath),
+				this.updateConfigSafely(config, "contextAwareAnalysis", persistedSettings.contextAwareAnalysis),
+				this.updateConfigSafely(config, "analysisDisabilityFocus", persistedSettings.analysisDisabilityFocus),
+				this.updateConfigSafely(config, "autoApply", persistedSettings.autoApply),
+				this.updateConfigSafely(config, "includeComments", persistedSettings.includeComments),
+				this.updateConfigSafely(config, "enableStatistics", persistedSettings.enableStatistics),
+				this.updateConfigSafely(config, "customPrompt", persistedSettings.customPrompt),
+				this.updateConfigSafely(config, "responseDetail", persistedSettings.responseDetail),
+				this.updateConfigSafely(config, "interfacePreferences", persistedSettings.interfacePreferences),
+				this.updateConfigSafely(config, "browserIntegration", persistedSettings.browserIntegration),
+				this.updateConfigSafely(config, "jira", persistedSettings.jira),
+				this.updateConfigSafely(config, "wizardCompleted", persistedSettings.wizardCompleted),
+			];
 
-            // Workspace state'den ayarları yükle
-            const workspaceSettings = this.context.workspaceState.get("wcagEnhancer.workspaceSettings") as any;
+			const selectedModel =
+				persistedSettings.aiModels?.selectedModel || persistedSettings.ai?.selectedModel;
+			if (selectedModel) {
+				restorePromises.push(updateNormalizedSelectedModel(config, selectedModel));
+			} else {
+				restorePromises.push(this.updateConfigSafely(config, "aiModels", persistedSettings.aiModels));
+			}
 
-            // Mevcut ayarları kontrol et
-            if (globalSettings || workspaceSettings) {
-                // Workspace ayarları öncelik alır, sonra global ayarlar
-                const settingsToRestore = { ...globalSettings, ...workspaceSettings };
+			if (persistedSettings.shortcuts) {
+				restorePromises.push(
+					this.updateConfigSafely(
+						config,
+						"shortcuts.analyzeOpenCode",
+						persistedSettings.shortcuts.analyzeOpenCode
+					),
+					this.updateConfigSafely(
+						config,
+						"shortcuts.analyzeSelectedCode",
+						persistedSettings.shortcuts.analyzeSelectedCode
+					),
+					this.updateConfigSafely(
+						config,
+						"shortcuts.showInterface",
+						persistedSettings.shortcuts.showInterface
+					)
+				);
+			}
 
-                // Cache'i güncelle
-                this.settingsCache.set("persistedSettings", settingsToRestore);
+			await Promise.all(restorePromises);
 
-                logger.info("📥 Kalıcı storage'dan ayarlar başarıyla yüklendi");
-            } else {
-                logger.info("ℹ️ Kalıcı storage'da önceki ayar bulunamadı");
-            }
-        } catch (error) {
-            logger.error("❌ Kalıcı storage'dan ayar yükleme hatası:", error);
-        }
-    }
+			const localization = LocalizationManager.getInstance();
+			vscode.window.showInformationMessage(localization.getString("persistent.settings.restored"));
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : String(error);
+			logger.error("Settings restore error:", error);
+			const localization = LocalizationManager.getInstance();
+			vscode.window.showErrorMessage(
+				localization.getStringWithParams("persistent.settings.error.restore", { error: errorMessage })
+			);
+		}
+	}
 
-    /**
-     * Kalıcı storage'daki ayarları VS Code configuration'a geri yükle
-     */
-    public async restoreSettings(): Promise<void> {
-        try {
-            const persistedSettings = this.settingsCache.get("persistedSettings") ||
-                this.context.globalState.get("wcagEnhancer.persistedSettings") as any;
+	private async updateConfigSafely(
+		config: vscode.WorkspaceConfiguration,
+		key: string,
+		value: unknown
+	): Promise<void> {
+		if (value === undefined || value === null) {
+			return;
+		}
 
-            if (!persistedSettings) {
-                logger.info("ℹ️ Geri yüklenecek ayar bulunamadı");
-                return;
-            }
+		try {
+			await config.update(key, value, vscode.ConfigurationTarget.Global);
+		} catch (error) {
+			logger.error(`Failed to update configuration key ${key}:`, error);
+		}
+	}
 
-            const config = vscode.workspace.getConfiguration("wcagEnhancer");
+	private async syncWithWorkspaceConfiguration(): Promise<void> {
+		try {
+			const persistedSettings = this.settingsCache.get("persistedSettings") as Record<string, any> | undefined;
+			if (!persistedSettings) {
+				return;
+			}
 
-            // Ayarları tek tek geri yükle
-            const restorePromises = [
-                this.updateConfigSafely(config, "ai", persistedSettings.ai),
-                this.updateConfigSafely(config, "aiModels", persistedSettings.aiModels),
-                this.updateConfigSafely(config, "language", persistedSettings.language),
-                this.updateConfigSafely(config, "wcagLevel", persistedSettings.wcagLevel),
-                this.updateConfigSafely(config, "autoApply", persistedSettings.autoApply),
-                this.updateConfigSafely(config, "includeComments", persistedSettings.includeComments),
-                this.updateConfigSafely(config, "enableStatistics", persistedSettings.enableStatistics),
-                this.updateConfigSafely(config, "customPrompt", persistedSettings.customPrompt),
-                this.updateConfigSafely(config, "responseDetail", persistedSettings.responseDetail),
-                this.updateConfigSafely(config, "interfacePreferences", persistedSettings.interfacePreferences),
-                this.updateConfigSafely(config, "jira", persistedSettings.jira),
-                this.updateConfigSafely(config, "wizardCompleted", persistedSettings.wizardCompleted)
-            ];
+			const config = vscode.workspace.getConfiguration("wcagEnhancer");
+			const { ai, aiModels } = normalizeAiSettingsSnapshot(config);
+			const hasAiConfig = Object.keys(ai).length > 0;
+			const hasModelConfig = Object.keys(aiModels).length > 0;
 
-            // Shortcuts ayrı olarak güncelle
-            if (persistedSettings.shortcuts) {
-                restorePromises.push(
-                    this.updateConfigSafely(config, "shortcuts.analyzeOpenCode", persistedSettings.shortcuts.analyzeOpenCode),
-                    this.updateConfigSafely(config, "shortcuts.analyzeSelectedCode", persistedSettings.shortcuts.analyzeSelectedCode),
-                    this.updateConfigSafely(config, "shortcuts.showInterface", persistedSettings.shortcuts.showInterface)
-                );
-            }
+			if (!hasAiConfig && persistedSettings.ai && Object.keys(persistedSettings.ai).length > 0) {
+				await config.update("ai", persistedSettings.ai, vscode.ConfigurationTarget.Global);
+			}
 
-            await Promise.all(restorePromises);
+			if (!hasModelConfig && persistedSettings.aiModels && Object.keys(persistedSettings.aiModels).length > 0) {
+				const selectedModel =
+					persistedSettings.aiModels.selectedModel || persistedSettings.ai?.selectedModel;
+				if (selectedModel) {
+					await updateNormalizedSelectedModel(config, selectedModel);
+				}
+			}
 
-            logger.info("✅ Settings successfully restored");
+			if (!config.get("wizardCompleted", false) && persistedSettings.wizardCompleted) {
+				await config.update("wizardCompleted", persistedSettings.wizardCompleted, vscode.ConfigurationTarget.Global);
+			}
 
-            const localization = LocalizationManager.getInstance();
-            vscode.window.showInformationMessage(localization.getString("persistent.settings.restored"));
+			if (config.get("language", "en") === "en" && persistedSettings.language && persistedSettings.language !== "en") {
+				await config.update("language", persistedSettings.language, vscode.ConfigurationTarget.Global);
+			}
 
-        } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            logger.error("❌ Settings restore error:", error);
-            const localization = LocalizationManager.getInstance();
-            vscode.window.showErrorMessage(
-                localization.getStringWithParams("persistent.settings.error.restore", { error: errorMessage })
-            );
-        }
-    }
+			if (config.get("wcagLevel", "AA") === "AA" && persistedSettings.wcagLevel && persistedSettings.wcagLevel !== "AA") {
+				await config.update("wcagLevel", persistedSettings.wcagLevel, vscode.ConfigurationTarget.Global);
+			}
+		} catch (error) {
+			logger.error("Workspace configuration sync error:", error);
+		}
+	}
 
-    /**
-     * Güvenli şekilde configuration güncelle
-     */
-    private async updateConfigSafely(config: vscode.WorkspaceConfiguration, key: string, value: any): Promise<void> {
-        if (value !== undefined && value !== null) {
-            try {
-                await config.update(key, value, vscode.ConfigurationTarget.Global);
-            } catch (error) {
-                logger.error(`❌ ${key} ayarı güncellenirken hata:`, error);
-            }
-        }
-    }
+	public async persistSetting(key: string, value: unknown): Promise<void> {
+		try {
+			const currentSettings =
+				(this.settingsCache.get("persistedSettings") as Record<string, unknown> | undefined) || {};
+			currentSettings[key] = value;
 
-    /**
-     * Workspace configuration ile senkronize et
-     */
-    private async syncWithWorkspaceConfiguration(): Promise<void> {
-        try {
-            const persistedSettings = this.settingsCache.get("persistedSettings");
-            if (persistedSettings) {
-                const config = vscode.workspace.getConfiguration("wcagEnhancer");
+			await this.context.globalState.update("wcagEnhancer.persistedSettings", currentSettings);
+			await this.context.workspaceState.update("wcagEnhancer.workspaceSettings", currentSettings);
+			this.settingsCache.set("persistedSettings", currentSettings);
+		} catch (error) {
+			logger.error(`Persistent setting save error for ${key}:`, error);
+		}
+	}
 
-                // Mevcut ayarlarla karşılaştır ve gerekirse güncelle
-                const currentSettings = {
-                    ai: config.get("ai", {}),
-                    aiModels: config.get("aiModels", {}),
-                    language: config.get("language", "en"),
-                    wcagLevel: config.get("wcagLevel", "AA"),
-                    wizardCompleted: config.get("wizardCompleted", false)
-                };
+	public getPersistedSetting(key: string, defaultValue?: unknown): unknown {
+		const settings =
+			(this.settingsCache.get("persistedSettings") as Record<string, unknown> | undefined) ||
+			(this.context.globalState.get("wcagEnhancer.persistedSettings") as Record<string, unknown> | undefined) ||
+			{};
+		return settings[key] !== undefined ? settings[key] : defaultValue;
+	}
 
-                // Önemli ayarlar eksik ise geri yükle
-                if (!currentSettings.ai || Object.keys(currentSettings.ai).length === 0) {
-                    if (persistedSettings.ai && Object.keys(persistedSettings.ai).length > 0) {
-                        await config.update("ai", persistedSettings.ai, vscode.ConfigurationTarget.Global);
-                        logger.info("🔄 AI ayarları senkronize edildi");
-                    }
-                }
+	public async clearPersistedSettings(): Promise<void> {
+		try {
+			await this.context.globalState.update("wcagEnhancer.persistedSettings", undefined);
+			await this.context.workspaceState.update("wcagEnhancer.workspaceSettings", undefined);
+			this.settingsCache.clear();
 
-                if (!currentSettings.aiModels || Object.keys(currentSettings.aiModels).length === 0) {
-                    if (persistedSettings.aiModels && Object.keys(persistedSettings.aiModels).length > 0) {
-                        await config.update("aiModels", persistedSettings.aiModels, vscode.ConfigurationTarget.Global);
-                        logger.info("🔄 AI model ayarları senkronize edildi");
-                    }
-                }
+			const localization = LocalizationManager.getInstance();
+			vscode.window.showInformationMessage(localization.getString("persistent.settings.cleared"));
+		} catch (error) {
+			logger.error("Persistent settings clear error:", error);
+		}
+	}
 
-                // Wizard tamamlanma durumunu da kontrol et
-                if (!currentSettings.wizardCompleted && persistedSettings.wizardCompleted) {
-                    await config.update("wizardCompleted", persistedSettings.wizardCompleted, vscode.ConfigurationTarget.Global);
-                    logger.info("🔄 Wizard tamamlanma durumu senkronize edildi");
-                }
+	public async exportPersistedSettings(): Promise<void> {
+		try {
+			const settings =
+				(this.settingsCache.get("persistedSettings") as Record<string, unknown> | undefined) ||
+				(this.context.globalState.get("wcagEnhancer.persistedSettings") as Record<string, unknown> | undefined);
+			const localization = LocalizationManager.getInstance();
 
-                // Dil ayarını da senkronize et
-                if (currentSettings.language === "en" && persistedSettings.language && persistedSettings.language !== "en") {
-                    await config.update("language", persistedSettings.language, vscode.ConfigurationTarget.Global);
-                    logger.info("🔄 Dil ayarları senkronize edildi");
-                }
+			if (!settings) {
+				vscode.window.showWarningMessage(localization.getString("persistent.settings.no.data"));
+				return;
+			}
 
-                // WCAG seviyesini de senkronize et
-                if (currentSettings.wcagLevel === "AA" && persistedSettings.wcagLevel && persistedSettings.wcagLevel !== "AA") {
-                    await config.update("wcagLevel", persistedSettings.wcagLevel, vscode.ConfigurationTarget.Global);
-                    logger.info("🔄 WCAG seviyesi senkronize edildi");
-                }
-            }
-        } catch (error) {
-            logger.error("❌ Workspace configuration senkronizasyon hatası:", error);
-        }
-    }
+			const jsonContent = JSON.stringify(settings, null, 2);
+			const timestamp = new Date().toISOString().split("T")[0];
+			const uri = await vscode.window.showSaveDialog({
+				filters: { "JSON Files": ["json"] },
+				defaultUri: vscode.Uri.file(`accessimind-settings-${timestamp}.json`),
+			});
 
-    /**
-     * Belirli bir ayarı kalıcı storage'a kaydet
-     */
-    public async persistSetting(key: string, value: any): Promise<void> {
-        try {
-            const currentSettings = this.settingsCache.get("persistedSettings") || {};
-            currentSettings[key] = value;
+			if (uri) {
+				await vscode.workspace.fs.writeFile(uri, Buffer.from(jsonContent, "utf8"));
+				vscode.window.showInformationMessage(localization.getString("persistent.settings.exported"));
+			}
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : String(error);
+			logger.error("Settings export error:", error);
+			const localization = LocalizationManager.getInstance();
+			vscode.window.showErrorMessage(
+				localization.getStringWithParams("persistent.settings.error.export", { error: errorMessage })
+			);
+		}
+	}
 
-            await this.context.globalState.update("wcagEnhancer.persistedSettings", currentSettings);
-            await this.context.workspaceState.update("wcagEnhancer.workspaceSettings", currentSettings);
+	public async importPersistedSettings(): Promise<void> {
+		try {
+			const uri = await vscode.window.showOpenDialog({
+				filters: { "JSON Files": ["json"] },
+				canSelectMany: false,
+				openLabel: "Import AccessiMind Settings",
+			});
 
-            this.settingsCache.set("persistedSettings", currentSettings);
+			if (!uri?.[0]) {
+				return;
+			}
 
-            logger.info(`💾 ${key} ayarı kalıcı storage'a kaydedildi`);
-        } catch (error) {
-            logger.error(`❌ ${key} ayarını kalıcı storage'a kaydetme hatası:`, error);
-        }
-    }
+			const fileContent = await vscode.workspace.fs.readFile(uri[0]);
+			const settings = JSON.parse(fileContent.toString());
 
-    /**
-     * Belirli bir ayarı kalıcı storage'dan al
-     */
-    public getPersistedSetting(key: string, defaultValue?: any): any {
-        const settings = this.settingsCache.get("persistedSettings") ||
-            this.context.globalState.get("wcagEnhancer.persistedSettings") as any || {};
+			await this.context.globalState.update("wcagEnhancer.persistedSettings", settings);
+			await this.context.workspaceState.update("wcagEnhancer.workspaceSettings", settings);
+			this.settingsCache.set("persistedSettings", settings);
 
-        return settings[key] !== undefined ? settings[key] : defaultValue;
-    }
+			await this.restoreSettings();
 
-    /**
-     * Tüm kalıcı ayarları temizle
-     */
-    public async clearPersistedSettings(): Promise<void> {
-        try {
-            await this.context.globalState.update("wcagEnhancer.persistedSettings", undefined);
-            await this.context.workspaceState.update("wcagEnhancer.workspaceSettings", undefined);
-            this.settingsCache.clear();
+			const localization = LocalizationManager.getInstance();
+			vscode.window.showInformationMessage(localization.getString("persistent.settings.imported"));
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : String(error);
+			logger.error("Settings import error:", error);
+			const localization = LocalizationManager.getInstance();
+			vscode.window.showErrorMessage(
+				localization.getStringWithParams("persistent.settings.error.import", { error: errorMessage })
+			);
+		}
+	}
 
-            logger.info("🗑️ All persistent settings cleared");
-            const localization = LocalizationManager.getInstance();
-            vscode.window.showInformationMessage(localization.getString("persistent.settings.cleared"));
-        } catch (error) {
-            logger.error("❌ Persistent settings clear error:", error);
-        }
-    }
+	public getSettingsStatus(): {
+		hasPersistedSettings: boolean;
+		globalSettingsCount: number;
+		workspaceSettingsCount: number;
+		cacheSize: number;
+	} {
+		const globalSettings =
+			(this.context.globalState.get("wcagEnhancer.persistedSettings") as Record<string, unknown> | undefined) || {};
+		const workspaceSettings =
+			(this.context.workspaceState.get("wcagEnhancer.workspaceSettings") as Record<string, unknown> | undefined) || {};
+		const cachedSettings =
+			(this.settingsCache.get("persistedSettings") as Record<string, unknown> | undefined) || {};
 
-    /**
-     * Kalıcı ayarları dışa aktar
-     */
-    public async exportPersistedSettings(): Promise<void> {
-        try {
-            const settings = this.settingsCache.get("persistedSettings") ||
-                this.context.globalState.get("wcagEnhancer.persistedSettings") as any;
+		return {
+			hasPersistedSettings:
+				Object.keys(globalSettings).length > 0 || Object.keys(workspaceSettings).length > 0,
+			globalSettingsCount: Object.keys(globalSettings).length,
+			workspaceSettingsCount: Object.keys(workspaceSettings).length,
+			cacheSize: Object.keys(cachedSettings).length,
+		};
+	}
 
-            const localization = LocalizationManager.getInstance();
-
-            if (!settings) {
-                vscode.window.showWarningMessage(localization.getString("persistent.settings.no.data"));
-                return;
-            }
-
-            const jsonContent = JSON.stringify(settings, null, 2);
-            const timestamp = new Date().toISOString().split("T")[0];
-
-            const uri = await vscode.window.showSaveDialog({
-                filters: {
-                    "JSON Files": ["json"]
-                },
-                defaultUri: vscode.Uri.file(`accessimind-settings-${timestamp}.json`)
-            });
-
-            if (uri) {
-                await vscode.workspace.fs.writeFile(uri, Buffer.from(jsonContent, "utf8"));
-                vscode.window.showInformationMessage(localization.getString("persistent.settings.exported"));
-            }
-        } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            logger.error("❌ Settings export error:", error);
-            const localization = LocalizationManager.getInstance();
-            vscode.window.showErrorMessage(
-                localization.getStringWithParams("persistent.settings.error.export", { error: errorMessage })
-            );
-        }
-    }
-
-    /**
-     * Kalıcı ayarları içe aktar
-     */
-    public async importPersistedSettings(): Promise<void> {
-        try {
-            const uri = await vscode.window.showOpenDialog({
-                filters: {
-                    "JSON Files": ["json"]
-                },
-                canSelectMany: false,
-                openLabel: "Import AccessiMind Settings"
-            });
-
-            if (uri && uri[0]) {
-                const fileContent = await vscode.workspace.fs.readFile(uri[0]);
-                const settings = JSON.parse(fileContent.toString());
-
-                // Kalıcı storage'a kaydet
-                await this.context.globalState.update("wcagEnhancer.persistedSettings", settings);
-                await this.context.workspaceState.update("wcagEnhancer.workspaceSettings", settings);
-                this.settingsCache.set("persistedSettings", settings);
-
-                // VS Code configuration'a uygula
-                await this.restoreSettings();
-
-                const localization = LocalizationManager.getInstance();
-                vscode.window.showInformationMessage(localization.getString("persistent.settings.imported"));
-            }
-        } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            logger.error("❌ Settings import error:", error);
-            const localization = LocalizationManager.getInstance();
-            vscode.window.showErrorMessage(
-                localization.getStringWithParams("persistent.settings.error.import", { error: errorMessage })
-            );
-        }
-    }
-
-    /**
-     * Mevcut durumu raporla
-     */
-    public getSettingsStatus(): {
-        hasPersistedSettings: boolean;
-        globalSettingsCount: number;
-        workspaceSettingsCount: number;
-        cacheSize: number;
-    } {
-        const globalSettings = this.context.globalState.get("wcagEnhancer.persistedSettings") as any || {};
-        const workspaceSettings = this.context.workspaceState.get("wcagEnhancer.workspaceSettings") as any || {};
-        const cachedSettings = this.settingsCache.get("persistedSettings") || {};
-
-        return {
-            hasPersistedSettings: Object.keys(globalSettings).length > 0 || Object.keys(workspaceSettings).length > 0,
-            globalSettingsCount: Object.keys(globalSettings).length,
-            workspaceSettingsCount: Object.keys(workspaceSettings).length,
-            cacheSize: Object.keys(cachedSettings).length
-        };
-    }
-
-    /**
-     * Resource'ları temizle
-     */
-    public dispose(): void {
-        if (this.configChangeListener) {
-            this.configChangeListener.dispose();
-            this.configChangeListener = undefined;
-        }
-        this.settingsCache.clear();
-        logger.info("🔄 PersistentSettingsManager temizlendi");
-    }
+	public dispose(): void {
+		this.configChangeListener?.dispose();
+		if (this.persistDebounceTimer) {
+			clearTimeout(this.persistDebounceTimer);
+		}
+		this.settingsCache.clear();
+	}
 }

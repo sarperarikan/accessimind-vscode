@@ -4,7 +4,9 @@ import { StatisticsManager } from "./utils/statisticsManager";
 import { LocalizationManager } from "./utils/localizationManager";
 import { StatsViewProvider } from "./views/statsViewProvider";
 import { ModernStatsViewProvider } from "./views/modernStatsViewProvider";
+import { normalizeGeneratedCode } from "./utils/codeGenerationUtils";
 import { logger } from "./utils/logger";
+import { getRuntimeSettings, readCustomRules } from "./utils/runtimeSettings";
 
 // Shared dependencies
 let aiProviderManager: AIProviderManager;
@@ -69,12 +71,22 @@ export async function improveCurrentFileWithProvider(providerType: "gemini" | "v
 				const config = vscode.workspace.getConfiguration("wcagEnhancer");
 				const wcagLevel = config.get("wcagLevel") as "A" | "AA" | "AAA" || "AA";
 				const includeComments = config.get("includeComments") !== false;
-				const autoApply = config.get("autoApply") || false;
+				const runtimeSettings = getRuntimeSettings();
+				const customRules = await readCustomRules();
+				const autoApply = (config.get("autoApply") || false) || runtimeSettings.autoSave;
+				const guidedCode = [
+					runtimeSettings.strictMode ? "STRICT_MODE: true" : "",
+					runtimeSettings.contextAwareAnalysis
+						? "CONTEXT_AWARE_ANALYSIS: enabled. Evaluate surrounding structure and interaction flow."
+						: "CONTEXT_AWARE_ANALYSIS: disabled. Limit changes to the target scope.",
+					customRules ? `CUSTOM_RULES:\n${customRules}` : "",
+					code
+				].filter(Boolean).join("\n\n");
 
 				progress.report({ increment: 40, message: localizationManager.getString("progress.applying.rules") });
 
 				const improvementResult = await provider.improveCode({
-					code,
+					code: guidedCode,
 					fileType: fileName.split(".").pop() || "unknown",
 					language,
 					wcagLevel,
@@ -87,6 +99,19 @@ export async function improveCurrentFileWithProvider(providerType: "gemini" | "v
 				progress.report({ increment: 80, message: localizationManager.getString("progress.preparing.results") });
 
 				if (improvementResult.success && improvementResult.improvedCode) {
+					const normalized = normalizeGeneratedCode({
+						originalCode: code,
+						generatedContent: improvementResult.improvedCode,
+						language,
+						mode: "file"
+					});
+					improvementResult.improvedCode = normalized.code;
+					if (normalized.warnings.length > 0) {
+						if (runtimeSettings.showNotifications) {
+							void vscode.window.showWarningMessage(normalized.warnings.join(" "));
+						}
+					}
+
 					// Count improved lines
 					const originalLines = code.split("\n");
 					const improvedLines = improvementResult.improvedCode.split("\n");
@@ -131,13 +156,15 @@ export async function improveCurrentFileWithProvider(providerType: "gemini" | "v
 						edit.replace(document.uri, fullRange, improvementResult.improvedCode);
 						await vscode.workspace.applyEdit(edit);
 
-						vscode.window.showInformationMessage(
-							localizationManager.getStringWithParams("success.provider.improved.detail", {
-								lines: linesImproved,
-								provider: providerType === "gemini" ? "Gemini" : "Copilot",
-								criteria: wcagCriteria.length
-							})
-						);
+						if (runtimeSettings.showNotifications) {
+							vscode.window.showInformationMessage(
+								localizationManager.getStringWithParams("success.provider.improved.detail", {
+									lines: linesImproved,
+									provider: providerType === "gemini" ? "Gemini" : "Copilot",
+									criteria: wcagCriteria.length
+								})
+							);
+						}
 					} else {
 						// Show diff for manual review
 						const originalUri = document.uri;
@@ -151,27 +178,29 @@ export async function improveCurrentFileWithProvider(providerType: "gemini" | "v
 							await vscode.commands.executeCommand("vscode.diff", originalUri, improvedUri,
 								localizationManager.getStringWithParams("progress.provider.diff.title", { filename: fileName, provider: providerType === "gemini" ? "Gemini" : "Copilot" }));
 
-							vscode.window.showInformationMessage(
-								localizationManager.getStringWithParams("success.provider.selection.improved.detail", {
-									lines: linesImproved,
-									provider: providerType === "gemini" ? "Gemini" : "Copilot",
-									criteria: wcagCriteria.length
-								}),
-								localizationManager.getString("button.apply.changes"),
-								localizationManager.getString("button.show.stats")
-							).then(action => {
-								if (action === localizationManager.getString("button.apply.changes")) {
-									const edit = new vscode.WorkspaceEdit();
-									const fullRange = new vscode.Range(
-										document.positionAt(0),
-										document.positionAt(code.length)
-									);
-									edit.replace(document.uri, fullRange, improvementResult.improvedCode!);
-									vscode.workspace.applyEdit(edit);
-								} else if (action === localizationManager.getString("button.show.stats")) {
-									vscode.commands.executeCommand("wcagEnhancer.showDetailedStatistics");
-								}
-							});
+							if (runtimeSettings.showNotifications) {
+								vscode.window.showInformationMessage(
+									localizationManager.getStringWithParams("success.provider.selection.improved.detail", {
+										lines: linesImproved,
+										provider: providerType === "gemini" ? "Gemini" : "Copilot",
+										criteria: wcagCriteria.length
+									}),
+									localizationManager.getString("button.apply.changes"),
+									localizationManager.getString("button.show.stats")
+								).then(action => {
+									if (action === localizationManager.getString("button.apply.changes")) {
+										const edit = new vscode.WorkspaceEdit();
+										const fullRange = new vscode.Range(
+											document.positionAt(0),
+											document.positionAt(code.length)
+										);
+										edit.replace(document.uri, fullRange, improvementResult.improvedCode!);
+										vscode.workspace.applyEdit(edit);
+									} else if (action === localizationManager.getString("button.show.stats")) {
+										vscode.commands.executeCommand("wcagEnhancer.showDetailedStatistics");
+									}
+								});
+							}
 						});
 					}
 				} else {
@@ -243,12 +272,22 @@ export async function improveSelectedCodeWithProvider(providerType: "gemini" | "
 				const config = vscode.workspace.getConfiguration("wcagEnhancer");
 				const wcagLevel = config.get("wcagLevel") as "A" | "AA" | "AAA" || "AA";
 				const includeComments = config.get("includeComments") !== false;
-				const autoApply = config.get("autoApply") || false;
+				const runtimeSettings = getRuntimeSettings();
+				const customRules = await readCustomRules();
+				const autoApply = (config.get("autoApply") || false) || runtimeSettings.autoSave;
+				const guidedCode = [
+					runtimeSettings.strictMode ? "STRICT_MODE: true" : "",
+					runtimeSettings.contextAwareAnalysis
+						? "CONTEXT_AWARE_ANALYSIS: enabled. Evaluate surrounding structure and interaction flow."
+						: "CONTEXT_AWARE_ANALYSIS: disabled. Limit changes to the target scope.",
+					customRules ? `CUSTOM_RULES:\n${customRules}` : "",
+					fullCode
+				].filter(Boolean).join("\n\n");
 
 				progress.report({ increment: 40, message: localizationManager.getString("progress.applying.rules") });
 
 				const improvementResult = await provider.improveCode({
-					code: fullCode,
+					code: guidedCode,
 					fileType: fileName.split(".").pop() || "unknown",
 					language,
 					selectedText: selectedCode,
@@ -262,6 +301,19 @@ export async function improveSelectedCodeWithProvider(providerType: "gemini" | "
 				progress.report({ increment: 80, message: localizationManager.getString("progress.preparing.results") });
 
 				if (improvementResult.success && improvementResult.improvedCode) {
+					const normalized = normalizeGeneratedCode({
+						originalCode: selectedCode,
+						generatedContent: improvementResult.improvedCode,
+						language,
+						mode: "selection"
+					});
+					improvementResult.improvedCode = normalized.code;
+					if (normalized.warnings.length > 0) {
+						if (runtimeSettings.showNotifications) {
+							void vscode.window.showWarningMessage(normalized.warnings.join(" "));
+						}
+					}
+
 					// Count improved lines
 					const originalLines = selectedCode.split("\n");
 					const improvedLines = improvementResult.improvedCode.split("\n");
@@ -302,49 +354,52 @@ export async function improveSelectedCodeWithProvider(providerType: "gemini" | "
 						edit.replace(document.uri, selection, improvementResult.improvedCode);
 						await vscode.workspace.applyEdit(edit);
 
-						vscode.window.showInformationMessage(
-							localizationManager.getStringWithParams("success.provider.selection.improved.detail", {
-								lines: linesImproved,
-								provider: providerType === "gemini" ? "Gemini" : "Copilot",
-								criteria: wcagCriteria.length
-							})
-						);
+						if (runtimeSettings.showNotifications) {
+							vscode.window.showInformationMessage(
+								localizationManager.getStringWithParams("success.provider.selection.improved.detail", {
+									lines: linesImproved,
+									provider: providerType === "gemini" ? "Gemini" : "Copilot",
+									criteria: wcagCriteria.length
+								})
+							);
+						}
 					} else {
 						// Show improvement result and ask for confirmation
-						vscode.window.showInformationMessage(
-							localizationManager.getStringWithParams("success.provider.selection.improved.detail", {
-								lines: linesImproved,
-								provider: providerType === "gemini" ? "Gemini" : "Copilot",
-								criteria: wcagCriteria.length
-							}),
-							localizationManager.getString("button.apply.changes"),
-							localizationManager.getString("button.show.preview"),
-							localizationManager.getString("button.show.stats")
-						).then(async action => {
-							if (action === localizationManager.getString("button.apply.changes")) {
-								const edit = new vscode.WorkspaceEdit();
-								edit.replace(document.uri, selection, improvementResult.improvedCode!);
-								await vscode.workspace.applyEdit(edit);
-							} else if (action === localizationManager.getString("button.show.preview")) {
-								// Create diff view for selection
-								const originalUri = vscode.Uri.parse(`untitled:original-selection.${language}`);
-								const improvedUri = vscode.Uri.parse(`untitled:${providerType}-selection.${language}`);
+						if (runtimeSettings.showNotifications) {
+							vscode.window.showInformationMessage(
+								localizationManager.getStringWithParams("success.provider.selection.improved.detail", {
+									lines: linesImproved,
+									provider: providerType === "gemini" ? "Gemini" : "Copilot",
+									criteria: wcagCriteria.length
+								}),
+								localizationManager.getString("button.apply.changes"),
+								localizationManager.getString("button.show.preview"),
+								localizationManager.getString("button.show.stats")
+							).then(async action => {
+								if (action === localizationManager.getString("button.apply.changes")) {
+									const edit = new vscode.WorkspaceEdit();
+									edit.replace(document.uri, selection, improvementResult.improvedCode!);
+									await vscode.workspace.applyEdit(edit);
+								} else if (action === localizationManager.getString("button.show.preview")) {
+									const originalUri = vscode.Uri.parse(`untitled:original-selection.${language}`);
+									const improvedUri = vscode.Uri.parse(`untitled:${providerType}-selection.${language}`);
 
-								const editOriginal = new vscode.WorkspaceEdit();
-								const editImproved = new vscode.WorkspaceEdit();
+									const editOriginal = new vscode.WorkspaceEdit();
+									const editImproved = new vscode.WorkspaceEdit();
 
-								editOriginal.insert(originalUri, new vscode.Position(0, 0), selectedCode);
-								editImproved.insert(improvedUri, new vscode.Position(0, 0), improvementResult.improvedCode!);
+									editOriginal.insert(originalUri, new vscode.Position(0, 0), selectedCode);
+									editImproved.insert(improvedUri, new vscode.Position(0, 0), improvementResult.improvedCode!);
 
-								await vscode.workspace.applyEdit(editOriginal);
-								await vscode.workspace.applyEdit(editImproved);
+									await vscode.workspace.applyEdit(editOriginal);
+									await vscode.workspace.applyEdit(editImproved);
 
-								await vscode.commands.executeCommand("vscode.diff", originalUri, improvedUri,
-									localizationManager.getStringWithParams("progress.provider.selection.diff.title", { provider: providerType === "gemini" ? "Gemini" : "Copilot" }));
-							} else if (action === localizationManager.getString("button.show.stats")) {
-								vscode.commands.executeCommand("wcagEnhancer.showDetailedStatistics");
-							}
-						});
+									await vscode.commands.executeCommand("vscode.diff", originalUri, improvedUri,
+										localizationManager.getStringWithParams("progress.provider.selection.diff.title", { provider: providerType === "gemini" ? "Gemini" : "Copilot" }));
+								} else if (action === localizationManager.getString("button.show.stats")) {
+									vscode.commands.executeCommand("wcagEnhancer.showDetailedStatistics");
+								}
+							});
+						}
 					}
 				} else {
 					// Record error

@@ -22,9 +22,20 @@ export interface AIResponse {
     outputTokens?: number;
     responseTime?: number;
     model?: string;
-    provider: "gemini" | "vscode-copilot" | "ollama";
+    provider: "gemini" | "vscode-copilot" | "ollama" | "codex-subscription";
     usageMetadata?: Record<string, unknown>;
     cached?: boolean;
+}
+
+export interface AIModelDescriptor {
+    id: string;
+    name: string;
+    description?: string;
+    family?: string;
+    vendor?: string;
+    recommended?: boolean;
+    inputTokenLimit?: number;
+    outputTokenLimit?: number;
 }
 
 export interface WCAGRequest {
@@ -48,6 +59,10 @@ export abstract class AIProvider {
     abstract analyzeCode(request: WCAGRequest): Promise<AIResponse>;
     abstract isAvailable(): Promise<boolean>;
     abstract getDisplayName(): string;
+
+    async getAvailableModels(): Promise<AIModelDescriptor[]> {
+        return [];
+    }
 
     async chat(_message: string): Promise<AIResponse> {
         throw new Error("Chat not implemented for this provider.");
@@ -97,6 +112,8 @@ export abstract class AIProvider {
         return `${strings.title}
 
 ${strings.primaryDirective}
+
+${strings.scopeDirective}
 
 ${strings.fileType}: ${fileType}
 ${strings.language}: ${language}
@@ -230,6 +247,7 @@ ${code}
 interface PromptStrings {
     title: string;
     primaryDirective: string;
+    scopeDirective: string;
     fileType: string;
     language: string;
     wcagLevel: string;
@@ -258,6 +276,8 @@ const PROMPT_STRINGS: Record<"en" | "tr", PromptStrings> = {
         title: "You are a WCAG 2.2 accessibility expert.",
         primaryDirective:
             "YOUR PRIMARY DIRECTIVE: PRESERVE the existing code structure COMPLETELY. You must ONLY add accessibility improvements to the EXISTING elements. DO NOT rewrite, restructure, or recreate the code.",
+        scopeDirective:
+            "SCOPE RULE: If selected code is provided, return ONLY the rewritten selection. If the input is a full file, return the COMPLETE file. Preserve the original scope and do not inflate a component into a full application.",
         fileType: "File Type",
         language: "Language",
         wcagLevel: "WCAG Level",
@@ -427,6 +447,8 @@ SELF-VALIDATION CHECKLIST (perform before returning output):
         title: "Sen bir WCAG 2.2 erişilebilirlik uzmanısın.",
         primaryDirective:
             "BİRİNCİL DİREKTİFİN: Mevcut kod yapısını TAMAMEN KORU. SADECE mevcut elementlere erişilebilirlik iyileştirmeleri ekle. Kodu yeniden yazma, yapılandırma veya yeniden oluşturma.",
+        scopeDirective:
+            "KAPSAM KURALI: Se�ili kod verildiyse YALNIZCA yeniden yaz�lm�� se�imi d�nd�r. Girdi tam dosyaysa TAM dosyay� d�nd�r. Orijinal kapsam� koru; bir bile�eni t�m uygulamaya d�n��t�rme.",
         fileType: "Dosya Türü",
         language: "Dil",
         wcagLevel: "WCAG Seviyesi",
@@ -592,3 +614,12 @@ JAVASCRIPT GEREKSİNİMLERİ:
 □ aria-live bölgeleri tetiklendiğinde doğru güncelleniyor mu?`,
     },
 };
+
+
+
+
+
+
+
+
+

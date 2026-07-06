@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { AIProviderManager, GeminiProvider } from "./aiProvider";
+import { testCodexAccountConnection } from "./codexAccountAuth";
 
 import { logger } from "./logger";
 
@@ -47,6 +48,8 @@ export class AITestUtils {
 				return await this.testCopilotProvider();
 			} else if (currentProvider === "ollama") {
 				return await this.testOllamaProvider();
+			} else if (currentProvider === "codex-subscription") {
+				return await this.testCodexSubscriptionProvider();
 			} else {
 				return {
 					success: false,
@@ -318,6 +321,41 @@ export class AITestUtils {
 		}
 	}
 
+	private async testCodexSubscriptionProvider(): Promise<AITestResult> {
+		const result = await testCodexAccountConnection();
+
+		if (result.success) {
+			return {
+				success: true,
+				message: `Codex account connection succeeded. Model: ${result.model}`,
+				provider: "codex-subscription",
+				model: result.model,
+				responseTime: result.responseTime,
+				details: {
+					apiKeyConfigured: true,
+					connectionSuccessful: true,
+					modelAvailable: true,
+					responseReceived: true
+				}
+			};
+		}
+
+		return {
+			success: false,
+			message: result.message,
+			provider: "codex-subscription",
+			model: result.model,
+			responseTime: result.responseTime,
+			error: result.error,
+			details: {
+				apiKeyConfigured: false,
+				connectionSuccessful: false,
+				modelAvailable: false,
+				responseReceived: false
+			}
+		};
+	}
+
 	public async showTestResult(result: AITestResult): Promise<void> {
 		const panel = vscode.window.createWebviewPanel(
 			"aiTestResult",
@@ -366,6 +404,8 @@ export class AITestUtils {
 			providerName = "GitHub Copilot";
 		} else if (result.provider === "ollama") {
 			providerName = "Ollama (Local)";
+		} else if (result.provider === "codex-subscription") {
+			providerName = "Codex Subscription (ChatGPT)";
 		}
 
 		return `
@@ -686,6 +726,11 @@ export class AITestUtils {
 				<li>• VS Code'da GitHub hesabınızla giriş yaptığınızdan emin olun</li>
 				<li>• GitHub Copilot uzantısının yüklü ve etkin olduğunu kontrol edin</li>
 				<li>• VS Code'u yeniden başlatmayı deneyin</li>
+				` : result.provider === "codex-subscription" ? `
+				<li>AccessiMind: Connect Codex Account komutunu calistirin</li>
+				<li>Terminalde codex login ile ChatGPT/Codex hesabinizda oturum acin</li>
+				<li>API anahtari girmeyin; bu provider Codex hesabinizin oturumunu kullanir</li>
+				<li>Windows app alias engellenirse wcagEnhancer.ai.codexPath ayarina codex.exe yolunu girin</li>
 				` : `
 				<li>• Ollama servisinin çalıştığından emin olun (ollama serve)</li>
 				<li>• Ollama API URL'inin doğru olduğunu kontrol edin (Varsayılan: http://localhost:11434)</li>

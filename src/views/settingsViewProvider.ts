@@ -3,6 +3,7 @@ import { SettingsManager } from "../utils/settingsManager";
 import { AITestUtils } from "../utils/aiTestUtils";
 import { AIProviderManager } from "../utils/aiProvider";
 import { logger } from "../utils/logger";
+import { LocalizationManager } from "../utils/localizationManager";
 
 export class SettingsViewProvider implements vscode.TreeDataProvider<SettingItem> {
 	public static readonly viewType = "wcagEnhancer.settingsView";
@@ -13,11 +14,13 @@ export class SettingsViewProvider implements vscode.TreeDataProvider<SettingItem
 	private settingsManager: SettingsManager;
 	private aiTestUtils: AITestUtils;
 	private aiProviderManager: AIProviderManager;
+	private localization: LocalizationManager;
 
 	constructor(private readonly context: vscode.ExtensionContext) {
 		this.settingsManager = SettingsManager.getInstance();
 		this.aiTestUtils = AITestUtils.getInstance();
 		this.aiProviderManager = AIProviderManager.getInstance();
+		this.localization = LocalizationManager.getInstance();
 		this.refresh();
 
 		// Configuration değişikliklerini dinle
@@ -26,6 +29,28 @@ export class SettingsViewProvider implements vscode.TreeDataProvider<SettingItem
 				this.refresh();
 			}
 		});
+	}
+
+	public refreshView(): void {
+		void this.refresh();
+	}
+
+	private t(en: string, tr: string): string {
+		return this.localization.getCurrentLanguage() === "tr" ? tr : en;
+	}
+
+	private getProviderDisplayName(provider: string): string {
+		switch (provider) {
+			case "vscode-copilot":
+				return "GitHub Copilot";
+			case "ollama":
+				return "Ollama";
+			case "codex-subscription":
+				return "Codex Subscription";
+			case "gemini":
+			default:
+				return "Google Gemini";
+		}
 	}
 
 	getTreeItem(element: SettingItem): vscode.TreeItem {
@@ -60,28 +85,31 @@ export class SettingsViewProvider implements vscode.TreeDataProvider<SettingItem
 		let availableModels: any[] = [];
 		try {
 			if (currentProvider === "gemini") {
-				availableModels = [
-					{ id: "gemini-2.5-flash", name: "Gemini 2.5 Flash", description: "En hızlı model" },
-					{ id: "gemini-2.5-pro", name: "Gemini 2.5 Pro", description: "En kaliteli model" }
-				];
+				availableModels = await this.aiProviderManager.getAvailableModelsForProvider("gemini");
 			} else if (currentProvider === "vscode-copilot") {
-				availableModels = await this.aiProviderManager.getAvailableCopilotModels();
+				availableModels = await this.aiProviderManager.getAvailableModelsForProvider("vscode-copilot");
+			} else if (currentProvider === "ollama") {
+				availableModels = await this.aiProviderManager.getAvailableModelsForProvider("ollama");
+			} else if (currentProvider === "codex-subscription") {
+				availableModels = await this.aiProviderManager.getAvailableModelsForProvider("codex-subscription");
 			}
 		} catch (error) {
 			logger.error("Model listesi alınamadı:", error);
 		}
 
 		this.settings = [
-			new SettingCategory("🤖 AI Provider Configuration", "ai-provider-config", [
+			new SettingCategory(this.t("AI Provider Configuration", "AI Sa�lay�c� Yap�land�rmas�"), "ai-provider-config", [
 				new SettingItem(
 					"AI Provider",
-					currentProvider === "gemini" ? "🚀 Google Gemini" : "🤖 GitHub Copilot",
+					this.getProviderDisplayName(currentProvider),
 					"Select AI provider for WCAG improvements",
 					"aiProvider",
 					"gear",
 					[
-						new SettingAction("🚀 Select Gemini", "selectProvider", { provider: "gemini" }),
-						new SettingAction("🤖 Select Copilot", "selectProvider", { provider: "vscode-copilot" })
+						new SettingAction("Select Gemini", "selectProvider", { provider: "gemini" }),
+						new SettingAction("Select Copilot", "selectProvider", { provider: "vscode-copilot" }),
+						new SettingAction("Select Ollama", "selectProvider", { provider: "ollama" }),
+						new SettingAction("Select Codex Subscription", "selectProvider", { provider: "codex-subscription" })
 					]
 				),
 				...(currentProvider === "gemini" ? [
@@ -109,11 +137,11 @@ export class SettingsViewProvider implements vscode.TreeDataProvider<SettingItem
 				)
 			]),
 
-			new SettingCategory("🧠 AI Model Settings", "ai-model-settings", [
+			new SettingCategory(this.t("AI Model Settings", "AI Model Ayarlar�"), "ai-model-settings", [
 				new SettingItem(
 					"Selected Model",
 					this.getModelDisplayName(currentModel, availableModels),
-					`Current ${currentProvider === "gemini" ? "Gemini" : "Copilot"} model`,
+					`Current ${this.getProviderDisplayName(currentProvider)} model`,
 					"selectedModel",
 					"circuit-board",
 					availableModels.map(model =>
@@ -137,7 +165,7 @@ export class SettingsViewProvider implements vscode.TreeDataProvider<SettingItem
 				)
 			]),
 
-			new SettingCategory("♿ WCAG Configuration", "wcag-config", [
+			new SettingCategory(this.t("WCAG Configuration", "WCAG Yap�land�rmas�"), "wcag-config", [
 				new SettingItem(
 					"WCAG Level",
 					`Level ${wcagLevel}`,
@@ -172,22 +200,22 @@ export class SettingsViewProvider implements vscode.TreeDataProvider<SettingItem
 				)
 			]),
 
-			new SettingCategory("🌍 Language & Localization", "language-settings", [
+			new SettingCategory(this.t("Language & Localization", "Dil ve Yerelle�tirme"), "language-settings", [
 				new SettingItem(
-					"Interface Language",
+					this.t("Interface Language", "Aray�z Dili"),
 					this.getLanguageDisplayName(language as string),
-					"AI responses and interface language",
+					this.t("AI responses and interface language", "AI yan�tlar� ve aray�z dili"),
 					"language",
 					"globe",
 					[
-						new SettingAction(`Auto${language === "auto" ? " ✅" : ""}`, "setLanguage", { language: "auto" }),
-						new SettingAction(`English${language === "en" ? " ✅" : ""}`, "setLanguage", { language: "en" }),
-						new SettingAction(`Türkçe${language === "tr" ? " ✅" : ""}`, "setLanguage", { language: "tr" })
+						new SettingAction(`${this.t("Auto", "Otomatik")}${language === "auto" ? " ✅" : ""}`, "setLanguage", { language: "auto" }),
+						new SettingAction(`${this.t("English", "�ngilizce")}${language === "en" ? " ✅" : ""}`, "setLanguage", { language: "en" }),
+						new SettingAction(`${this.t("Turkish", "T�rk�e")}${language === "tr" ? " ✅" : ""}`, "setLanguage", { language: "tr" })
 					]
 				)
 			]),
 
-			new SettingCategory("📊 Statistics & Analytics", "statistics-settings", [
+			new SettingCategory(this.t("Statistics & Analytics", "�statistikler ve Analitik"), "statistics-settings", [
 				new SettingItem(
 					"Statistics Tracking",
 					enableStatistics ? "✅ Enabled" : "❌ Disabled",
@@ -203,7 +231,7 @@ export class SettingsViewProvider implements vscode.TreeDataProvider<SettingItem
 				)
 			]),
 
-			new SettingCategory("⌨️ Keyboard Shortcuts", "keyboard-shortcuts", [
+			new SettingCategory(this.t("Keyboard Shortcuts", "Klavye K�sayollar�"), "keyboard-shortcuts", [
 				new SettingItem(
 					"Shortcut Configuration",
 					"Customize keyboard shortcuts",
@@ -217,7 +245,7 @@ export class SettingsViewProvider implements vscode.TreeDataProvider<SettingItem
 				)
 			]),
 
-			new SettingCategory("📊 Statistics & Analytics", "statistics-analytics", [
+			new SettingCategory(this.t("Statistics & Analytics", "�statistikler ve Analitik"), "statistics-analytics", [
 				new SettingItem(
 					"View Statistics",
 					"Display detailed WCAG enhancement statistics",
@@ -240,7 +268,7 @@ export class SettingsViewProvider implements vscode.TreeDataProvider<SettingItem
 				)
 			]),
 
-			new SettingCategory("🔗 Help & Resources", "help-resources", [
+			new SettingCategory(this.t("Help & Resources", "Yard�m ve Kaynaklar"), "help-resources", [
 				new SettingItem(
 					"Documentation & Guides",
 					"Access to help resources",
@@ -404,9 +432,9 @@ export class SettingsViewProvider implements vscode.TreeDataProvider<SettingItem
 		try {
 			const success = await this.aiProviderManager.setProvider(provider);
 			if (success) {
-				vscode.window.showInformationMessage(`✅ AI sağlayıcı ${provider === "gemini" ? "Gemini" : "Copilot"} olarak ayarlandı`);
+				vscode.window.showInformationMessage(`AI provider set to ${this.getProviderDisplayName(provider)}`);
 			} else {
-				vscode.window.showErrorMessage(`❌ ${provider === "gemini" ? "Gemini" : "Copilot"} sağlayıcısı kullanılamıyor`);
+				vscode.window.showErrorMessage(`${this.getProviderDisplayName(provider)} provider is not available`);
 			}
 		} catch (error) {
 			vscode.window.showErrorMessage(`❌ Sağlayıcı ayarlanamadı: ${error instanceof Error ? error.message : "Bilinmeyen hata"}`);
@@ -507,11 +535,15 @@ export class SettingsViewProvider implements vscode.TreeDataProvider<SettingItem
 
 		const availableModels = type === "quick"
 			? [
+				{ id: "gemini-3.5-flash", name: "Gemini 3.5 Flash" },
+				{ id: "gemini-flash-latest", name: "Gemini Flash Latest" },
 				{ id: "gemini-2.5-flash", name: "Gemini 2.5 Flash" },
+				{ id: "gemini-2.5-flash-lite", name: "Gemini 2.5 Flash-Lite" },
 				{ id: "gpt-4o-mini", name: "GPT-4o Mini" },
 				{ id: "claude-3-haiku", name: "Claude 3 Haiku" }
 			]
 			: [
+				{ id: "gemini-3.5-flash", name: "Gemini 3.5 Flash" },
 				{ id: "gemini-2.5-pro", name: "Gemini 2.5 Pro" },
 				{ id: "gpt-4o", name: "GPT-4o" },
 				{ id: "claude-3.5-sonnet", name: "Claude 3.5 Sonnet" }
@@ -586,3 +618,5 @@ export class SettingAction {
 		public readonly data?: any
 	) { }
 }
+
+
