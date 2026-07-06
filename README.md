@@ -1,192 +1,231 @@
-# ♿ AccessiMind - AI WCAG Accessibility
+# AccessiMind - AI WCAG Accessibility
 
 <p align="center">
-  <img src="accessi-mind.jpg" alt="AccessiMind Logo" width="128">
+  <img src="accessi-mind.png" alt="AccessiMind logo" width="128">
 </p>
 
 <p align="center">
   <a href="https://marketplace.visualstudio.com/items?itemName=sarperarikan.accessimind">
-    <img src="https://img.shields.io/visual-studio-marketplace/v/sarperarikan.accessimind?color=blue&label=VS%20Code%20Marketplace" alt="VS Code Marketplace Version">
+    <img src="https://img.shields.io/visual-studio-marketplace/v/sarperarikan.accessimind?color=blue&label=VS%20Code%20Marketplace" alt="VS Code Marketplace version">
   </a>
   <a href="https://marketplace.visualstudio.com/items?itemName=sarperarikan.accessimind">
-    <img src="https://img.shields.io/visual-studio-marketplace/d/sarperarikan.accessimind?color=green" alt="Downloads">
+    <img src="https://img.shields.io/visual-studio-marketplace/d/sarperarikan.accessimind?color=green" alt="Marketplace downloads">
   </a>
-  <img src="https://img.shields.io/badge/WCAG-2.2-success" alt="WCAG 2.2 Conformance">
-  <img src="https://img.shields.io/badge/AI-Gemini%20%7C%20Copilot%20%7C%20Ollama-blue" alt="AI Powered">
-  <img src="https://img.shields.io/badge/license-MIT-blue" alt="License">
+  <img src="https://img.shields.io/badge/WCAG-2.2-success" alt="WCAG 2.2">
+  <img src="https://img.shields.io/badge/AI-Gemini%20%7C%20Copilot%20%7C%20Ollama%20%7C%20Codex-blue" alt="AI providers">
+  <img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT license">
 </p>
 
-<p align="center">
-  <strong>Your AI-powered accessibility improvement tool for WCAG 2.2 conformance.</strong>
-</p>
+AccessiMind is a VS Code extension for finding and improving accessibility issues in code. It combines WCAG 2.2 analysis, AI-assisted fixes, provider model selection, agentic planning, browser inspection workflows, Jira-ready task generation, and usage statistics.
 
----
+The public command namespace is still `wcagEnhancer.*` for backward compatibility, while user-facing branding is AccessiMind.
 
-## ✨ Features
+## Current Capabilities
 
-### 🤖 Multi-AI Provider Support
-- **Google Gemini** - Gemini 2.0/2.5 Pro & Flash (Next-gen models)
-- **GitHub Copilot** - GPT-4o, Claude 3.5 Sonnet, and GPT-5.2 Preview
-- **Ollama (Local AI)** - Run private models like Llama 3, Mistral, or Phi-3 locally
-- Automatic model detection and smart selection
+### WCAG 2.2 Code Analysis
 
-### 🔍 Intelligent Code Analysis
-- Real-time WCAG 2.2 conformance checking
-- Analyze entire files or selected code blocks
-- Support for HTML, CSS, JavaScript, TypeScript, React, Vue, Angular
+- Analyze the active file or selected code from the editor context menu or Command Palette.
+- Apply AI-generated accessibility improvements directly to the editor.
+- Target WCAG levels A, AA, or AAA.
+- Use strict mode, context-aware analysis, custom rule files, and disability-focus targeting.
+- Prioritize screen reader, low vision, hearing, motor, or cognitive accessibility needs while keeping baseline WCAG coverage.
 
-### 💬 AI Chat Assistant
-- Ask accessibility questions in natural language
-- Get context-aware recommendations
-- Learn WCAG best practices interactively
+### AI Providers
 
-### 🎫 Jira Integration
-- Generate Jira-compatible task descriptions
-- Export as JSON or Markdown
-- Automatic priority mapping based on severity
-- WCAG criteria linking with full documentation
+AccessiMind can use several provider families:
 
-### 📊 Comprehensive Statistics
-- Daily, monthly, and yearly analytics
-- Track improvements by language and WCAG criteria
-- Export statistics for reporting
+| Provider | Use case | Requirement |
+| --- | --- | --- |
+| Gemini | Google Gemini API models for general WCAG analysis and fixes | Gemini API key |
+| VS Code Copilot | GitHub Copilot-backed language models through the VS Code Language Model API | Active Copilot entitlement |
+| Ollama | Local/private model execution | Local Ollama server |
+| Codex Subscription | Codex CLI through ChatGPT/Codex sign-in | Installed Codex CLI and signed-in ChatGPT/Codex account |
 
-### 🌐 Accessibility First
-- Fully accessible settings panel
-- Keyboard navigation support
-- Screen reader announcements
-- High contrast theme support
+Model selection is dynamic through `AccessiMind: Select Provider Model`. Gemini discovery uses the Google models API when an API key is available, Copilot discovery uses VS Code's language model API, Ollama discovery reads local `/api/tags`, and Codex Subscription runs through local `codex exec`.
 
----
+### Agent Session
 
-## 🚀 Getting Started
+`AccessiMind: Agent Session` starts a guided workflow that:
 
-### Installation
+- Uses the currently selected AI provider.
+- Collects active editor context, selected text, and a bounded workspace file map.
+- Creates a Markdown implementation plan before editing.
+- Generates code only after confirmation.
+- Opens a diff and applies changes only after explicit approval.
 
-1. Install from [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=sarperarikan.accessimind)
-2. Or search "AccessiMind" in VS Code Extensions
+Built-in workflows include fixing the active file, fixing a selection, investigating the workspace, and creating a production plan.
 
-### Quick Setup
+### Browser And Companion Extension
 
-1. Open Command Palette (`Ctrl+Shift+P`)
-2. Run `♿ AccessiMind: Welcome Guide`
-3. Choose your AI provider:
-   - **Google Gemini**: [Get API Key](https://makersuite.google.com/app/apikey)
-   - **GitHub Copilot**: Requires active subscription
+AccessiMind includes live browser-oriented workflows:
 
----
+- `AccessiMind: Show in Browser` creates a temporary HTML preview for the active file.
+- Browser integration settings control the live Chrome/Edge inspector bridge.
+- The companion browser extension lives in `browser-extension/accessimind-companion/`.
+- Browser bridge utilities support selection capture and live inspection flows.
 
-## ⌨️ Commands
+Browser integration settings:
 
-| Command | Description |
-|---------|-------------|
-| `♿ AccessiMind: Analyze Open File` | Analyze current file for WCAG conformance |
-| `♿ AccessiMind: Analyze Selection` | Analyze selected code for WCAG conformance |
-| `♿ AccessiMind: Create Jira Task` | Generate Jira task from findings |
-| `♿ AccessiMind: Chat` | Open AI accessibility chat |
-| `♿ AccessiMind: Settings` | Open modern settings panel |
-| `♿ AccessiMind: Statistics` | View improvement statistics |
-| `♿ AccessiMind: Help & Documentation` | Open help panel |
+| Setting | Purpose |
+| --- | --- |
+| `wcagEnhancer.browserIntegration.enabled` | Enables live browser inspection support |
+| `wcagEnhancer.browserIntegration.browserPath` | Optional Chrome or Edge executable path |
+| `wcagEnhancer.browserIntegration.launchMode` | Launch an isolated debugging browser or attach to an existing debugging session |
 
----
+### Chat And ChatGPT Handoff
 
-## 🎯 WCAG 2.2 Coverage
+- `AccessiMind: Chat` opens the in-sidebar chat view.
+- `AccessiMind: Inline Chat` edits selected code with natural-language instructions.
+- `AccessiMind: Open in ChatGPT` builds an accessibility prompt, copies the full prompt to the clipboard, and opens ChatGPT or a configured ChatGPT app URL.
+- `AccessiMind: Configure ChatGPT Auth` stores ChatGPT app and MCP server URLs for account-authorized handoff flows.
+- The ChatGPT bridge is a handoff path. It does not reuse hidden browser sessions or cookies.
 
-AccessiMind analyzes your code against WCAG 2.2 guidelines:
+### Jira, Statistics, And Settings
 
-| Level | Description | Included |
-|-------|-------------|----------|
-| **A** | Minimum accessibility | ✅ |
-| **AA** | Standard (Recommended) | ✅ |
-| **AAA** | Enhanced accessibility | ✅ |
+- Generate Jira-ready accessibility tasks from findings.
+- Export and reset statistics.
+- Track improvements by time period, language, provider, model, and WCAG criteria.
+- Export, import, restore, clear, and inspect persistent settings.
+- Sync supported settings with the AccessiMind JSON-backed settings file.
 
-### Supported Criteria
-- **Perceivable**: Alt text, captions, color contrast
-- **Operable**: Keyboard access, focus management
-- **Understandable**: Labels, error messages, navigation
-- **Robust**: Valid markup, ARIA attributes
+## Commands
 
----
+| Command title | Command id | Description |
+| --- | --- | --- |
+| AccessiMind: Analyze Open File | `wcagEnhancer.analyzeOpenCode` | Analyze and improve the active file |
+| AccessiMind: Analyze Selection | `wcagEnhancer.analyzeSelectedCode` | Analyze and improve selected code |
+| AccessiMind: Preview Improvement | `wcagEnhancer.previewImprovement` | Preview an AI improvement |
+| AccessiMind: Chat | `wcagEnhancer.openChat` | Focus the AccessiMind chat view |
+| AccessiMind: Inline Chat | `wcagEnhancer.inlineChat` | Modify selected code from an instruction |
+| AccessiMind: Settings | `wcagEnhancer.openSettings` | Open the native settings UI |
+| AccessiMind: Help & Documentation | `wcagEnhancer.openHelp` | Open the help panel |
+| AccessiMind: Show in Browser | `wcagEnhancer.showInBrowser` | Open a browser preview for the active file |
+| AccessiMind: Agent Session | `wcagEnhancer.startAgentSession` | Start guided plan, generate, diff, and apply flow |
+| AccessiMind: Select Provider Model | `wcagEnhancer.selectProviderModel` | Refresh and select models for the active provider |
+| AccessiMind: Connect Codex Account | `wcagEnhancer.connectCodexAccount` | Select Codex Subscription and open `codex login` |
+| AccessiMind: Test Codex Account | `wcagEnhancer.testCodexAccount` | Validate the local Codex CLI account |
+| AccessiMind: Open in ChatGPT | `wcagEnhancer.openChatGptBridge` | Copy prompt and open ChatGPT handoff |
+| AccessiMind: Configure ChatGPT Auth | `wcagEnhancer.configureChatGptAuth` | Configure ChatGPT app and MCP URLs |
+| AccessiMind: ChatGPT Auth Guide | `wcagEnhancer.openChatGptAuthGuide` | Open guidance for account-authorized ChatGPT handoff |
+| AccessiMind: Create Jira Task | `wcagEnhancer.createJiraTask` | Generate a Jira-compatible accessibility task |
+| AccessiMind: Statistics | `wcagEnhancer.showDetailedStatistics` | View detailed statistics |
+| AccessiMind: Export Statistics | `wcagEnhancer.exportStatistics` | Export statistics |
+| AccessiMind: Reset Statistics | `wcagEnhancer.resetStatistics` | Reset statistics |
+| AccessiMind: User Journey Scan | `wcagEnhancer.userJourneyScan` | Run user-journey accessibility analysis |
+| AccessiMind: DOM Diff Risk | `wcagEnhancer.domDiffRisk` | Analyze DOM-change accessibility risk |
+| AccessiMind: Design Token Guard | `wcagEnhancer.designTokenGuard` | Check design-token accessibility risk |
+| AccessiMind: Component Memory | `wcagEnhancer.componentMemory` | Analyze component accessibility patterns |
+| AccessiMind: Apply Last Fix To Similar | `wcagEnhancer.applyLastFixToSimilar` | Reuse the last fix pattern on similar code |
+| AccessiMind: Generate Accessibility Test | `wcagEnhancer.generateA11yTest` | Generate an accessibility-focused test |
+| AccessiMind: Generate PR Summary | `wcagEnhancer.generatePrSummary` | Generate a pull-request accessibility summary |
+| AccessiMind: Regression Shield | `wcagEnhancer.regressionShield` | Run accessibility regression checks |
 
-## 📷 Screenshots
+Default keybindings:
 
-### Modern Settings Panel
-A tabbed interface for easy configuration with full accessibility support.
+| Keybinding | Command |
+| --- | --- |
+| `Ctrl+Alt+W` | Analyze open file |
+| `Ctrl+Alt+Shift+W` | Analyze selection |
 
-### AI Chat Assistant
-Context-aware chat that understands your code and provides WCAG recommendations.
+## Configuration
 
-### Jira Task Export
-Generate comprehensive accessibility tasks with WCAG criteria links.
+Most settings are managed through the AccessiMind settings UI. The manifest-backed settings include:
 
----
+| Setting | Default | Notes |
+| --- | --- | --- |
+| `wcagEnhancer.ai.provider` | `gemini` | `gemini`, `vscode-copilot`, `ollama`, or `codex-subscription` |
+| `wcagEnhancer.ai.apiKey` | empty | Gemini API key |
+| `wcagEnhancer.ai.ollamaUrl` | `http://localhost:11434` | Local Ollama endpoint |
+| `wcagEnhancer.ai.ollamaModel` | `llama3` | Selected Ollama model |
+| `wcagEnhancer.ai.codexPath` | `codex` | Codex CLI path |
+| `wcagEnhancer.ai.codexTimeoutMs` | `180000` | Codex execution timeout |
+| `wcagEnhancer.aiModels.selectedModel` | `gemini-2.5-flash` | Active model id |
+| `wcagEnhancer.wcagLevel` | `AA` | Target WCAG level |
+| `wcagEnhancer.language` | `en` | `auto`, `en`, or `tr` |
+| `wcagEnhancer.strictMode` | `false` | Enables stricter analysis checks |
+| `wcagEnhancer.contextAwareAnalysis` | `true` | Evaluates surrounding code context |
+| `wcagEnhancer.customRulesPath` | empty | Optional markdown file with local rules |
+| `wcagEnhancer.analysisDisabilityFocus` | `[]` | Optional disability-focus groups |
+| `wcagEnhancer.performance.promptMaxChars` | `8000` | Prompt-size control |
+| `wcagEnhancer.performance.maxScanSize` | `500000` | WCAG metadata scan limit |
+| `wcagEnhancer.chatGptIntegration.enabled` | `false` | Enables ChatGPT handoff settings |
 
-## 🔧 Configuration
+## Requirements
 
-Access settings via `♿ AccessiMind: Settings` command:
+- VS Code 1.93.0 or newer.
+- Node.js/npm for local development.
+- Gemini provider: Google Gemini API key.
+- VS Code Copilot provider: active GitHub Copilot access.
+- Ollama provider: local Ollama server.
+- Codex Subscription provider: Codex CLI installed and signed in with a ChatGPT/Codex account.
+- Browser bridge features: Chrome or Edge, with optional remote debugging for attach mode.
 
-| Setting | Description | Default |
-|---------|-------------|---------|
-| WCAG Level | Target conformance level | AA |
-| AI Provider | Gemini, Copilot, or Ollama | Gemini |
-| AI Model | Select from GPT-5.2, Gemini 2.5, etc. | Auto |
-| Language | Interface language | English |
-| Auto-fix | Apply safe fixes automatically | Off |
-| Notifications | Show popup notifications | On |
+## Development
 
----
+Install dependencies:
 
-## 🌍 Languages
+```bash
+npm install
+```
 
-- 🇬🇧 English (Full support)
-- 🇹🇷 Turkish (Türkçe - Tam destek)
+Compile TypeScript:
 
-### Türkçe Özet
-AccessiMind, kodunuzu WCAG 2.2 **uyum** (conformance) seviyelerine göre analiz eden ve AI desteğiyle iyileştiren bir yardımcıdır. Tüm arayüz ve raporlama dili "uyumluluk" yerine, standartlara daha uygun olan "**uyum**" terimiyle güncellenmiştir.
+```bash
+npm run compile
+```
 
----
+Run unit tests:
 
-## 📋 Requirements
+```bash
+npm run test:unit
+```
 
-- VS Code 1.93.0 or higher
-- For Gemini: Google AI API key (free tier available)
-- For Copilot: Active GitHub Copilot subscription
+Build the extension bundle:
 
----
+```bash
+npm run build
+```
 
-## 🤝 Contributing
+Package a VSIX:
 
-Contributions are welcome! Please see our [Contributing Guidelines](CONTRIBUTING.md).
+```bash
+npm run package
+```
 
-1. Fork the repository
-2. Create a feature branch
-3. Submit a pull request
+Main source areas:
 
----
+| Path | Purpose |
+| --- | --- |
+| `src/extension.ts` | Extension composition root |
+| `src/extensionActions.ts` | Core command handlers and editor actions |
+| `src/extensionCommands.ts` | Command registration |
+| `src/extensionBootstrap.ts` | Settings/bootstrap helpers |
+| `src/core/` | WCAG analysis and improvement logic |
+| `src/infrastructure/providers/` | AI provider implementations |
+| `src/agent/` | Agent session planning and apply workflow |
+| `src/innovation/` | Advanced accessibility workflows |
+| `src/views/` | VS Code webview and settings UI surfaces |
+| `src/utils/` | Browser bridge, settings, runtime, and provider utilities |
+| `browser-extension/accessimind-companion/` | Browser companion extension |
 
-## 📄 License
+## Language Support
 
-MIT License - see [LICENSE](LICENSE) for details.
+- English UI and AI responses.
+- Turkish UI and AI responses.
+- `auto` language mode follows the VS Code environment where supported.
 
----
+## Repository
 
-## 👨‍💻 Author
+- GitHub: [sarperarikan/accessimind-vscode](https://github.com/sarperarikan/accessimind-vscode)
+- Issues: [github.com/sarperarikan/accessimind-vscode/issues](https://github.com/sarperarikan/accessimind-vscode/issues)
+- WCAG 2.2 quick reference: [w3.org/WAI/WCAG22/quickref](https://www.w3.org/WAI/WCAG22/quickref/)
 
-**Sarper Arıkan**
-- GitHub: [@sarperarikan](https://github.com/sarperarikan)
-- Email: sarperarikan@gmail.com
+## License
 
----
+MIT License. See [LICENSE](LICENSE) for details.
 
-## 🔗 Links
+## Author
 
-- [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=sarperarikan.accessimind)
-- [GitHub Repository](https://github.com/sarperarikan/accessimind-vscode)
-- [Report Issues](https://github.com/sarperarikan/accessimind-vscode/issues)
-- [WCAG 2.2 Guidelines](https://www.w3.org/WAI/WCAG22/quickref/)
-
----
-
-<p align="center">
-  <strong>Make the web accessible for everyone! 🌐♿</strong>
-</p>
+Sarper Arikan  
+GitHub: [@sarperarikan](https://github.com/sarperarikan)  
+Email: sarperarikan@gmail.com
